@@ -19,6 +19,10 @@ export const listingUpdate = listingInput
   .strict();
 export const catalogFilters = z
   .object({
+    upcoming: z
+      .enum(["true", "false"])
+      .transform((v) => v === "true")
+      .optional(),
     city: z.string().trim().max(100).optional(),
     kind: z.enum(["movie", "event", "sports"]).optional(),
     q: z.string().trim().max(100).optional(),
@@ -40,6 +44,13 @@ export const catalogSearchResponse = z
     items: z.array(
       z
         .object({
+          nextSession: z
+            .object({
+              startsAt: z.iso.datetime(),
+              timeZone: z.string(),
+              venueName: z.string(),
+            })
+            .nullable(),
           id: z.uuid(),
           title: z.string(),
           kind: z.enum(["movie", "event", "sports"]),

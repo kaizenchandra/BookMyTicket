@@ -29,13 +29,31 @@ export async function ingestWebhook(
   } catch {
     throw new AppError("INVALID_PAYLOAD", "Malformed webhook.", 400);
   }
-  if (typeof payload.event !== "string" || !payload.payload)
+  if (
+    !payload ||
+    typeof payload !== "object" ||
+    typeof payload.event !== "string" ||
+    !payload.payload ||
+    typeof payload.payload !== "object"
+  )
     throw new AppError("INVALID_PAYLOAD", "Missing webhook event.", 400);
+  if (eventId !== undefined && !/^[A-Za-z0-9_-]{1,200}$/.test(eventId))
+    throw new AppError(
+      "INVALID_EVENT_ID",
+      "Invalid webhook event identifier.",
+      400,
+    );
   const id =
     eventId || `sha256:${createHash("sha256").update(body).digest("hex")}`;
-  await pool.query(
-    "INSERT INTO payments.webhook_events(provider_event_id,body) VALUES($1,$2) ON CONFLICT DO NOTHING",
+  const inserted = await pool.query(
+    "INSERT INTO payments.webhook_events(provider_event_id,body) VALUES($1,$2) ON CONFLICT(provider_event_id) DO UPDATE SET body=payments.webhook_events.body WHERE payments.webhook_events.body=EXCLUDED.body RETURNING provider_event_id",
     [id, payload],
   );
+  if (inserted.rowCount !== 1)
+    throw new AppError(
+      "WEBHOOK_CONFLICT",
+      "Webhook identifier was reused with different content.",
+      409,
+    );
   return { received: true };
 }

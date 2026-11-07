@@ -1,0 +1,21 @@
+✔ BE:PAY-04/05 — concurrent initiation commits exactly one trusted intent (138.144917ms)
+✔ BE:PRC-08 — changed policy prevents payment intent persistence (15.062916ms)
+✔ BE:RSV-03 — expired hold blocks payment without worker cleanup (8.892167ms)
+✔ BE:ACL-01 — payment preparation and status reject another owner (7.6655ms)
+✔ BE:PAY-10 — unknown outcomes do not erase resolved mappings (11.271792ms)
+✔ BE:WHK-06 — stale observations cannot regress captured/refunded states or change associations (119.850541ms)
+✔ BE:PAY-13 — retry claims require failed observations and serialize concurrent reopen requests (31.927625ms)
+(node:18002) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP payments enforce authentication, ownership, strict input and invalid signature rejection (138.483708ms)
+✔ Customer recovery requests persist once under concurrency and preserve worker leases, backoff and review (37.46675ms)
+(node:18002) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Raw signed webhook HTTP ingestion rejects malformed content, deduplicates deliveries and detects reused IDs (24.500084ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 904.077042

@@ -1,10 +1,11 @@
+import { BookingProgress, SeatSelection } from "./features/booking-design.tsx";
 import { CommunicationPreferences } from "./features/communication-preferences.tsx";
 import { CategoryDetail } from "./features/category-detail.tsx";
 import { CatalogSearch, CatalogFilters } from "./features/catalog-search.tsx";
 import { NotificationInbox } from "./features/notifications.tsx";
 import { ProviderStaff } from "./features/provider-staff.tsx";
 import { SupportOperations } from "./features/support-operations.tsx";
-import { VenueWorkspace, PlanPreview } from "./features/venues.tsx";
+import { VenueWorkspace } from "./features/venues.tsx";
 import { SaveListing, FavoritesPage } from "./features/favorites.tsx";
 import { SessionManagement } from "./features/sessions.tsx";
 import { AccountSecurity } from "./features/mfa.tsx";
@@ -15,6 +16,11 @@ import { createRoot } from "react-dom/client";
 import { api, ApiError, money } from "./api.ts";
 import "./style.css";
 type Listing = {
+  nextSession?: {
+    startsAt: string;
+    timeZone: string;
+    venueName: string;
+  } | null;
   id: string;
   title: string;
   kind: string;
@@ -237,7 +243,10 @@ function App() {
           </nav>
         </div>
       </header>
-      <main id="main" className="container">
+      <main
+        id="main"
+        className={`container ${/^\/(occurrence|checkout|bookings)\//.test(route) ? "booking-main" : ""}`}
+      >
         {status && <Notice message={status} />}
         {["/", "/explore", "/movies", "/events", "/sports"].includes(route) ? (
           <Discovery
@@ -476,6 +485,7 @@ function Discovery({
   firstPage.delete("after");
   const query = new URLSearchParams({
     kind: category,
+    ...(category === "event" ? { upcoming: "true" } : {}),
     ...extra,
     ...(city ? { city } : {}),
     ...(search ? { q: search } : {}),
@@ -609,6 +619,24 @@ function Discovery({
                     <p className="eyebrow">DEMO · Fictional listing</p>
                   )}
                   <h3>{item.title}</h3>
+                  {item.nextSession && (
+                    <>
+                      <p className="event-date">
+                        {new Date(item.nextSession.startsAt).toLocaleString(
+                          "en-IN",
+                          {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            timeZone: item.nextSession.timeZone,
+                          },
+                        )}
+                      </p>
+                      <p>{item.nextSession.venueName}</p>
+                    </>
+                  )}
                   <p>{item.city}</p>
                   <p>{item.metadata.genre ?? item.kind}</p>
                 </a>
@@ -818,26 +846,72 @@ function Detail({
   if (loading) return <p role="status">Loading listing…</p>;
   if (error || !data) return <Notice message={error || "Listing not found."} />;
   return (
-    <section className="detail">
-      <div className="detail-poster">
-        {data.poster_url ? (
-          <img src={data.poster_url} alt={`${data.title} poster`} />
-        ) : (
-          <div className="poster-fallback">{data.title}</div>
-        )}
-      </div>
-      <div>
-        <p className="eyebrow">
-          {data.kind} · {data.city}
-        </p>
-        <h1>{data.title}</h1>
-        <p>{data.description}</p>
-        {data.metadata.demo === "true" && (
-          <p className="notice">
-            DEMO listing · Fictional film or fixture. Not a real event. Paid
-            demo sessions cannot collect payments.
+    <div className="listing-page">
+      <nav className="breadcrumbs" aria-label="Breadcrumb">
+        <a
+          href={`/${data.kind === "movie" ? "movies" : data.kind === "event" ? "events" : "sports"}`}
+        >
+          {data.kind === "movie"
+            ? "Movies"
+            : data.kind === "event"
+              ? "Events"
+              : "Sports"}
+        </a>
+        <span aria-hidden="true">›</span>
+        <span>{data.title}</span>
+      </nav>
+      <section className="detail detail-hero">
+        <div className="detail-poster">
+          {data.poster_url ? (
+            <img src={data.poster_url} alt={`${data.title} poster`} />
+          ) : (
+            <div className="poster-fallback">{data.title}</div>
+          )}
+          <span>
+            {data.metadata.demo === "true"
+              ? "Fictional demo listing"
+              : data.city}
+          </span>
+        </div>
+        <div className="detail-headline">
+          <p className="eyebrow">
+            {data.kind === "movie" ? "AT THE MOVIES" : "LIVE EXPERIENCES"} ·{" "}
+            {data.city}
           </p>
-        )}
+          <h1>{data.title}</h1>
+          <div className="format-tags">
+            {[data.metadata.format, data.metadata.language]
+              .filter(Boolean)
+              .map((value, i) => (
+                <span key={i}>{value}</span>
+              ))}
+          </div>
+          <p className="detail-meta">
+            {[
+              data.metadata.duration,
+              data.metadata.genre,
+              data.metadata.certification,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          <div className="detail-actions">
+            <a className="primary" href="#sessions">
+              Book tickets
+            </a>
+            <SaveListing id={id} accountId={accountId} signIn={signIn} />
+          </div>
+          {data.metadata.demo === "true" && (
+            <p className="demo-disclosure">
+              DEMO · Fictional listing. Paid demo sessions cannot collect
+              payments.
+            </p>
+          )}
+        </div>
+      </section>
+      <section className="detail-about">
+        <h2>About {data.kind === "movie" ? "the movie" : "the experience"}</h2>
+        <p>{data.description}</p>
         {data.metadata.managedBy ? (
           <CategoryDetail id={id} category={data.metadata.managedBy} />
         ) : (
@@ -850,12 +924,12 @@ function Detail({
             ))}
           </dl>
         )}
-        <SaveListing id={id} accountId={accountId} signIn={signIn} />
-        <Occurrences listingId={id} />
-      </div>
-    </section>
+      </section>
+      <Occurrences listingId={id} />
+    </div>
   );
 }
+
 function Seats({ id, signIn }: { id: string; signIn: () => void }) {
   const { data, error, loading, retry } = useLoad<any>(
     `/occurrences/${id}/inventory`,
@@ -893,74 +967,70 @@ function Seats({ id, signIn }: { id: string; signIn: () => void }) {
   if (error) return <Notice message={error} />;
   return (
     <section>
-      <p className="eyebrow">CHOOSE YOUR PLACES</p>
-      <h1>{data?.occurrence.venue_name}</h1>
-      <p>
-        {new Date(data?.occurrence.starts_at).toLocaleString("en-IN", {
-          timeZone: data?.occurrence.time_zone,
-        })}{" "}
-        · {data?.occurrence.time_zone}
-      </p>
-      {data?.occurrence.venue_snapshot ? (
-        <>
-          <p>{data.occurrence.venue_snapshot.address}</p>
-          <p>{data.occurrence.venue_snapshot.accessibility}</p>
-          <p>Seating plan version {data.occurrence.venue_snapshot.version}</p>
-          <PlanPreview plan={data.occurrence.venue_snapshot.configuration} />
-        </>
-      ) : (
-        <div className="screen">
-          Screen / stage orientation not configured for this legacy occurrence
+      <BookingProgress step={2} />
+      <div className="booking-title">
+        <a
+          className="back-link"
+          href={`/listing/${data.occurrence.listing_id}`}
+          aria-label="Back to showtimes"
+        >
+          ‹
+        </a>
+        <div>
+          <p className="eyebrow">SELECT YOUR TICKETS</p>
+          <h1>{data?.occurrence.venue_name}</h1>
+          <p>
+            {new Date(data?.occurrence.starts_at).toLocaleString("en-IN", {
+              timeZone: data?.occurrence.time_zone,
+            })}{" "}
+            · {data?.occurrence.time_zone}
+          </p>
         </div>
+      </div>
+      {data.occurrence.venue_snapshot?.accessibility && (
+        <p className="venue-access">
+          {data.occurrence.venue_snapshot.accessibility}
+        </p>
       )}
-      <fieldset className="seat-list">
-        <legend>Available seats and admission categories</legend>
-        {data?.resources.map((r: any) => (
-          <label
-            key={r.id}
-            className={selected[r.id] ? "seat selected" : "seat"}
-          >
-            {r.kind === "seat" ? (
-              <input
-                type="checkbox"
-                disabled={r.available < 1}
-                checked={Boolean(selected[r.id])}
-                onChange={(e) => {
-                  setSelected({
-                    ...selected,
-                    [r.id]: e.target.checked ? 1 : 0,
-                  });
-                  key.current = crypto.randomUUID();
-                }}
-              />
-            ) : (
-              <input
-                type="number"
-                aria-label={`${r.label} quantity`}
-                min={0}
-                max={Math.min(8, r.available)}
-                value={selected[r.id] ?? 0}
-                onChange={(e) => {
-                  setSelected({ ...selected, [r.id]: Number(e.target.value) });
-                  key.current = crypto.randomUUID();
-                }}
-              />
-            )}
-            <span>{r.label}</span>
-            <span>{money(r.price_paise)}</span>
-            <small>{r.available > 0 ? "Available" : "Unavailable"}</small>
-          </label>
-        ))}
-      </fieldset>
-      <p>Selected seats are not held until your reservation is confirmed.</p>
+      <SeatSelection
+        resources={data.resources}
+        plan={data.occurrence.venue_snapshot?.configuration}
+        selected={selected}
+        busy={busy}
+        onChange={(resourceId, quantity) => {
+          setSelected({ ...selected, [resourceId]: quantity });
+          key.current = crypto.randomUUID();
+        }}
+      />
+      <p className="muted">
+        Your selection is reserved only after the server confirms the hold.
+      </p>
       {message && <Notice message={message} />}
-      <button
-        className="primary"
-        disabled={busy || !Object.values(selected).some((n) => n > 0)}
-        onClick={reserve}
-      >
-        {busy ? "Reserving…" : "Reserve selection"}
-      </button>
+      <div className="booking-bottom-bar">
+        <div>
+          <strong>
+            {Object.values(selected).reduce((sum, n) => sum + n, 0)} ticket(s)
+            selected
+          </strong>
+          <span>
+            {money(
+              data.resources.reduce(
+                (sum: number, r: any) =>
+                  sum + (selected[r.id] ?? 0) * r.price_paise,
+                0,
+              ),
+            )}{" "}
+            <small>before fees & taxes</small>
+          </span>
+        </div>
+        <button
+          className="primary"
+          disabled={busy || !Object.values(selected).some((n) => n > 0)}
+          onClick={reserve}
+        >
+          {busy ? "Reserving…" : "Continue"}
+        </button>
+      </div>
     </section>
   );
 }
@@ -987,23 +1057,28 @@ function Reservation({ id }: { id: string }) {
   if (loading) return <p>Retrieving reservation…</p>;
   if (error) return <Notice message={error} />;
   return (
-    <section className="reading">
+    <section className="reading reservation-page">
+      <BookingProgress step={3} />
       <p className="eyebrow">YOUR RESERVATION</p>
       <h1>Review your selection</h1>
-      <p>
+      <p className="hold-timer">
         {remaining > 0 && data.effective_state === "active"
           ? `Hold expires in ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`
           : "This reservation is no longer active."}
       </p>
-      <ul>
-        {data.items.map((i: any) => (
-          <li key={i.resource_id}>
-            {i.resource_id} × {i.quantity}{" "}
-            <strong>{money(i.quantity * i.unit_price_paise)}</strong>
-          </li>
-        ))}
-      </ul>
-      <h2>Ticket subtotal {money(data.subtotalPaise)}</h2>
+      <details className="reservation-items">
+        <summary>
+          Your selection · {money(data.subtotalPaise)} before fees and taxes
+        </summary>
+        <ul>
+          {data.items.map((i: any) => (
+            <li key={i.resource_id}>
+              {i.resource_id} × {i.quantity}{" "}
+              <strong>{money(i.quantity * i.unit_price_paise)}</strong>
+            </li>
+          ))}
+        </ul>
+      </details>
       <CheckoutQuote
         reservationId={id}
         active={remaining > 0 && data.effective_state === "active"}
@@ -1216,9 +1291,23 @@ function Occurrences({ listingId }: { listingId: string }) {
     }).format(new Date(o.starts_at));
   const dates = Array.from(new Set((data?.items ?? []).map(localDate))),
     venues = Array.from(new Set((data?.items ?? []).map((o) => o.venue_name)));
+  const visible = (data?.items ?? []).filter(
+    (o) =>
+      (!date || localDate(o) === date) && (!venue || o.venue_name === venue),
+  );
   return (
-    <section>
-      <h2>Dates and venues</h2>
+    <section
+      id="sessions"
+      className="showtime-section"
+      aria-labelledby="sessions-heading"
+    >
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">PLAN YOUR VISIT</p>
+          <h2 id="sessions-heading">Select a date and venue</h2>
+        </div>
+        <p className="muted">All times are local to the venue</p>
+      </div>
       {loading ? (
         <p role="status">Loading sessions…</p>
       ) : error ? (
@@ -1228,74 +1317,151 @@ function Occurrences({ listingId }: { listingId: string }) {
         </>
       ) : (
         <>
-          <div className="chips">
-            <button aria-pressed={!date} onClick={() => setDate("")}>
-              All dates
-            </button>
-            {dates.map((d) => (
-              <button
-                key={d}
-                aria-pressed={date === d}
-                onClick={() => setDate(d)}
-              >
-                {d}
+          <div className="showtime-toolbar">
+            <div className="date-strip" aria-label="Show dates">
+              <button aria-pressed={!date} onClick={() => setDate("")}>
+                All
+                <br />
+                dates
               </button>
-            ))}
+              {dates.map((d) => {
+                const day = new Date(`${d}T12:00:00Z`);
+                return (
+                  <button
+                    key={d}
+                    aria-pressed={date === d}
+                    onClick={() => setDate(d)}
+                    aria-label={day.toLocaleDateString("en-IN", {
+                      dateStyle: "full",
+                      timeZone: "UTC",
+                    })}
+                  >
+                    <small>
+                      {day.toLocaleDateString("en-IN", {
+                        weekday: "short",
+                        timeZone: "UTC",
+                      })}
+                    </small>
+                    <strong>{day.getUTCDate()}</strong>
+                    <small>
+                      {day.toLocaleDateString("en-IN", {
+                        month: "short",
+                        timeZone: "UTC",
+                      })}
+                    </small>
+                  </button>
+                );
+              })}
+            </div>
+            <label className="venue-filter">
+              Filter by venue
+              <select value={venue} onChange={(e) => setVenue(e.target.value)}>
+                <option value="">All venues</option>
+                {venues.map((v) => (
+                  <option key={v}>{v}</option>
+                ))}
+              </select>
+            </label>
           </div>
-          <label>
-            Venue
-            <select value={venue} onChange={(e) => setVenue(e.target.value)}>
-              <option value="">All venues</option>
-              {venues.map((v) => (
-                <option key={v}>{v}</option>
-              ))}
-            </select>
-          </label>
-          {!data?.items.length && <p>No scheduled sessions are available.</p>}
-          {data?.items
-            .filter(
-              (o) =>
-                (!date || localDate(o) === date) &&
-                (!venue || o.venue_name === venue),
-            )
-            .map((o) => (
-              <article className="organization" key={o.id}>
-                <h3>{o.venue_name}</h3>
-                <p>
-                  {new Date(o.starts_at).toLocaleString("en-IN", {
-                    timeZone: o.time_zone,
-                  })}{" "}
-                  · {o.time_zone}
+          {!visible.length && (
+            <div className="empty">
+              <h3>No sessions for this selection</h3>
+              <p>Try another date or venue.</p>
+              <button
+                onClick={() => {
+                  setDate("");
+                  setVenue("");
+                }}
+              >
+                Show all sessions
+              </button>
+            </div>
+          )}
+          {Array.from(new Set(visible.map((o) => o.venue_name))).map((name) => (
+            <article className="venue-showtimes" key={name}>
+              <div className="venue-description">
+                <h3>{name}</h3>
+                <p className="muted">
+                  Select a showtime to choose your tickets
                 </p>
-                <p>
-                  {o.is_demo ? "DEMO session · " : ""}
-                  {o.min_price_paise === 0
-                    ? "Free session"
-                    : `From ${money(o.min_price_paise ?? 0)}`}
-                </p>
-                {o.state === "open" &&
-                o.sales_valid &&
-                o.available_units > 0 ? (
-                  <a className="chip" href={`/occurrence/${o.id}`}>
-                    Choose seats or tickets · {o.available_units} available
-                  </a>
-                ) : (
-                  <p>
-                    {o.state !== "open"
-                      ? o.state
-                      : !o.sales_valid
-                        ? "Sales closed or not yet open"
-                        : "Sold out"}
-                  </p>
-                )}
-              </article>
-            ))}
+              </div>
+              <div className="showtime-options">
+                {visible
+                  .filter((o) => o.venue_name === name)
+                  .map((o) => {
+                    const available =
+                      o.state === "open" &&
+                      o.sales_valid &&
+                      o.available_units > 0;
+                    return (
+                      <div className="showtime-option" key={o.id}>
+                        {available ? (
+                          <a
+                            className="showtime-button"
+                            href={`/occurrence/${o.id}`}
+                            aria-label={`${name}, ${new Date(o.starts_at).toLocaleString("en-IN", { timeZone: o.time_zone })}, ${o.available_units} available`}
+                          >
+                            <strong>
+                              {new Date(o.starts_at).toLocaleTimeString(
+                                "en-IN",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZone: o.time_zone,
+                                },
+                              )}
+                            </strong>
+                            <small>
+                              {o.min_price_paise === 0
+                                ? "Free"
+                                : `From ${money(o.min_price_paise)}`}
+                            </small>
+                          </a>
+                        ) : (
+                          <span className="showtime-button closed">
+                            <strong>
+                              {new Date(o.starts_at).toLocaleTimeString(
+                                "en-IN",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZone: o.time_zone,
+                                },
+                              )}
+                            </strong>
+                            <small>
+                              {o.state !== "open"
+                                ? o.state
+                                : !o.sales_valid
+                                  ? "Sales unavailable"
+                                  : "Sold out"}
+                            </small>
+                          </span>
+                        )}
+                        <small>
+                          {new Date(o.starts_at).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            timeZone: o.time_zone,
+                          })}
+                          {o.is_demo ? " · DEMO" : ""}
+                        </small>
+                      </div>
+                    );
+                  })}
+              </div>
+            </article>
+          ))}
         </>
       )}
-      <p className="muted">Availability is checked again when you reserve.</p>
+      <p className="muted">
+        Availability is checked again when you reserve. Final fees and taxes are
+        shown at checkout.
+      </p>
     </section>
   );
 }
+
 function Bookings() {
   const { data, error, loading, retry } = useLoad<{ items: any[] }>(
     "/bookings",

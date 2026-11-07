@@ -43,18 +43,30 @@ export function CategoryEditor({
           "cast",
           "crew",
         ]
-      : [
-          "sport",
-          "competition",
-          "season",
-          "homeTeam",
-          "awayTeam",
-          "entryInstructions",
-          "hospitality",
-        ];
+      : category === "events"
+        ? [
+            "performers",
+            "organizer",
+            "durationMinutes",
+            "minimumAge",
+            "genre",
+            "language",
+            "inclusions",
+            "exclusions",
+            "entryInstructions",
+          ]
+        : [
+            "sport",
+            "competition",
+            "season",
+            "homeTeam",
+            "awayTeam",
+            "entryInstructions",
+            "hospitality",
+          ];
   return (
     <details>
-      <summary>Cinema movies and sports fixtures</summary>
+      <summary>Movies, events and sports fixtures</summary>
       <label>
         Category
         <select
@@ -70,6 +82,7 @@ export function CategoryEditor({
         >
           <option value="cinema">Cinema</option>
           <option value="sports">Sports</option>
+          <option value="events">Events</option>
         </select>
       </label>
       <p>
@@ -94,8 +107,13 @@ export function CategoryEditor({
           if (!values.posterUrl) delete values.posterUrl;
           const input: any = {
               ...values,
-              ...(category === "cinema"
-                ? { durationMinutes: Number(values.durationMinutes) }
+              ...(category === "cinema" || category === "events"
+                ? {
+                    durationMinutes: Number(values.durationMinutes),
+                    ...(category === "events"
+                      ? { minimumAge: Number(values.minimumAge) }
+                      : {}),
+                  }
                 : {}),
               ...(editing ? { version: editing.version } : {}),
             },
@@ -127,7 +145,11 @@ export function CategoryEditor({
       >
         <h3>
           {editing ? "Edit" : "Create"}{" "}
-          {category === "cinema" ? "movie" : "fixture"}
+          {category === "cinema"
+            ? "movie"
+            : category === "events"
+              ? "event"
+              : "fixture"}
         </h3>
         {["title", "city", "description", "posterUrl", ...fields].map(
           (field) => (
@@ -155,14 +177,28 @@ export function CategoryEditor({
                 <input
                   name={field}
                   type={
-                    field === "durationMinutes"
+                    ["durationMinutes", "minimumAge"].includes(field)
                       ? "number"
                       : field === "releaseDate"
                         ? "date"
                         : "text"
                   }
-                  min={field === "durationMinutes" ? 1 : undefined}
-                  max={field === "durationMinutes" ? 600 : undefined}
+                  min={
+                    field === "durationMinutes"
+                      ? 1
+                      : field === "minimumAge"
+                        ? 0
+                        : undefined
+                  }
+                  max={
+                    field === "durationMinutes"
+                      ? category === "events"
+                        ? 1440
+                        : 600
+                      : field === "minimumAge"
+                        ? 100
+                        : undefined
+                  }
                   maxLength={field === "description" ? 10000 : 2000}
                   required={field !== "posterUrl"}
                   defaultValue={editing?.details[field] ?? ""}

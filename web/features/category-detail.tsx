@@ -12,6 +12,7 @@ export function CategoryDetail({
   useEffect(() => {
     let current = true;
     setDetails(null);
+    setError("");
     api(`/catalog/${id}/${category}`)
       .then((r) => {
         if (current) setDetails(r.details);
@@ -37,21 +38,41 @@ export function CategoryDetail({
           "cast",
           "crew",
         ]
-      : [
-          "sport",
-          "competition",
-          "season",
-          "homeTeam",
-          "awayTeam",
-          "entryInstructions",
-          "hospitality",
-        ];
+      : category === "events"
+        ? [
+            "performers",
+            "organizer",
+            "durationMinutes",
+            "minimumAge",
+            "genre",
+            "language",
+            "inclusions",
+            "exclusions",
+            "entryInstructions",
+          ]
+        : [
+            "sport",
+            "competition",
+            "season",
+            "homeTeam",
+            "awayTeam",
+            "entryInstructions",
+            "hospitality",
+          ];
   return (
     <dl>
       {keys.map((k) => (
         <div key={k}>
           <dt>{k.replace(/([A-Z])/g, " $1")}</dt>
-          <dd>{details[k]}</dd>
+          <dd>
+            {k === "minimumAge"
+              ? details[k] === 0
+                ? "All ages"
+                : `${details[k]} years and above`
+              : k === "durationMinutes"
+                ? `${details[k]} minutes`
+                : details[k]}
+          </dd>
         </div>
       ))}
     </dl>

@@ -1,0 +1,115 @@
+ Image bookmyticket:local Building 
+ Image bookmyticket:local Building 
+ Image bookmyticket:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.80kB done
+#1 DONE 0.0s
+
+#2 [worker internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.09kB done
+#2 DONE 0.0s
+
+#3 [worker internal] load metadata for docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#3 DONE 0.0s
+
+#4 [worker internal] load .dockerignore
+#4 transferring context: 97B done
+#4 DONE 0.0s
+
+#5 [app internal] load build context
+#5 transferring context: 388.42kB 0.0s done
+#5 transferring context: 388.42kB 0.0s done
+#5 DONE 0.0s
+
+#6 [migrate dependencies 1/4] FROM docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#6 resolve docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 0.0s done
+#6 DONE 0.0s
+
+#7 [migrate dependencies 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [app dependencies 3/4] COPY package.json package-lock.json ./
+#8 DONE 0.1s
+
+#9 [migrate dependencies 4/4] RUN npm ci
+#9 ...
+
+#10 [app production-dependencies 4/4] RUN npm ci --omit=dev && npm cache clean --force
+#10 2.976 
+#10 2.976 added 121 packages, and audited 122 packages in 3s
+#10 2.977 
+#10 2.977 32 packages are looking for funding
+#10 2.977   run `npm fund` for details
+#10 2.978 
+#10 2.978 found 0 vulnerabilities
+#10 2.978 npm warn install-scripts 1 package has install scripts not yet covered by allowScripts:
+#10 2.978 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#10 2.978 npm warn install-scripts
+#10 2.978 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#10 2.979 npm notice
+#10 2.979 npm notice New major version of npm available! 11.20.0 -> 12.2.2
+#10 2.979 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#10 2.979 npm notice To update run: npm install -g npm@12.2.2
+#10 2.979 npm notice
+#10 3.044 npm warn using --force Recommended protections disabled.
+#10 DONE 3.3s
+
+#11 [worker runtime 3/8] COPY --from=production-dependencies /app/node_modules ./node_modules
+#11 DONE 0.2s
+
+#9 [migrate dependencies 4/4] RUN npm ci
+#9 6.983 
+#9 6.983 added 152 packages, and audited 153 packages in 7s
+#9 6.983 
+#9 6.983 42 packages are looking for funding
+#9 6.983   run `npm fund` for details
+#9 6.983 
+#9 6.983 found 0 vulnerabilities
+#9 6.984 npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+#9 6.984 npm warn install-scripts   @embedded-postgres/linux-arm64@18.6.0-beta.19 (postinstall: node scripts/hydrate-symlinks.js)
+#9 6.984 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#9 6.984 npm warn install-scripts
+#9 6.984 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#9 6.984 npm notice
+#9 6.984 npm notice New major version of npm available! 11.20.0 -> 12.2.2
+#9 6.984 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#9 6.984 npm notice To update run: npm install -g npm@12.2.2
+#9 6.984 npm notice
+#9 DONE 7.1s
+
+#12 [migrate verify 1/2] COPY . .
+#12 DONE 0.1s
+
+#13 [migrate verify 2/2] RUN npm run build && npm run check:architecture
+#13 0.159 
+#13 0.159 > bookmyticket@0.17.0 build
+#13 0.159 > tsc --noEmit && vite build
+#13 0.159 
+#13 0.549 scripts/generate-contracts.ts(56,5): error TS2304: Cannot find name 'paymentInitiationSchema'.
+#13 ERROR: process "/bin/sh -c npm run build && npm run check:architecture" did not complete successfully: exit code: 1
+------
+ > [migrate verify 2/2] RUN npm run build && npm run check:architecture:
+0.159 
+0.159 > bookmyticket@0.17.0 build
+0.159 > tsc --noEmit && vite build
+0.159 
+0.549 scripts/generate-contracts.ts(56,5): error TS2304: Cannot find name 'paymentInitiationSchema'.
+------
+Dockerfile:8
+
+--------------------
+
+   6 |     FROM dependencies AS verify
+
+   7 |     COPY . .
+
+   8 | >>> RUN npm run build && npm run check:architecture
+
+   9 |     CMD ["npm", "test"]
+
+  10 |     
+
+--------------------
+
+target app: failed to solve: process "/bin/sh -c npm run build && npm run check:architecture" did not complete successfully: exit code: 1
+

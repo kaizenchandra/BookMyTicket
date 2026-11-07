@@ -3,9 +3,9 @@
 India/INR ticket-booking platform under active implementation. **Not a completed or production-ready platform.** No live payment, external email delivery, supplier, payout or cloud deployment has been verified. Local Mailpit SMTP signup/login is verified.
 
 
-Current local demo (**v0.14.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
+Current local demo (**v0.21.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
 
-The user-requested sample catalog contains **4 fictional movies, 3 sports fixtures and 14 sessions**, clearly labeled DEMO. Choose a **Free session** to test actual reservation → confirmation → QR ticket → cancellation. Priced demo sessions cannot collect real payments. [Demo setup, operator sign-in and limits](docs/runbooks/cinema-sports-demo.md).
+The user-requested sample catalog contains **4 fictional movies, 4 events, 3 sports fixtures and 22 sessions**, clearly labeled DEMO. Choose a **Free session** to test actual reservation → confirmation → QR ticket → cancellation. Priced demo sessions cannot collect real payments. [Demo setup, operator sign-in and limits](docs/runbooks/cinema-sports-demo.md).
 
 Implemented subsets include PostgreSQL reservations, immutable commercial quotes and accepted orders, confirmation and ticket/ledger transactions, OTP controls and authenticator MFA, published discovery, onboarding drafts, support cases, customer payment initiation/recovery, session management, listing favorites and initial role interfaces. The customer appearance is inferred: browser access to the reference was unavailable.
 
@@ -37,3 +37,13 @@ Version 0.10.0 adds `/notifications`: persisted booking confirmation, pending ca
 Version 0.11.0 supports explicitly authorized free bookings. Pricing staff approve a new policy with “Authorize free bookings” in `/admin/pricing` and assign it to an occurrence. When the full quote is ₹0, customers accept the policies and choose “Confirm free booking”; the server consumes inventory and issues tickets without a payment transaction. Existing policies do not authorize this by default. See [eligibility and transaction rules](docs/architecture/adr-014-free-bookings.md).
 
 Version 0.12.0 adds full cancellation of confirmed free bookings when the accepted policy explicitly allows it before a configured cutoff. Customers review affected tickets and confirm cancellation; unused tickets are revoked and capacity is returned atomically. No refund is due for these zero-total bookings. Paid/partial cancellation is not included. See [policy and concurrency rules](docs/architecture/adr-015-free-cancellation.md).
+
+Event organizers can now create structured event drafts and connect them to sessions, attendee forms and booking. See [event booking setup and verification](docs/runbooks/event-booking.md).
+
+[Razorpay checkout configuration, recovery and verification blockers](docs/runbooks/razorpay-checkout.md). Payment provider credentials remain unconfigured locally; live processing is not verified.
+
+Customer booking UI now includes a poster-led detail page, grouped showtimes, interactive seat selection and a clearer checkout summary. [Reference observations and visual verification limits](docs/evidence/booking-design-reference-audit.md).
+
+Organizers can preview and atomically create daily/weekly session series with excluded dates from the venue scheduling form. Existing-series editing remains outstanding.
+
+Version 0.21.0 adds encrypted online-event joining links, organizer access-window controls and ticket-holder access from confirmed bookings. [Access rules and provider limitations](docs/architecture/adr-023-online-event-access.md).

@@ -1,3 +1,6 @@
+import { OnlineAccess } from "./modules/events/application/online-access.ts";
+import { PostgresOnlineAccess } from "./modules/events/adapters/online-access.ts";
+import { PostgresOnlineEligibility } from "./modules/bookings/adapters/online-eligibility.ts";
 import { FreeCancellation } from "./modules/bookings/application/free-cancellation.ts";
 import { PostgresFreeCancellation } from "./modules/bookings/adapters/free-cancellation.ts";
 import { PostgresFreeCancellationInventory } from "./modules/inventory/adapters/free-cancellation.ts";
@@ -115,6 +118,14 @@ export function commerce() {
       new PostgresTicketOccurrences(),
       tickets,
       new QrCodes(),
+    ),
+    onlineAccess: new OnlineAccess(
+      new PostgresOnlineAccess(
+        new PostgresRegistrationTarget(),
+        new PostgresProviders(),
+        new PostgresOnlineEligibility(new PostgresTicketOccurrences(), tickets),
+        new PostgresAudit(),
+      ),
     ),
     attendeeExports,
     forms,

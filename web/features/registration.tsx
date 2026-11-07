@@ -102,6 +102,7 @@ const empty: FormDefinition = {
   fields: [],
 };
 export function RegistrationEditor({ occurrenceId }: { occurrenceId: string }) {
+  const [previewAnswers, setPreviewAnswers] = useState<Answers[]>([]);
   const [definition, setDefinition] = useState<FormDefinition>(empty),
     [version, setVersion] = useState<number | null>(null),
     [message, setMessage] = useState(""),
@@ -287,6 +288,21 @@ export function RegistrationEditor({ occurrenceId }: { occurrenceId: string }) {
         </button>
         <button onClick={publish}>Publish form version</button>
       </fieldset>
+      <details>
+        <summary>Preview attendee form</summary>
+        <p>
+          Preview only: these answers are not saved. This shows one attendee;
+          checkout renders one form per admission.
+        </p>
+        <AttendeeFields
+          preview={{
+            form: { id: "preview", version: (version ?? 0) + 1, definition },
+            quantity: 1,
+          }}
+          answers={previewAnswers}
+          onChange={setPreviewAnswers}
+        />
+      </details>
       <button disabled={busy} onClick={() => setRevision((v) => v + 1)}>
         Reload saved form (discard edits)
       </button>

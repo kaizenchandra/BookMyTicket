@@ -1,3 +1,8 @@
+import { onlineSettings } from "./modules/events/adapters/online-schema.ts";
+import { isAllowedOrigin } from "./shared/request-origin.ts";
+import { EventCatalog } from "./modules/events/application/catalog.ts";
+import { PostgresEventCatalog } from "./modules/events/adapters/catalog.ts";
+import { eventInput } from "./modules/events/adapters/catalog-schema.ts";
 import { Communications } from "./modules/profiles/application/communications.ts";
 import { PostgresCommunications } from "./modules/profiles/adapters/communications.ts";
 import { communicationInput } from "./modules/profiles/adapters/communication-schema.ts";
@@ -45,6 +50,7 @@ import {
   spaceInput,
   planInput,
   scheduleInput,
+  scheduleSeriesInput,
 } from "./modules/venues/adapters/schemas.ts";
 import { Scheduling } from "./modules/inventory/application/scheduling.ts";
 import {
@@ -149,6 +155,7 @@ export async function buildApp() {
     registrations,
     attendeeExports,
     registrationPreview,
+    onlineAccess,
   } = commerce();
   const policies = new Policies(
     new PostgresPolicies(),
@@ -163,12 +170,15 @@ export async function buildApp() {
       .header("X-Frame-Options", "DENY");
     if (
       !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
-      !req.url.startsWith("/api/v1/payments/webhook")
+      req.url.split("?")[0] !== "/api/v1/payments/webhook"
     ) {
       if (
         req.headers.origin &&
-        req.headers.origin !==
-          (process.env.APP_ORIGIN ?? "http://localhost:3000")
+        !isAllowedOrigin(
+          req.headers.origin,
+          process.env.APP_ORIGIN ?? "http://localhost:3000",
+          process.env.NODE_ENV,
+        )
       )
         throw new AppError(
           "ORIGIN_DENIED",
@@ -211,7 +221,7 @@ export async function buildApp() {
       requestId: req.id,
     });
   });
-  app.get("/health", async () => ({ status: "ok", version: "0.15.0" }));
+  app.get("/health", async () => ({ status: "ok", version: "0.21.0" }));
   app.get("/ready", async () => {
     await assertSchemaReady(pool, expectedMigrations);
     return { status: "ready" };
@@ -436,6 +446,9 @@ export async function buildApp() {
     fixtures = new Fixtures(
       new PostgresFixtures(categoryDrafts, catalog, providers),
     );
+  const eventCatalog = new EventCatalog(
+    new PostgresEventCatalog(categoryDrafts, catalog, providers),
+  );
   app.get("/api/v1/organizations/:id/cinema", async (req) => ({
     items: await movies.list(
       (await identity.authenticate(req.cookies.session)).id,
@@ -467,6 +480,38 @@ export async function buildApp() {
   });
   app.get("/api/v1/catalog/:id/cinema", async (req) =>
     movies.detail(uuid.parse((req.params as { id: string }).id)),
+  );
+  app.get("/api/v1/organizations/:id/events", async (req) => ({
+    items: await eventCatalog.list(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+    ),
+  }));
+  app.post("/api/v1/organizations/:id/events", async (req) =>
+    eventCatalog.save(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      z.string().min(8).max(100).parse(req.headers["idempotency-key"]),
+      eventInput.parse(req.body),
+    ),
+  );
+  app.put("/api/v1/organizations/:id/events/:listingId", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session),
+      p = req.params as { id: string; listingId: string },
+      { version, ...input } = eventInput
+        .extend({ version: z.number().int().positive() })
+        .parse(req.body);
+    return eventCatalog.save(
+      actor.id,
+      uuid.parse(p.id),
+      z.string().min(8).max(100).parse(req.headers["idempotency-key"]),
+      input,
+      uuid.parse(p.listingId),
+      version,
+    );
+  });
+  app.get("/api/v1/catalog/:id/events", async (req) =>
+    eventCatalog.detail(uuid.parse((req.params as { id: string }).id)),
   );
   app.get("/api/v1/organizations/:id/sports", async (req) => ({
     items: await fixtures.list(
@@ -601,6 +646,19 @@ export async function buildApp() {
         .object({ version: z.number().int().positive() })
         .strict()
         .parse(req.body).version,
+    ),
+  );
+  app.post("/api/v1/occurrences/series/preview", async (req) =>
+    schedule.previewSeries(
+      (await identity.authenticate(req.cookies.session)).id,
+      scheduleSeriesInput.parse(req.body),
+    ),
+  );
+  app.post("/api/v1/occurrences/series", async (req) =>
+    schedule.createSeries(
+      (await identity.authenticate(req.cookies.session)).id,
+      z.string().min(8).max(100).parse(req.headers["idempotency-key"]),
+      scheduleSeriesInput.parse(req.body),
     ),
   );
   app.post("/api/v1/occurrences", async (req) =>
@@ -738,6 +796,39 @@ export async function buildApp() {
       .type("text/csv; charset=utf-8")
       .send(csv);
   });
+  app.get("/api/v1/occurrences/:id/online-access", async (req) =>
+    onlineAccess.configuration(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+    ),
+  );
+  app.put("/api/v1/occurrences/:id/online-access", async (req) =>
+    onlineAccess.configure(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      onlineSettings.parse(req.body),
+    ),
+  );
+  app.get("/api/v1/bookings/:id/online-access/:occurrenceId", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session),
+      p = req.params as { id: string; occurrenceId: string };
+    return onlineAccess.access(
+      actor.id,
+      uuid.parse(p.id),
+      uuid.parse(p.occurrenceId),
+    );
+  });
+  app.post("/api/v1/bookings/:id/online-access/:occurrenceId", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session),
+      p = req.params as { id: string; occurrenceId: string };
+    z.object({}).strict().parse(req.body);
+    return onlineAccess.access(
+      actor.id,
+      uuid.parse(p.id),
+      uuid.parse(p.occurrenceId),
+      true,
+    );
+  });
   app.get("/api/v1/occurrences/:id/registration-form", async (req) =>
     forms.list(
       (await identity.authenticate(req.cookies.session)).id,
@@ -824,6 +915,14 @@ export async function buildApp() {
       uuid.parse((req.params as { id: string }).id),
     ),
   );
+  app.post("/api/v1/bookings/:id/payment/reconcile", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    paymentInitiationSchema.parse(req.body);
+    return collection.requestRecovery(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+    );
+  });
   app.post("/api/v1/bookings/:id/payment/callback", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
     const input = paymentCallbackSchema.parse(req.body);
@@ -832,6 +931,7 @@ export async function buildApp() {
       uuid.parse((req.params as { id: string }).id),
       input.paymentId,
       input.signature,
+      input.providerOrderId,
     );
   });
   app.get("/api/v1/bookings", async (req) => ({

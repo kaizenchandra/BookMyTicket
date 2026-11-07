@@ -1,3 +1,6 @@
+import { EventCatalog } from "../src/modules/events/application/catalog.ts";
+import { PostgresEventCatalog } from "../src/modules/events/adapters/catalog.ts";
+import { commerce } from "../src/composition.ts";
 // Explicitly requested LOCAL DEMO data. Never run against production.
 import { randomUUID } from "node:crypto";
 import { pool } from "../src/shared/database.ts";
@@ -89,6 +92,52 @@ const demoSports = [
     poster: "racquet-cup",
   },
 ];
+const demoEvents = [
+  {
+    title: "Moonlight Sessions",
+    city: "Bengaluru",
+    genre: "Live music",
+    language: "English",
+    performers: "The Paper Satellites (fictional)",
+    durationMinutes: 120,
+    minimumAge: 12,
+    seated: false,
+    poster: "moonlight-sessions",
+  },
+  {
+    title: "The Laugh Laboratory",
+    city: "Mumbai",
+    genre: "Comedy",
+    language: "Hindi",
+    performers: "Aditi Verma and Kabir Lal (fictional)",
+    durationMinutes: 90,
+    minimumAge: 18,
+    seated: true,
+    poster: "laugh-laboratory",
+  },
+  {
+    title: "Clay and Coffee Studio",
+    city: "Chennai",
+    genre: "Workshop",
+    language: "Tamil",
+    performers: "Mira Arts Collective (fictional)",
+    durationMinutes: 150,
+    minimumAge: 8,
+    seated: false,
+    poster: "clay-coffee",
+  },
+  {
+    title: "Stories Under the Stars",
+    city: "Bengaluru",
+    genre: "Storytelling",
+    language: "Kannada",
+    performers: "The Story Grove (fictional)",
+    durationMinutes: 100,
+    minimumAge: 0,
+    seated: true,
+    poster: "stories-stars",
+  },
+];
 async function seed() {
   if (
     process.env.NODE_ENV !== "development" ||
@@ -124,7 +173,11 @@ async function seed() {
     ),
     policies = new Policies(new PostgresPolicies(), new PostgresPolicyTarget()),
     movies = new Movies(new PostgresMovies(drafts, catalog, providers)),
-    sports = new Fixtures(new PostgresFixtures(drafts, catalog, providers));
+    sports = new Fixtures(new PostgresFixtures(drafts, catalog, providers)),
+    events = new EventCatalog(
+      new PostgresEventCatalog(drafts, catalog, providers),
+    ),
+    forms = commerce().forms;
   const owner = (
     await pool.query(
       "INSERT INTO identity.accounts(id,contact) VALUES($1,$2) ON CONFLICT(contact) DO UPDATE SET contact=EXCLUDED.contact RETURNING id",
@@ -135,6 +188,7 @@ async function seed() {
   for (const [kind, records] of [
     ["cinema", demoMovies],
     ["sports", demoSports],
+    ["events", demoEvents],
   ] as const) {
     let org = (
       await pool.query(
@@ -143,7 +197,11 @@ async function seed() {
       )
     ).rows[0];
     if (!org) {
-      org = await providers.create(owner, `DEMO ${kind} organization`, kind);
+      org = await providers.create(
+        owner,
+        `DEMO ${kind} organization`,
+        kind === "events" ? "event" : kind,
+      );
       await pool.query(
         "UPDATE providers.organizations SET state='approved',reason='USER-AUTHORIZED LOCAL DEMO SEED; NOT REAL PROVIDER APPROVAL',version=version+1 WHERE id=$1",
         [org.id],
@@ -162,7 +220,7 @@ async function seed() {
         const common = {
           title,
           city: record.city,
-          description: `Fictional local demonstration ${kind === "cinema" ? "film" : "sports fixture"}. ${record.title} is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.`,
+          description: `Fictional local demonstration ${kind === "cinema" ? "film" : kind === "events" ? "event" : "sports fixture"}. ${record.title} is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.`,
           posterUrl: `/demo/${record.poster}.svg`,
         };
         listing =
@@ -178,18 +236,34 @@ async function seed() {
                 cast: record.cast + " (fictional)",
                 crew: record.crew + " (fictional)",
               })
-            : await sports.save(owner, org.id, `demo-${record.poster}-v1`, {
-                ...common,
-                sport: record.sport,
-                competition: record.competition,
-                season: "Demo season",
-                homeTeam: record.homeTeam,
-                awayTeam: record.awayTeam,
-                entryInstructions:
-                  "DEMO: arrive 30 minutes before start. No real venue entry is offered.",
-                hospitality:
-                  "Demo Pavilion includes a fictional lounge. No food, service or physical entitlement is sold.",
-              });
+            : kind === "events"
+              ? await events.save(owner, org.id, `demo-${record.poster}-v1`, {
+                  ...common,
+                  performers: record.performers,
+                  organizer: "DEMO local event studio (fictional)",
+                  durationMinutes: record.durationMinutes,
+                  minimumAge: record.minimumAge,
+                  genre: record.genre,
+                  language: record.language,
+                  inclusions:
+                    "One demo admission per ticket. This fixture does not provide a real-world experience.",
+                  exclusions:
+                    "Travel, food and physical services are not included or sold.",
+                  entryInstructions:
+                    "DEMO only. Keep the QR ticket and attendee registration for testing. Do not travel to the fictional venue.",
+                })
+              : await sports.save(owner, org.id, `demo-${record.poster}-v1`, {
+                  ...common,
+                  sport: record.sport,
+                  competition: record.competition,
+                  season: "Demo season",
+                  homeTeam: record.homeTeam,
+                  awayTeam: record.awayTeam,
+                  entryInstructions:
+                    "DEMO: arrive 30 minutes before start. No real venue entry is offered.",
+                  hospitality:
+                    "Demo Pavilion includes a fictional lounge. No food, service or physical entitlement is sold.",
+                });
       }
       if (["draft", "changes_requested"].includes(listing.state))
         listing = await managed.submit(owner, listing.id, listing.version);
@@ -208,8 +282,10 @@ async function seed() {
         (await schedule.forOrganization(owner, org.id)) as any[]
       ).filter((o) => o.listing_id === listing.id);
       if (!current.length) {
+        const seated =
+          kind === "cinema" || (kind === "events" && record.seated);
         const venue = await venues.create(owner, org.id, {
-          name: `DEMO ${record.city} ${kind === "cinema" ? "Aurora Cinema" : "Arena"} ${index + 1}`,
+          name: `DEMO ${record.city} ${kind === "cinema" ? "Aurora Cinema" : kind === "events" ? "Event Studio" : "Arena"} ${index + 1}`,
           address: "Fictional demonstration venue — do not travel here",
           city: record.city,
           timeZone: "Asia/Kolkata",
@@ -217,25 +293,61 @@ async function seed() {
           accessibility: "Step-free demo layout; wheelchair spaces labeled",
         });
         const space = await venues.space(owner, org.id, venue.id, {
-          name: kind === "cinema" ? "Screen 1" : "Main stadium",
-          kind: kind === "cinema" ? "screen" : "stadium",
-          physicalCapacity: kind === "cinema" ? 48 : 240,
+          name:
+            kind === "cinema"
+              ? "Screen 1"
+              : kind === "events"
+                ? "Event Hall"
+                : "Main stadium",
+          kind:
+            kind === "cinema"
+              ? "screen"
+              : kind === "events"
+                ? "hall"
+                : "stadium",
+          physicalCapacity: seated ? 48 : kind === "events" ? 80 : 240,
           turnaroundMinutes: 30,
         });
-        const resources: Plan["resources"] =
-          kind === "cinema"
-            ? Array.from({ length: 48 }, (_, n) => ({
-                id: `${String.fromCharCode(65 + Math.floor(n / 8))}${(n % 8) + 1}`,
-                kind: "seat" as const,
-                label: `${String.fromCharCode(65 + Math.floor(n / 8))}${(n % 8) + 1}`,
-                section: n < 24 ? "Classic" : "Premium",
-                row: String.fromCharCode(65 + Math.floor(n / 8)),
-                gate: "Screen entrance",
-                capacity: 1,
-                x: 10 + (n % 8) * 11,
-                y: 20 + Math.floor(n / 8) * 12,
-                accessible: n === 0 || n === 1,
-              }))
+        const resources: Plan["resources"] = seated
+          ? Array.from({ length: 48 }, (_, n) => ({
+              id: `${String.fromCharCode(65 + Math.floor(n / 8))}${(n % 8) + 1}`,
+              kind: "seat" as const,
+              label: `${String.fromCharCode(65 + Math.floor(n / 8))}${(n % 8) + 1}`,
+              section: n < 24 ? "Classic" : "Premium",
+              row: String.fromCharCode(65 + Math.floor(n / 8)),
+              gate: kind === "events" ? "Hall entrance" : "Screen entrance",
+              capacity: 1,
+              x: 10 + (n % 8) * 11,
+              y: 20 + Math.floor(n / 8) * 12,
+              accessible: n === 0 || n === 1,
+            }))
+          : kind === "events"
+            ? [
+                {
+                  id: "general",
+                  kind: "pool",
+                  label: "General admission",
+                  section: "Main floor",
+                  row: "",
+                  gate: "Main entrance",
+                  capacity: 60,
+                  x: 30,
+                  y: 45,
+                  accessible: true,
+                },
+                {
+                  id: "premium",
+                  kind: "pool",
+                  label: "Premium section",
+                  section: "Premium area",
+                  row: "",
+                  gate: "Main entrance",
+                  capacity: 20,
+                  x: 70,
+                  y: 45,
+                  accessible: true,
+                },
+              ]
             : [
                 ...Array.from({ length: 24 }, (_, n) => ({
                   id: `P${n + 1}`,
@@ -279,7 +391,11 @@ async function seed() {
           expectedVersion: 1,
           configuration: {
             orientation:
-              kind === "cinema" ? "SCREEN THIS WAY" : "FIELD OF PLAY",
+              kind === "cinema"
+                ? "SCREEN THIS WAY"
+                : kind === "events"
+                  ? "STAGE THIS WAY"
+                  : "FIELD OF PLAY",
             resources,
           },
         });
@@ -306,7 +422,7 @@ async function seed() {
           start.setUTCHours(show ? 13 : 9, 0, 0, 0);
           const end = new Date(
             start.getTime() +
-              (kind === "cinema" ? record.durationMinutes : 180) * 60000,
+              (kind !== "sports" ? record.durationMinutes : 180) * 60000,
           );
           const occurrence = await schedule.create(
             owner,
@@ -324,11 +440,15 @@ async function seed() {
                 resources.map((r) => [
                   r.id,
                   show
-                    ? kind === "cinema"
-                      ? 19900
-                      : r.kind === "seat"
-                        ? 149900
-                        : 49900
+                    ? kind === "events"
+                      ? r.id === "premium"
+                        ? 79900
+                        : 39900
+                      : kind === "cinema"
+                        ? 19900
+                        : r.kind === "seat"
+                          ? 149900
+                          : 49900
                     : 0,
                 ]),
               ),
@@ -340,6 +460,38 @@ async function seed() {
           (await schedule.forOrganization(owner, org.id)) as any[]
         ).filter((o) => o.listing_id === listing.id);
       }
+      if (kind === "events")
+        for (const occurrence of current) {
+          const configured = (await forms.list(owner, occurrence.id)) as any;
+          if (!configured.current)
+            await forms.publish(owner, occurrence.id, 0, {
+              title: "Demo event attendee details",
+              instructions:
+                "Fictional event: provide test names only. One registration per admission.",
+              fields: [
+                {
+                  id: "name",
+                  label: "Attendee name",
+                  purpose: "Identify the demo ticket holder",
+                  type: "text",
+                  required: true,
+                  maxLength: 80,
+                  options: [],
+                },
+                {
+                  id: "eligibility",
+                  label: record.minimumAge
+                    ? `I meet the ${record.minimumAge}+ entry requirement`
+                    : "I understand this is a fictional demo event",
+                  purpose: "Acknowledge the published demo entry conditions",
+                  type: "checkbox",
+                  required: true,
+                  maxLength: 10,
+                  options: [],
+                },
+              ],
+            });
+        }
       summary.push({
         id: listing.id,
         title,

@@ -28,6 +28,9 @@ export interface CollectionStore {
   observe(orderId: string, payment: ProviderPayment): Promise<string>;
   claimRetry(tx: Transaction, orderId: string): Promise<void>;
   summary(orderId: string): Promise<unknown[]>;
+  requestRecovery(
+    orderId: string,
+  ): Promise<{ state: string; requestedAt: Date | null }>;
 }
 export class Collection {
   constructor(
@@ -153,16 +156,29 @@ export class Collection {
       allowedActions: { initiate: allowed, reason },
     };
   }
+  async requestRecovery(ownerId: string, orderId: string) {
+    await this.orders.owned(ownerId, orderId);
+    if (!this.available())
+      throw new AppError(
+        "PAYMENTS_UNAVAILABLE",
+        "Payment provider recovery is not configured.",
+        503,
+      );
+    return this.store.requestRecovery(orderId);
+  }
   async callback(
     ownerId: string,
     orderId: string,
     paymentId: string,
     signature: string,
+    providerOrderId?: string,
   ) {
     await this.orders.owned(ownerId, orderId);
     const stored = await this.store.get(orderId);
     if (
       !stored?.provider_id ||
+      (providerOrderId !== undefined &&
+        providerOrderId !== stored.provider_id) ||
       !this.provider.verifyCheckout(stored.provider_id, paymentId, signature)
     )
       throw new AppError(

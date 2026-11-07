@@ -32,7 +32,7 @@ export interface CategoryDrafts {
     tx: Transaction,
     actor: string,
     org: string,
-    kind: "movie" | "sports",
+    kind: "movie" | "sports" | "event",
     key: string,
     input: CategoryDraftInput,
     id?: string,
@@ -54,4 +54,18 @@ export interface CategoryDrafts {
     state: string;
     replayed?: boolean;
   }>;
+}
+
+export interface CatalogSessions {
+  recordSession(
+    tx: Transaction,
+    input: {
+      id: string;
+      listingId: string;
+      startsAt: string;
+      timeZone: string;
+      venueName: string;
+      state: string;
+    },
+  ): Promise<void>;
 }

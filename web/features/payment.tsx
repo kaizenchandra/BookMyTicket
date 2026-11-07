@@ -9,6 +9,7 @@ type Status = {
   allowedActions: { initiate: boolean; reason: string | null };
 };
 type ProviderResult = {
+  razorpay_order_id: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
 };
@@ -39,7 +40,16 @@ function loadCheckout() {
       }, 15000);
       script.onload = () => {
         clearTimeout(timeout);
-        resolve();
+        if (window.Razorpay) resolve();
+        else {
+          script.remove();
+          scriptPromise = undefined;
+          reject(
+            new Error(
+              "Razorpay checkout did not initialize. Retry loading checkout.",
+            ),
+          );
+        }
       };
       script.onerror = () => {
         clearTimeout(timeout);
@@ -111,6 +121,29 @@ export function PaymentPanel({
       checkout.current?.close();
     };
   }, [orderId]);
+  async function recover() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await api<{ state: string }>(
+        `/bookings/${orderId}/payment/reconcile`,
+        { method: "POST", body: "{}" },
+      );
+      if (mounted.current)
+        setMessage(
+          result.state === "queued"
+            ? "Payment verification queued. Keep this page open or return to your booking later. Do not pay again."
+            : "Payment verification is already pending. Do not pay again.",
+        );
+    } catch (error) {
+      if (mounted.current) setMessage((error as Error).message);
+    } finally {
+      if (mounted.current) {
+        setBusy(false);
+        void refreshRef.current();
+      }
+    }
+  }
   async function pay() {
     if (busy || !status?.allowedActions.initiate) return;
     setBusy(true);
@@ -162,6 +195,7 @@ export function PaymentPanel({
             await api(`/bookings/${orderId}/payment/callback`, {
               method: "POST",
               body: JSON.stringify({
+                providerOrderId: result.razorpay_order_id,
                 paymentId: result.razorpay_payment_id,
                 signature: result.razorpay_signature,
               }),
@@ -258,8 +292,14 @@ export function PaymentPanel({
         </p>
       )}
       <button disabled={busy} onClick={() => void refreshRef.current()}>
-        Check payment status
+        Refresh saved status
       </button>
+      {status &&
+        !["not_started", "not_required"].includes(status.paymentState) && (
+          <button disabled={busy} onClick={() => void recover()}>
+            Check payment with Razorpay
+          </button>
+        )}
     </section>
   );
 }

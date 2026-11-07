@@ -1,3 +1,4 @@
+import { expandRecurrence, type Recurrence } from "../domain/recurrence.ts";
 import { createHash } from "node:crypto";
 import type { Transaction } from "../../../shared/database.ts";
 import { AppError } from "../../../shared/errors.ts";
@@ -19,6 +20,19 @@ export type ScheduleInput = {
   prices: Record<string, number>;
 };
 export interface ScheduleStore {
+  previousSeries(
+    tx: Transaction,
+    actor: string,
+    key: string,
+    fingerprint: string,
+  ): Promise<{ ids: string[] } | null>;
+  saveSeries(
+    tx: Transaction,
+    actor: string,
+    key: string,
+    fingerprint: string,
+    ids: string[],
+  ): Promise<void>;
   unitOfWork<T>(work: (tx: Transaction) => Promise<T>): Promise<T>;
   previous(
     tx: Transaction,
@@ -45,6 +59,115 @@ export class Scheduling {
     private plans: VenuePlans,
   ) {}
   create(actor: string, key: string, input: ScheduleInput) {
+    return this.store.unitOfWork((tx) =>
+      this.createWithin(tx, actor, key, input),
+    );
+  }
+  previewSeries(
+    actor: string,
+    input: { schedule: ScheduleInput; repeat: Recurrence },
+  ) {
+    return this.store.unitOfWork(async (tx) => {
+      await this.access.requireMember(
+        actor,
+        input.schedule.organizationId,
+        true,
+        tx,
+      );
+      await this.access.requireApproved(input.schedule.organizationId, tx);
+      await this.catalog.requireOwnedPublished(
+        input.schedule.listingId,
+        input.schedule.organizationId,
+        tx,
+      );
+      const plan = await this.plans.lockForSchedule(
+        tx,
+        input.schedule.organizationId,
+        input.schedule.planId,
+      );
+      return {
+        items: expandRecurrence(input.schedule, input.repeat).map((s) => ({
+          startsAt: s.startsAt,
+          endsAt: s.endsAt,
+          salesOpen: s.salesOpen,
+          salesClose: s.salesClose,
+        })),
+        timeZone: plan.timeZone,
+        conflictsChecked: false,
+      };
+    });
+  }
+  createSeries(
+    actor: string,
+    key: string,
+    input: { schedule: ScheduleInput; repeat: Recurrence },
+  ) {
+    if (key.length < 8 || key.length > 100)
+      throw new AppError(
+        "INVALID_IDEMPOTENCY_KEY",
+        "Use a stable series operation key.",
+        422,
+      );
+    const schedules = expandRecurrence(input.schedule, input.repeat);
+    const fingerprint = createHash("sha256")
+      .update(
+        JSON.stringify({
+          ...input,
+          schedule: {
+            ...input.schedule,
+            prices: Object.fromEntries(
+              Object.entries(input.schedule.prices).sort(([a], [b]) =>
+                a.localeCompare(b),
+              ),
+            ),
+          },
+          repeat: {
+            ...input.repeat,
+            excludeDates: [...input.repeat.excludeDates].sort(),
+          },
+        }),
+      )
+      .digest("hex");
+    return this.store.unitOfWork(async (tx) => {
+      await this.access.requireMember(
+        actor,
+        input.schedule.organizationId,
+        true,
+        tx,
+      );
+      await this.access.requireApproved(input.schedule.organizationId, tx);
+      const previous = await this.store.previousSeries(
+        tx,
+        actor,
+        key,
+        fingerprint,
+      );
+      if (previous) return previous;
+      const prefix = createHash("sha256")
+          .update(actor + ":" + key)
+          .digest("hex"),
+        ids: string[] = [];
+      for (const [index, schedule] of schedules.entries())
+        ids.push(
+          (
+            await this.createWithin(
+              tx,
+              actor,
+              `series:${prefix}:${index}`,
+              schedule,
+            )
+          ).id,
+        );
+      await this.store.saveSeries(tx, actor, key, fingerprint, ids);
+      return { ids };
+    });
+  }
+  private async createWithin(
+    tx: Transaction,
+    actor: string,
+    key: string,
+    input: ScheduleInput,
+  ) {
     if (key.length < 8 || key.length > 100)
       throw new AppError(
         "INVALID_IDEMPOTENCY_KEY",
@@ -78,67 +201,64 @@ export class Scheduling {
         }),
       )
       .digest("hex");
-    return this.store.unitOfWork(async (tx) => {
-      await this.access.requireMember(actor, input.organizationId, true, tx);
-      await this.access.requireApproved(input.organizationId, tx);
-      const previous = await this.store.previous(tx, actor, key, fingerprint);
-      if (previous) return previous;
-      await this.catalog.requireOwnedPublished(
-        input.listingId,
-        input.organizationId,
-        tx,
-      );
-      const plan = await this.plans.lockForSchedule(
-        tx,
-        input.organizationId,
-        input.planId,
-      );
-      // Explicit offsets must agree with venue-local intent; this rejects DST gaps
-      // and lets callers choose the intended offset during a repeated local hour.
-      for (const value of [
-        input.startsAt,
-        input.endsAt,
-        input.salesOpen,
-        input.salesClose,
-      ]) {
-        if (value.endsWith("Z")) continue;
-        const parts = new Intl.DateTimeFormat("en-CA", {
-          timeZone: plan.timeZone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hourCycle: "h23",
-        }).formatToParts(new Date(value));
-        const part = (name: string) =>
-          parts.find((p) => p.type === name)!.value;
-        const local = `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
-        if (local !== value.slice(0, 16))
-          throw new AppError(
-            "TIME_ZONE_OFFSET_MISMATCH",
-            "The entered UTC offset does not match this venue and date. Check daylight-saving changes and enter each affected date with its correct offset.",
-            422,
-          );
-      }
-      const ids = plan.configuration.resources.map((r) => r.id);
-      if (
-        Object.keys(input.prices).length !== ids.length ||
-        ids.some(
-          (id) =>
-            !Object.hasOwn(input.prices, id) ||
-            !Number.isSafeInteger(input.prices[id]) ||
-            input.prices[id] < 0 ||
-            input.prices[id] > 100000000,
-        )
-      )
+    await this.access.requireMember(actor, input.organizationId, true, tx);
+    await this.access.requireApproved(input.organizationId, tx);
+    const previous = await this.store.previous(tx, actor, key, fingerprint);
+    if (previous) return previous;
+    await this.catalog.requireOwnedPublished(
+      input.listingId,
+      input.organizationId,
+      tx,
+    );
+    const plan = await this.plans.lockForSchedule(
+      tx,
+      input.organizationId,
+      input.planId,
+    );
+    // Explicit offsets must agree with venue-local intent; this rejects DST gaps
+    // and lets callers choose the intended offset during a repeated local hour.
+    for (const value of [
+      input.startsAt,
+      input.endsAt,
+      input.salesOpen,
+      input.salesClose,
+    ]) {
+      if (value.endsWith("Z")) continue;
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: plan.timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }).formatToParts(new Date(value));
+      const part = (name: string) => parts.find((p) => p.type === name)!.value;
+      const local = `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
+      if (local !== value.slice(0, 16))
         throw new AppError(
-          "PRICE_CONFIGURATION",
-          "Provide exactly one valid price for every plan resource.",
+          "TIME_ZONE_OFFSET_MISMATCH",
+          "The entered UTC offset does not match this venue and date. Check daylight-saving changes and enter each affected date with its correct offset.",
           422,
         );
-      return this.store.persist(tx, actor, key, fingerprint, input, plan);
-    });
+    }
+    const ids = plan.configuration.resources.map((r) => r.id);
+    if (
+      Object.keys(input.prices).length !== ids.length ||
+      ids.some(
+        (id) =>
+          !Object.hasOwn(input.prices, id) ||
+          !Number.isSafeInteger(input.prices[id]) ||
+          input.prices[id] < 0 ||
+          input.prices[id] > 100000000,
+      )
+    )
+      throw new AppError(
+        "PRICE_CONFIGURATION",
+        "Provide exactly one valid price for every plan resource.",
+        422,
+      );
+    return this.store.persist(tx, actor, key, fingerprint, input, plan);
   }
   forListing(id: string) {
     return this.store.forListing(id);

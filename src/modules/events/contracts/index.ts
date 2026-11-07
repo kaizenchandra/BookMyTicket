@@ -29,3 +29,12 @@ export interface RegistrationFormHistory {
     form: string,
   ): Promise<AssignedForm>;
 }
+
+export interface OnlineEligibility {
+  authorize(
+    tx: import("../../../shared/database.ts").Transaction,
+    owner: string,
+    order: string,
+    occurrence: string,
+  ): Promise<void>;
+}

@@ -20,7 +20,7 @@ x-application: &application
     PGDATABASE: bookmyticket
     PGUSER: bookmyticket
     PGPASSWORD_FILE: /run/secrets/postgres_password
-    APP_ORIGIN: ${APP_ORIGIN:-http://127.0.0.1:3100}
+    APP_ORIGIN: ${APP_ORIGIN:-http://127.0.0.1:${APP_PORT:-3100}}
     HOST: 0.0.0.0
     PORT: "3000"
     OTP_PEPPER_FILE: /run/secrets/otp_pepper

@@ -116,3 +116,33 @@ Local Compose now defaults to real SMTP delivery into a pinned Mailpit container
 See `docs/runbooks/cinema-sports-demo.md` for explicit local seed commands and operator access. `scripts/seed-demo.ts` is opt-in, development/local-host guarded and included in the application image. Do not run it against production. The active local application DB contains user-requested fictional catalog data; automated tests continue to use `bookmyticket_test`.
 
 Verified additional commands: `node --import tsx --test tests/cinema-sports.test.ts` with the isolated DATABASE_URL; `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/verify-demo.ts`. The latter checks seeded HTTP data/media, not browser rendering, and expects unexhausted demo capacity.
+
+
+### Communication preferences verification (0.15.0)
+`DATABASE_URL=postgresql://bookmyticket:local-only-change-me@127.0.0.1:55432/bookmyticket_test node --import tsx --test tests/communication-preferences.test.ts` passes against the isolated local database. Full native tests use the existing Mailpit variables; 115 tests pass. The existing Compose verification command also passes all 115 tests. Migration 023 is applied through the normal migration-gated local deployment. No external campaign credentials are needed or used.
+
+
+### Event booking verification (0.16.0)
+`tests/cinema-sports.test.ts` now includes seated and general-admission event journeys; run using the existing isolated DATABASE_URL. Full native and Docker commands above pass all 117 tests. `npm run build`, `npm run check:architecture`, `npm run contracts` pass; `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` verifies 47 HTTP checks. Migration 024 follows the existing migration-gated Compose deployment.
+
+
+### Razorpay recovery verification (0.17.0)
+Existing native and Docker verification commands pass 120 tests. `tests/payment.test.ts` tests PostgreSQL/HTTP recovery and signed webhook ingestion with isolated fixtures, without external provider calls. Build, architecture and contract commands pass; local smoke command passes 48 checks. Migration 025 is applied through Compose startup. See `docs/runbooks/razorpay-checkout.md` for server-only credential/webhook configuration and the explicit live-verification blockers.
+
+
+### Booking design verification (0.18.0)
+`node --import tsx --test tests/booking-design.test.ts` runs three server-rendered component checks. Full native and Docker suites pass 123 tests; build, architecture and contracts pass; deployed smoke checks pass 48. These commands do not measure visual fidelity or replace browser accessibility verification. See the reference audit for unverified viewport/theme scenarios.
+
+
+### Local booking origin configuration
+Development permits localhost, 127.0.0.1 and [::1] only at the configured APP_ORIGIN protocol/port. Use one hostname consistently: session cookies are host-scoped, so switching hostnames requires signing in there. Production requires the exact configured public origin. Compose's default origin follows APP_PORT; set APP_ORIGIN explicitly for a reverse proxy or a separate frontend development server. Do not disable the origin check or add wildcard origins. Verified by tests/request-origin.test.ts and deployed origin-deployed-checks.json (v0.18.1).
+
+
+### Upcoming event verification (0.19.0)
+Full native/Docker suites pass 126 tests; build/typecheck, architecture and contracts pass; deployed smoke verifies 48 checks. `scripts/verify-event-booking.ts` is an opt-in LOCAL DEMO mutation check documented in runbooks/event-booking.md. Four SMTP/login-to-ticket-to-cancellation flows passed against the deployed development database. No provider charge or actual venue admission occurs. New migration 026 backfills the discovery projection; ongoing scheduling updates it atomically.
+
+
+### Recurring scheduling verification (0.20.0)
+`tests/venues.test.ts` covers recurring preview, exclusions, concurrent retry, later-conflict rollback and revoked permissions. Native/Docker full suites pass 129 tests; build/architecture/contracts pass; deployed smoke checks pass 50. Migration 027 uses the existing migration-gated Compose startup. Evidence is under docs/evidence/recurring-schedule-*. No new dependency or external service is required.
+
+Online-event access v0.21.0 verification: npm run build, npm run check:architecture and npm run contracts passed; 129 tests passed against isolated local PostgreSQL/Mailpit and inside the Docker verification profile. Existing local deployment commands apply migration 028. The 51-check deployed smoke run passed. Evidence is in docs/evidence/online-access-*. Browser host unavailable; no interactive acceptance claimed.

@@ -1,4 +1,8 @@
-import { pool, type Transaction } from "../../../shared/database.ts";
+import {
+  pool,
+  transaction,
+  type Transaction,
+} from "../../../shared/database.ts";
 import type { CollectionStore } from "../application/collection.ts";
 import type { ProviderPayment } from "../application/provider.ts";
 import { AppError } from "../../../shared/errors.ts";
@@ -100,6 +104,40 @@ export class PostgresCollection implements CollectionStore {
       "UPDATE payments.provider_orders SET retry_watermark=$2 WHERE order_id=$1",
       [orderId, watermark],
     );
+  }
+  async requestRecovery(orderId: string) {
+    return transaction(async (tx) => {
+      const row = (
+        await tx.query(
+          "SELECT *, recovery_requested_at > clock_timestamp()-interval '30 seconds' AS recent, lease_until>clock_timestamp() AS leased FROM payments.provider_orders WHERE order_id=$1 FOR UPDATE",
+          [orderId],
+        )
+      ).rows[0];
+      if (!row)
+        throw new AppError(
+          "PAYMENT_NOT_STARTED",
+          "No payment has been initiated for this booking.",
+          409,
+        );
+      if (row.review_required)
+        throw new AppError(
+          "PAYMENT_REVIEW_REQUIRED",
+          "Payment recovery requires support review. Do not pay again.",
+          409,
+        );
+      if (row.recent || row.leased || row.failures > 0)
+        return {
+          state: "pending",
+          requestedAt: row.recovery_requested_at ?? null,
+        };
+      const saved = (
+        await tx.query(
+          "UPDATE payments.provider_orders SET recovery_requested_at=clock_timestamp(),available_at=CASE WHEN state='creating' THEN greatest(clock_timestamp(),created_at+interval '30 seconds') ELSE clock_timestamp() END WHERE order_id=$1 RETURNING recovery_requested_at",
+          [orderId],
+        )
+      ).rows[0];
+      return { state: "queued", requestedAt: saved.recovery_requested_at };
+    });
   }
   async summary(orderId: string) {
     return (

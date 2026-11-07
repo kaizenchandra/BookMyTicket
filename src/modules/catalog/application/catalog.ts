@@ -1,4 +1,5 @@
 export type CatalogFilters = {
+  upcoming?: boolean;
   city?: string;
   kind?: "movie" | "event" | "sports";
   q?: string;

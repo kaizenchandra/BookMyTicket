@@ -2,6 +2,7 @@ import { z } from "zod";
 export const paymentInitiationSchema = z.object({}).strict();
 export const paymentCallbackSchema = z
   .object({
+    providerOrderId: z.string().regex(/^order_[A-Za-z0-9]+$/),
     paymentId: z.string().regex(/^pay_[A-Za-z0-9]+$/),
     signature: z.string().regex(/^[a-f0-9]{64}$/i),
   })
@@ -53,5 +54,12 @@ export const paymentStatusSchema = z
     allowedActions: z
       .object({ initiate: z.boolean(), reason: z.string().nullable() })
       .strict(),
+  })
+  .strict();
+
+export const paymentRecoverySchema = z
+  .object({
+    state: z.enum(["queued", "pending"]),
+    requestedAt: z.iso.datetime().nullable(),
   })
   .strict();

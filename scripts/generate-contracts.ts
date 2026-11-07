@@ -1,3 +1,9 @@
+import { onlineSettings } from "../src/modules/events/adapters/online-schema.ts";
+import {
+  paymentRecoverySchema,
+  paymentInitiationSchema,
+} from "../src/modules/payments/adapters/schemas.ts";
+import { eventInput } from "../src/modules/events/adapters/catalog-schema.ts";
 import { communicationInput } from "../src/modules/profiles/adapters/communication-schema.ts";
 import { movieInput } from "../src/modules/cinema/adapters/schema.ts";
 import { fixtureInput } from "../src/modules/sports/adapters/schema.ts";
@@ -29,6 +35,7 @@ import {
   spaceInput,
   planInput,
   scheduleInput,
+  scheduleSeriesInput,
 } from "../src/modules/venues/adapters/schemas.ts";
 import {
   listingInput,
@@ -50,6 +57,16 @@ import {
 const source = await readFile("src/app.ts", "utf8"),
   paths: Record<string, any> = {};
 const requests: Record<string, unknown> = {
+  "post /api/v1/occurrences/series": z.toJSONSchema(scheduleSeriesInput),
+  "post /api/v1/occurrences/series/preview":
+    z.toJSONSchema(scheduleSeriesInput),
+  "post /api/v1/bookings/{id}/payment/reconcile": z.toJSONSchema(
+    paymentInitiationSchema,
+  ),
+  "post /api/v1/organizations/{id}/events": z.toJSONSchema(eventInput),
+  "put /api/v1/organizations/{id}/events/{listingId}": z.toJSONSchema(
+    eventInput.extend({ version: z.number().int().positive() }),
+  ),
   "put /api/v1/profile/communications": z.toJSONSchema(communicationInput),
   "post /api/v1/organizations/{id}/cinema": z.toJSONSchema(movieInput),
   "put /api/v1/organizations/{id}/cinema/{listingId}": z.toJSONSchema(
@@ -88,6 +105,10 @@ const requests: Record<string, unknown> = {
     z.object({}).strict(),
   ),
   "post /api/v1/attendee-exports": z.toJSONSchema(exportInput),
+  "put /api/v1/occurrences/{id}/online-access": z.toJSONSchema(onlineSettings),
+  "post /api/v1/bookings/{id}/online-access/{occurrenceId}": z.toJSONSchema(
+    z.object({}).strict(),
+  ),
   "put /api/v1/occurrences/{id}/registration-form": z.toJSONSchema(publishForm),
   "post /api/v1/organizations/{id}/venues": z.toJSONSchema(venueInput),
   "post /api/v1/organizations/{id}/venues/{venueId}/spaces":
@@ -160,7 +181,13 @@ for (const [, method, raw] of source.matchAll(
     required: true,
     schema: { type: "string", format: "uuid" },
   }));
-  if (["/api/v1/orders", "/api/v1/occurrences"].includes(path))
+  if (
+    [
+      "/api/v1/orders",
+      "/api/v1/occurrences",
+      "/api/v1/occurrences/series",
+    ].includes(path)
+  )
     parameters.push({
       name: "Idempotency-Key",
       in: "header",
@@ -182,6 +209,7 @@ for (const [, method, raw] of source.matchAll(
   if (path === "/api/v1/catalog" || path === "/api/v1/catalog/suggestions") {
     const schema = z.toJSONSchema(
       path.endsWith("suggestions") ? suggestionFilters : catalogFilters,
+      { io: "input" },
     );
     operation.parameters = Object.entries(schema.properties ?? {}).map(
       ([name, property]) => ({
@@ -196,6 +224,10 @@ for (const [, method, raw] of source.matchAll(
         "application/json": { schema: z.toJSONSchema(catalogSearchResponse) },
       };
   }
+  if (path === "/api/v1/bookings/{id}/payment/reconcile")
+    operation.responses["200"].content = {
+      "application/json": { schema: z.toJSONSchema(paymentRecoverySchema) },
+    };
   if (path === "/api/v1/quotes")
     operation.responses["200"].content = {
       "application/json": { schema: z.toJSONSchema(quoteResponseSchema) },

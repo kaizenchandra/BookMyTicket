@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-11-07T06:03:28.363Z",
+  "origin": "http://127.0.0.1:3101",
+  "level": "Actual local HTTP + Mailpit + PostgreSQL DEMO journeys; no real payment or admission; no browser verification",
+  "checks": [
+    {
+      "title": "[DEMO] Stories Under the Stars",
+      "listingId": "dbb3ccec-de3b-4d14-a465-7f076aa8febf",
+      "bookingId": "fcad1753-fbc6-4d37-96dd-cd246df2f277",
+      "seating": "seat",
+      "formVersion": 1,
+      "qrIssued": true,
+      "finalState": "cancelled",
+      "capacityRestored": true
+    },
+    {
+      "title": "[DEMO] Clay and Coffee Studio",
+      "listingId": "1ff9b19d-8cbb-4cd6-9fc5-600bb7b1d421",
+      "bookingId": "335dfe8c-f8c6-4328-a1fd-f72fcbf60ebd",
+      "seating": "pool",
+      "formVersion": 1,
+      "qrIssued": true,
+      "finalState": "cancelled",
+      "capacityRestored": true
+    },
+    {
+      "title": "[DEMO] The Laugh Laboratory",
+      "listingId": "f8d96968-5824-46a5-a571-598c9a1876af",
+      "bookingId": "d3fd3fc2-5e7d-402e-88a1-e0bb9ce08d16",
+      "seating": "seat",
+      "formVersion": 1,
+      "qrIssued": true,
+      "finalState": "cancelled",
+      "capacityRestored": true
+    },
+    {
+      "title": "[DEMO] Moonlight Sessions",
+      "listingId": "56b00c1a-8b36-49dd-9a11-db7e85ec56ce",
+      "bookingId": "a567e397-8d1d-4574-8e52-bfac61693fce",
+      "seating": "pool",
+      "formVersion": 1,
+      "qrIssued": true,
+      "finalState": "cancelled",
+      "capacityRestored": true
+    }
+  ]
+}

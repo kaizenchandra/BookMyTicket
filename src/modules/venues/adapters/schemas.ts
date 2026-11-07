@@ -62,3 +62,17 @@ export const scheduleInput = z
     prices: z.record(z.string(), z.number().int().min(0).max(100000000)),
   })
   .strict();
+
+export const scheduleSeriesInput = z
+  .object({
+    schedule: scheduleInput,
+    repeat: z
+      .object({
+        frequency: z.enum(["daily", "weekly"]),
+        interval: z.number().int().min(1).max(12),
+        count: z.number().int().min(2).max(24),
+        excludeDates: z.array(z.iso.date()).max(24),
+      })
+      .strict(),
+  })
+  .strict();

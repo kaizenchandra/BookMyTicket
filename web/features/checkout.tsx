@@ -1,3 +1,6 @@
+import { OnlineEventAccess } from "./online-access.tsx";
+import { BookingProgress } from "./booking-design.tsx";
+import type { ReservedSnapshot } from "../../src/modules/inventory/contracts/index.ts";
 import { FreeBookingCancellation } from "./free-cancellation.tsx";
 import { FreeBookingConfirmation } from "./free-confirmation.tsx";
 import { PendingOrderCancellation } from "./pending-cancellation.tsx";
@@ -152,12 +155,41 @@ export function CheckoutQuote({
     }
   }
   return (
-    <section className="quote-panel" aria-labelledby="quote-heading">
-      <h2 id="quote-heading">Review the final price</h2>
+    <section
+      className="quote-panel checkout-review"
+      aria-labelledby="quote-heading"
+    >
+      <h2 id="quote-heading">Booking summary</h2>
       {loading ? (
         <p role="status">Calculating your quote…</p>
       ) : quote ? (
         <>
+          <section className="selected-session" aria-label="Selected sessions">
+            <h3>Your selected session</h3>
+            {(quote.reservationSnapshot as ReservedSnapshot).occurrences.map(
+              (occurrence) => (
+                <div key={occurrence.id}>
+                  <strong>{occurrence.venueName}</strong>
+                  <p>
+                    {new Date(occurrence.startsAt).toLocaleString("en-IN", {
+                      timeZone: occurrence.timeZone,
+                    })}{" "}
+                    –{" "}
+                    {new Date(occurrence.endsAt).toLocaleTimeString("en-IN", {
+                      timeZone: occurrence.timeZone,
+                    })}{" "}
+                    · {occurrence.timeZone}
+                  </p>
+                  <p>
+                    {(quote.reservationSnapshot as ReservedSnapshot).items
+                      .filter((item) => item.occurrence_id === occurrence.id)
+                      .reduce((total, item) => total + item.quantity, 0)}{" "}
+                    admission(s). Each ticket admits one person to this session.
+                  </p>
+                </div>
+              ),
+            )}
+          </section>
           {registration && (
             <AttendeeFields
               preview={registration}
@@ -170,7 +202,9 @@ export function CheckoutQuote({
               }}
             />
           )}
-          <QuoteTotals prices={quote.prices} />
+          <div className="checkout-price-summary">
+            <QuoteTotals prices={quote.prices} />
+          </div>
           <p className="muted">
             Quote {quote.id.slice(0, 8)} · {quote.policyLabel}
           </p>
@@ -210,7 +244,7 @@ export function CheckoutQuote({
           >
             {busy
               ? "Saving your order…"
-              : `Accept quote of ${money(quote.prices.totalPaise)}`}
+              : `Continue · ${money(quote.prices.totalPaise)}`}
           </button>
           <p className="muted">
             This creates an order awaiting payment or free-booking confirmation.
@@ -263,7 +297,8 @@ export function BookingDetail({ id }: { id: string }) {
     };
   }, [id, revision]);
   return (
-    <section className="reading">
+    <section className="reading booking-status-page">
+      <BookingProgress step={4} />
       <p className="eyebrow">YOUR ORDER</p>
       <h1>
         {order?.state === "confirmed" ? "Booking confirmed" : "Booking status"}
@@ -330,6 +365,14 @@ export function BookingDetail({ id }: { id: string }) {
               onChanged={() => setRevision((r) => r + 1)}
             />
           )}
+          {order.state === "confirmed" &&
+            order.snapshot.occurrences?.map((o: any) => (
+              <OnlineEventAccess
+                key={`${o.id}:${revision}`}
+                orderId={id}
+                occurrenceId={o.id}
+              />
+            ))}
           <SavedRegistration orderId={id} />
           <TicketWallet key={id} orderId={id} revision={revision} />
           {order.amount_paise === 0 ? (

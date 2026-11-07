@@ -20,7 +20,7 @@ export class PostgresCategoryDrafts implements CategoryDrafts {
     tx: Transaction,
     actor: string,
     org: string,
-    kind: "movie" | "sports",
+    kind: "movie" | "sports" | "event",
     key: string,
     input: CategoryDraftInput,
     id?: string,

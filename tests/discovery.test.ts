@@ -183,3 +183,47 @@ test("grouped suggestions are bounded and never expose drafts or another city", 
     await app.close();
   }
 });
+
+test("Upcoming discovery filters expired, unscheduled and cancelled projections with scoped pagination", async () => {
+  const f = await fixture(),
+    app = await buildApp();
+  try {
+    for (const [index, id] of f.ids.entries()) {
+      if (index === 29) continue;
+      await pool.query(
+        "INSERT INTO catalog.session_projection(occurrence_id,listing_id,starts_at,time_zone,venue_name,state) VALUES($1,$2,clock_timestamp()+make_interval(days=>$3),'Asia/Kolkata','Fixture venue',$4)",
+        [
+          randomUUID(),
+          id,
+          index === 28 ? -1 : 2,
+          index === 27 ? "cancelled" : "open",
+        ],
+      );
+    }
+    const query = new URLSearchParams({
+      city: f.city,
+      upcoming: "true",
+      sort: "title",
+    });
+    const first = (
+      await app.inject({ url: "/api/v1/catalog?" + query })
+    ).json();
+    assert.equal(first.total, 27);
+    assert.equal(first.items.length, 24);
+    assert(
+      first.items.every((x: any) => x.nextSession.timeZone === "Asia/Kolkata"),
+    );
+    query.set("after", first.nextCursor);
+    const second = (
+      await app.inject({ url: "/api/v1/catalog?" + query })
+    ).json();
+    assert.equal(second.items.length, 3);
+    query.set("upcoming", "false");
+    assert.equal(
+      (await app.inject({ url: "/api/v1/catalog?" + query })).statusCode,
+      422,
+    );
+  } finally {
+    await app.close();
+  }
+});

@@ -246,95 +246,130 @@
     "id": "FE:VIS-01",
     "requirement": "VIS-01 \u2014 Reference audit: Record the reference city, viewport, page, and observation date when collecting design evidence.",
     "source": "frontend-functional-requirement.md:39",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
+    "acceptanceTests": [
+      "tests/booking-design.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "component_render_checked_visual_unverified",
+    "evidence": [
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
+    ],
+    "dependencies": [
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:VIS-02",
     "requirement": "VIS-02 \u2014 Layout fidelity: Match observed header composition, navigation hierarchy, content widths, poster ratios, card density, spacing, filters, and booking flows.",
     "source": "frontend-functional-requirement.md:40",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
+    "acceptanceTests": [
+      "tests/booking-design.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "component_render_checked_visual_unverified",
+    "evidence": [
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
+    ],
+    "dependencies": [
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:VIS-03",
     "requirement": "VIS-03 \u2014 Evidence limits: Label unobserved screens as inferred designs; do not describe them as pixel-perfect reproductions.",
     "source": "frontend-functional-requirement.md:41",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
+    "acceptanceTests": [
+      "tests/booking-design.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "component_render_checked_visual_unverified",
+    "evidence": [
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
+    ],
+    "dependencies": [
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:VIS-04",
     "requirement": "VIS-04 \u2014 Design system: Define reusable tokens for spacing, typography, colors, radii, shadows, borders, motion, and stacking order.",
     "source": "frontend-functional-requirement.md:42",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
+    "acceptanceTests": [
+      "tests/booking-design.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "component_render_checked_visual_unverified",
+    "evidence": [
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
+    ],
+    "dependencies": [
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:VIS-05",
     "requirement": "VIS-05 \u2014 Consistent components: Reuse buttons, cards, form controls, chips, alerts, dialogs, drawers, tables, and status badges.",
     "source": "frontend-functional-requirement.md:43",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
+    "acceptanceTests": [
+      "tests/booking-design.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "component_render_checked_visual_unverified",
+    "evidence": [
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
+    ],
+    "dependencies": [
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -631,24 +666,25 @@
     "id": "FE:THM-08",
     "requirement": "THM-08: Prevent an incorrect-theme flash during initial rendering.",
     "source": "frontend-functional-requirement.md:61",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "All implemented screens",
-    "backendModule": "profiles",
-    "apiUseCase": "Theme persistence / profile settings",
-    "dataOwnership": "profiles",
-    "permissions": "Own profile",
-    "transactionRules": "Local explicit preference; account loaded after sign-in",
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
     "acceptanceTests": [
-      "tests/inventory.test.ts (see named subset; not full requirement coverage)"
+      "tests/booking-design.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "browser_verification_blocked",
+    "verificationStatus": "component_render_checked_visual_unverified",
     "evidence": [
-      "docs/evidence/integration-tests.txt"
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
     ],
     "dependencies": [
-      "Complete detailed acceptance coverage; see docs/progress.md"
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -1260,19 +1296,26 @@
     "id": "FE:PRO-03",
     "requirement": "PRO-03: Manage language and notification preferences.",
     "source": "frontend-functional-requirement.md:99",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Save language and optional marketing email consent; withdraw consent",
+    "frontendRoute": "/profile",
+    "backendModule": "profiles",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications",
+    "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
+    "permissions": "Authenticated account only; no submitted owner identity",
+    "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
+    "acceptanceTests": [
+      "tests/communication-preferences.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/communication-full-suite.txt",
+      "docs/architecture/adr-018-communication-preferences.md"
+    ],
+    "dependencies": [
+      "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -1336,38 +1379,52 @@
     "id": "FE:PRO-07",
     "requirement": "PRO-07: Display validation errors without unnecessarily erasing entered information.",
     "source": "frontend-functional-requirement.md:103",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Save language and optional marketing email consent; withdraw consent",
+    "frontendRoute": "/profile",
+    "backendModule": "profiles",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications",
+    "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
+    "permissions": "Authenticated account only; no submitted owner identity",
+    "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
+    "acceptanceTests": [
+      "tests/communication-preferences.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/communication-full-suite.txt",
+      "docs/architecture/adr-018-communication-preferences.md"
+    ],
+    "dependencies": [
+      "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:PRO-08",
     "requirement": "PRO-08: Distinguish required transactional communication from optional marketing preferences.",
     "source": "frontend-functional-requirement.md:104",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Save language and optional marketing email consent; withdraw consent",
+    "frontendRoute": "/profile",
+    "backendModule": "profiles",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications",
+    "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
+    "permissions": "Authenticated account only; no submitted owner identity",
+    "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
+    "acceptanceTests": [
+      "tests/communication-preferences.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/communication-full-suite.txt",
+      "docs/architecture/adr-018-communication-preferences.md"
+    ],
+    "dependencies": [
+      "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -1431,38 +1488,58 @@
     "id": "FE:DIS-04",
     "requirement": "DIS-04: Display upcoming events, sports fixtures, and relevant category collections.",
     "source": "frontend-functional-requirement.md:111",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:DIS-05",
     "requirement": "DIS-05: Show cards with title, image, location, date where appropriate, category, and price information.",
     "source": "frontend-functional-requirement.md:112",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -2302,76 +2379,111 @@
     "id": "FE:EVT-UI-01",
     "requirement": "EVT-UI-01: Display description, performers, organizer, venue, schedule, duration, age restrictions, inclusions, exclusions, and entry instructions.",
     "source": "frontend-functional-requirement.md:159",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:EVT-UI-02",
     "requirement": "EVT-UI-02: Support single sessions, recurring sessions, multiple dates, and multi-day passes.",
     "source": "frontend-functional-requirement.md:160",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
+    "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
+      "tests/registration.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
+    ],
+    "dependencies": [
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:EVT-UI-03",
     "requirement": "EVT-UI-03: Clearly identify the selected session and covered dates.",
     "source": "frontend-functional-requirement.md:161",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:EVT-UI-04",
     "requirement": "EVT-UI-04: Show ticket categories, prices, quantities, availability, and category-specific benefits.",
     "source": "frontend-functional-requirement.md:162",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Browse detail, select showtime and tickets, review checkout",
+    "frontendRoute": "/listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "existing catalog/inventory/pricing/bookings APIs",
+    "apiUseCase": "Existing published detail, session inventory, reservation and quote contracts",
+    "dataOwnership": "Backend modules remain authoritative; frontend selection only",
+    "permissions": "Public discovery; authenticated owner checkout",
+    "transactionRules": "No change to allocation/payment invariants; no optimistic confirmation",
+    "acceptanceTests": [
+      "tests/booking-design.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "component_render_checked_visual_unverified",
+    "evidence": [
+      "docs/evidence/booking-design-reference-audit.md",
+      "docs/evidence/booking-design-full-suite.txt"
+    ],
+    "dependencies": [
+      "Browser/reference screenshot access; five-width Light/Dark visual and accessibility acceptance"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -2397,44 +2509,57 @@
     "id": "FE:EVT-UI-06",
     "requirement": "EVT-UI-06: Display assigned seating, standing areas, or general admission as configured.",
     "source": "frontend-functional-requirement.md:164",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "FE:EVT-UI-07",
     "requirement": "EVT-UI-07: Render backend-defined attendee forms with required fields and validation.",
     "source": "frontend-functional-requirement.md:165",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
     "acceptanceTests": [
-      "tests/registration.test.ts"
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -2461,25 +2586,26 @@
     "id": "FE:EVT-UI-09",
     "requirement": "EVT-UI-09: Display applicable declarations and policy acknowledgments.",
     "source": "frontend-functional-requirement.md:167",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
     "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
       "tests/registration.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "database_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -2487,19 +2613,27 @@
     "id": "FE:EVT-UI-10",
     "requirement": "EVT-UI-10: Show online-event joining information only to authorized ticket holders.",
     "source": "frontend-functional-requirement.md:168",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Organizer; confirmed ticket holder",
+    "journey": "Configure and reveal protected online joining information",
+    "frontendRoute": "/partner/venues; /bookings/:id",
+    "backendModule": "events; bookings; inventory; ticketing; reporting",
+    "apiUseCase": "OnlineAccess.configure/configuration/access",
+    "dataOwnership": "events encrypted settings; bookings eligibility through injected port",
+    "permissions": "Approved organization writer to configure; owned confirmed booking and valid unused ticket to reveal",
+    "transactionRules": "Optimistic configuration version; booking/occurrence/ticket/config locks; database time after locks; encrypted URL; audit without secret",
+    "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated online access checks"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "postgres_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/online-access-full-suite.txt",
+      "docs/evidence/online-access-container-tests.txt",
+      "docs/architecture/adr-023-online-event-access.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; approved production window policy; external meeting-provider attendee controls; master-key rotation procedure"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -6097,19 +6231,26 @@
     "id": "FE:OPS-E-01",
     "requirement": "OPS-E-01: Create sessions, recurring schedules, and multi-day offerings.",
     "source": "frontend-functional-requirement.md:384",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Event organizer; venue operator",
+    "journey": "Preview and atomically publish daily/weekly concrete sessions with excluded dates",
+    "frontendRoute": "/partner/venues",
+    "backendModule": "inventory; venues; catalog; reporting",
+    "apiUseCase": "Scheduling.previewSeries/createSeries",
+    "dataOwnership": "inventory series command and occurrences; catalog schedule projection",
+    "permissions": "Organization writer; approved organization; owned published listing and venue plan",
+    "transactionRules": "One local transaction; deterministic child keys; actor advisory lock; all-or-nothing conflicts; permission recheck on replay; venue-offset validation",
+    "acceptanceTests": [
+      "tests/venues.test.ts: recurring series tests"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "postgres_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/recurring-schedule-full-suite.txt",
+      "docs/architecture/adr-022-recurring-schedules.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; existing-series edits and individual rescheduling; bulk form/policy assignment; DST-aware rule engine; packages/passes"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -6135,25 +6276,26 @@
     "id": "FE:OPS-E-03",
     "requirement": "OPS-E-03: Build attendee forms with field types, required status, options, and validation.",
     "source": "frontend-functional-requirement.md:386",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
     "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
       "tests/registration.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "database_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -6161,25 +6303,26 @@
     "id": "FE:OPS-E-04",
     "requirement": "OPS-E-04: Preview forms as a customer.",
     "source": "frontend-functional-requirement.md:387",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
     "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
       "tests/registration.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "database_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -6187,25 +6330,26 @@
     "id": "FE:OPS-E-05",
     "requirement": "OPS-E-05: Explain the effect of form changes on existing registrations.",
     "source": "frontend-functional-requirement.md:388",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
     "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
       "tests/registration.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "database_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -9368,19 +9512,26 @@
     "id": "BE:CUS-03",
     "requirement": "CUS-03: Store preferred city, language, and notification settings.",
     "source": "backend-functional-requirement.md:111",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Save language and optional marketing email consent; withdraw consent",
+    "frontendRoute": "/profile",
+    "backendModule": "profiles",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications",
+    "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
+    "permissions": "Authenticated account only; no submitted owner identity",
+    "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
+    "acceptanceTests": [
+      "tests/communication-preferences.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/communication-full-suite.txt",
+      "docs/architecture/adr-018-communication-preferences.md"
+    ],
+    "dependencies": [
+      "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -9433,38 +9584,52 @@
     "id": "BE:CUS-06",
     "requirement": "CUS-06: Track consent purpose, version, timestamp, and withdrawal.",
     "source": "backend-functional-requirement.md:114",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Save language and optional marketing email consent; withdraw consent",
+    "frontendRoute": "/profile",
+    "backendModule": "profiles",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications",
+    "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
+    "permissions": "Authenticated account only; no submitted owner identity",
+    "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
+    "acceptanceTests": [
+      "tests/communication-preferences.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/communication-full-suite.txt",
+      "docs/architecture/adr-018-communication-preferences.md"
+    ],
+    "dependencies": [
+      "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "BE:CUS-07",
     "requirement": "CUS-07: Separate transactional communication eligibility from marketing subscriptions.",
     "source": "backend-functional-requirement.md:115",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer",
+    "journey": "Save language and optional marketing email consent; withdraw consent",
+    "frontendRoute": "/profile",
+    "backendModule": "profiles",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications",
+    "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
+    "permissions": "Authenticated account only; no submitted owner identity",
+    "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
+    "acceptanceTests": [
+      "tests/communication-preferences.test.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "database_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/communication-full-suite.txt",
+      "docs/architecture/adr-018-communication-preferences.md"
+    ],
+    "dependencies": [
+      "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -10666,76 +10831,110 @@
     "id": "BE:EVT-01",
     "requirement": "EVT-01: Manage organizer, performers, categories, venue, description, duration, restrictions, and inclusions.",
     "source": "backend-functional-requirement.md:185",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "BE:EVT-02",
     "requirement": "EVT-02: Support one-time and recurring sessions.",
     "source": "backend-functional-requirement.md:186",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Event organizer; venue operator",
+    "journey": "Preview and atomically publish daily/weekly concrete sessions with excluded dates",
+    "frontendRoute": "/partner/venues",
+    "backendModule": "inventory; venues; catalog; reporting",
+    "apiUseCase": "Scheduling.previewSeries/createSeries",
+    "dataOwnership": "inventory series command and occurrences; catalog schedule projection",
+    "permissions": "Organization writer; approved organization; owned published listing and venue plan",
+    "transactionRules": "One local transaction; deterministic child keys; actor advisory lock; all-or-nothing conflicts; permission recheck on replay; venue-offset validation",
+    "acceptanceTests": [
+      "tests/venues.test.ts: recurring series tests"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "postgres_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/recurring-schedule-full-suite.txt",
+      "docs/architecture/adr-022-recurring-schedules.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; existing-series edits and individual rescheduling; bulk form/policy assignment; DST-aware rule engine; packages/passes"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "BE:EVT-03",
     "requirement": "EVT-03: Generate concrete occurrences from recurring schedules and support individual exceptions.",
     "source": "backend-functional-requirement.md:187",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Event organizer; venue operator",
+    "journey": "Preview and atomically publish daily/weekly concrete sessions with excluded dates",
+    "frontendRoute": "/partner/venues",
+    "backendModule": "inventory; venues; catalog; reporting",
+    "apiUseCase": "Scheduling.previewSeries/createSeries",
+    "dataOwnership": "inventory series command and occurrences; catalog schedule projection",
+    "permissions": "Organization writer; approved organization; owned published listing and venue plan",
+    "transactionRules": "One local transaction; deterministic child keys; actor advisory lock; all-or-nothing conflicts; permission recheck on replay; venue-offset validation",
+    "acceptanceTests": [
+      "tests/venues.test.ts: recurring series tests"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "postgres_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/recurring-schedule-full-suite.txt",
+      "docs/architecture/adr-022-recurring-schedules.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; existing-series edits and individual rescheduling; bulk form/policy assignment; DST-aware rule engine; packages/passes"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
     "id": "BE:EVT-04",
     "requirement": "EVT-04: Support assigned seating, standing sections, and general admission.",
     "source": "backend-functional-requirement.md:188",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
+    "acceptanceTests": [
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
+    "evidence": [
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -10799,25 +10998,26 @@
     "id": "BE:EVT-08",
     "requirement": "EVT-08: Define versioned attendee-form schemas, permitted field types, required fields, and validation rules.",
     "source": "backend-functional-requirement.md:192",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
     "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
       "tests/registration.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "database_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10825,25 +11025,28 @@
     "id": "BE:EVT-09",
     "requirement": "EVT-09: Validate submitted attendee data against the purchased schema version.",
     "source": "backend-functional-requirement.md:193",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
     "acceptanceTests": [
-      "tests/registration.test.ts"
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10851,25 +11054,26 @@
     "id": "BE:EVT-10",
     "requirement": "EVT-10: Preserve historical registrations when forms change.",
     "source": "backend-functional-requirement.md:194",
-    "role": "Organizer and customer",
-    "journey": "Publish immutable attendee form, review and accept per-admission answers",
-    "frontendRoute": "/partner/venues; reservation checkout; /bookings/:id",
-    "backendModule": "events; bookings",
-    "apiUseCase": "Forms.publish/validate; OrderPlacement.accept; registrations.get",
-    "dataOwnership": "events form versions; bookings encrypted answers; inventory capacity",
-    "permissions": "Organization writer and approval for publication; reservation/order owner for answers",
-    "transactionRules": "Occurrence lock; optimistic form version; atomic order/registration; keyed input digest and AES-GCM order/owner binding",
+    "role": "Event organizer; customer",
+    "journey": "Draft, publish, schedule and book an event with versioned attendee registration",
+    "frontendRoute": "/partner/venues; /events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "events; catalog; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "EventCatalog.save/list/detail; Forms.publish/validate; reservation, quote, order and confirmation",
+    "dataOwnership": "events catalog_details and immutable form definitions; catalog publication; inventory allocation; bookings encrypted answers",
+    "permissions": "Organization writer; moderator; customer-owned reservation/order",
+    "transactionRules": "Atomic category/catalog writes; scoped idempotency/version checks; inventory locks; attendee schema validation at order acceptance; immutable accepted form",
     "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated",
       "tests/registration.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_verified_browser_unverified",
+    "verificationStatus": "database_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/registration-test-run.txt",
-      "docs/architecture/adr-006-registration.md"
+      "docs/evidence/event-workflow-full-suite.txt",
+      "docs/architecture/adr-019-event-booking.md"
     ],
     "dependencies": [
-      "Browser acceptance; attendee corrections; retention deletion; authorized provider export; credential uploads and eligibility rules"
+      "Browser/accessibility acceptance; recurrence rules; categories/phases/packages/passes; online access; disruptions; live paid-event verification"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10877,19 +11081,27 @@
     "id": "BE:EVT-11",
     "requirement": "EVT-11: Restrict online-event access links to eligible customers and permitted time windows.",
     "source": "backend-functional-requirement.md:195",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Organizer; confirmed ticket holder",
+    "journey": "Configure and reveal protected online joining information",
+    "frontendRoute": "/partner/venues; /bookings/:id",
+    "backendModule": "events; bookings; inventory; ticketing; reporting",
+    "apiUseCase": "OnlineAccess.configure/configuration/access",
+    "dataOwnership": "events encrypted settings; bookings eligibility through injected port",
+    "permissions": "Approved organization writer to configure; owned confirmed booking and valid unused ticket to reveal",
+    "transactionRules": "Optimistic configuration version; booking/occurrence/ticket/config locks; database time after locks; encrypted URL; audit without secret",
+    "acceptanceTests": [
+      "tests/cinema-sports.test.ts: events and events-seated online access checks"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "postgres_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/online-access-full-suite.txt",
+      "docs/evidence/online-access-container-tests.txt",
+      "docs/architecture/adr-023-online-event-access.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; approved production window policy; external meeting-provider attendee controls; master-key rotation procedure"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -11144,26 +11356,25 @@
     "id": "BE:SCH-01",
     "requirement": "SCH-01: Store timestamps consistently while preserving venue-local scheduling intent.",
     "source": "backend-functional-requirement.md:213",
-    "role": "Cinema/event/sports provider; customer",
-    "journey": "Create physical venue and immutable plan; schedule and inspect exact occurrence seating",
-    "frontendRoute": "/partner/venues; /occurrence/:id",
-    "backendModule": "venues; inventory",
-    "apiUseCase": "Venues create/space/plan/list; Scheduling.create; inventory availability",
-    "dataOwnership": "Venues owns spaces/plans; Inventory owns occurrences/resources",
-    "permissions": "Organization membership; write role; approved provider and owned published listing for scheduling",
-    "transactionRules": "Space row lock; immutable plan/snapshot guards; actor-key fingerprint; exact plan-derived resources; schedule overlap including turnaround",
+    "role": "Event organizer; venue operator",
+    "journey": "Preview and atomically publish daily/weekly concrete sessions with excluded dates",
+    "frontendRoute": "/partner/venues",
+    "backendModule": "inventory; venues; catalog; reporting",
+    "apiUseCase": "Scheduling.previewSeries/createSeries",
+    "dataOwnership": "inventory series command and occurrences; catalog schedule projection",
+    "permissions": "Organization writer; approved organization; owned published listing and venue plan",
+    "transactionRules": "One local transaction; deterministic child keys; actor advisory lock; all-or-nothing conflicts; permission recheck on replay; venue-offset validation",
     "acceptanceTests": [
-      "tests/venues.test.ts"
+      "tests/venues.test.ts: recurring series tests"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_http_verified_browser_unverified",
+    "verificationStatus": "postgres_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/integration-tests.txt",
-      "docs/evidence/container-tests.txt",
-      "docs/architecture/adr-005-venues.md"
+      "docs/evidence/recurring-schedule-full-suite.txt",
+      "docs/architecture/adr-022-recurring-schedules.md"
     ],
     "dependencies": [
-      "Browser acceptance; bulk imports/large-map editing; controlled plan migration; full category scheduling fields; provider pagination"
+      "Browser acceptance; existing-series edits and individual rescheduling; bulk form/policy assignment; DST-aware rule engine; packages/passes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -11198,26 +11409,25 @@
     "id": "BE:SCH-03",
     "requirement": "SCH-03: Define behavior for ambiguous or nonexistent local times.",
     "source": "backend-functional-requirement.md:215",
-    "role": "Cinema/event/sports provider; customer",
-    "journey": "Create physical venue and immutable plan; schedule and inspect exact occurrence seating",
-    "frontendRoute": "/partner/venues; /occurrence/:id",
-    "backendModule": "venues; inventory",
-    "apiUseCase": "Venues create/space/plan/list; Scheduling.create; inventory availability",
-    "dataOwnership": "Venues owns spaces/plans; Inventory owns occurrences/resources",
-    "permissions": "Organization membership; write role; approved provider and owned published listing for scheduling",
-    "transactionRules": "Space row lock; immutable plan/snapshot guards; actor-key fingerprint; exact plan-derived resources; schedule overlap including turnaround",
+    "role": "Event organizer; venue operator",
+    "journey": "Preview and atomically publish daily/weekly concrete sessions with excluded dates",
+    "frontendRoute": "/partner/venues",
+    "backendModule": "inventory; venues; catalog; reporting",
+    "apiUseCase": "Scheduling.previewSeries/createSeries",
+    "dataOwnership": "inventory series command and occurrences; catalog schedule projection",
+    "permissions": "Organization writer; approved organization; owned published listing and venue plan",
+    "transactionRules": "One local transaction; deterministic child keys; actor advisory lock; all-or-nothing conflicts; permission recheck on replay; venue-offset validation",
     "acceptanceTests": [
-      "tests/venues.test.ts"
+      "tests/venues.test.ts: recurring series tests"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_domain_database_http_verified_browser_unverified",
+    "verificationStatus": "postgres_http_verified_not_browser",
     "evidence": [
-      "docs/evidence/integration-tests.txt",
-      "docs/evidence/container-tests.txt",
-      "docs/architecture/adr-005-venues.md"
+      "docs/evidence/recurring-schedule-full-suite.txt",
+      "docs/architecture/adr-022-recurring-schedules.md"
     ],
     "dependencies": [
-      "Browser acceptance; bulk imports/large-map editing; controlled plan migration; full category scheduling fields; provider pagination"
+      "Browser acceptance; existing-series edits and individual rescheduling; bulk form/policy assignment; DST-aware rule engine; packages/passes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -11328,19 +11538,26 @@
     "id": "BE:SCH-09",
     "requirement": "SCH-09: Record which future occurrences are affected by recurring-schedule edits.",
     "source": "backend-functional-requirement.md:221",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
-    "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
-    "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
-    "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "role": "Event organizer; venue operator",
+    "journey": "Preview and atomically publish daily/weekly concrete sessions with excluded dates",
+    "frontendRoute": "/partner/venues",
+    "backendModule": "inventory; venues; catalog; reporting",
+    "apiUseCase": "Scheduling.previewSeries/createSeries",
+    "dataOwnership": "inventory series command and occurrences; catalog schedule projection",
+    "permissions": "Organization writer; approved organization; owned published listing and venue plan",
+    "transactionRules": "One local transaction; deterministic child keys; actor advisory lock; all-or-nothing conflicts; permission recheck on replay; venue-offset validation",
+    "acceptanceTests": [
+      "tests/venues.test.ts: recurring series tests"
+    ],
+    "implementationStatus": "partial",
+    "verificationStatus": "postgres_http_verified_not_browser",
+    "evidence": [
+      "docs/evidence/recurring-schedule-full-suite.txt",
+      "docs/architecture/adr-022-recurring-schedules.md"
+    ],
+    "dependencies": [
+      "Browser acceptance; existing-series edits and individual rescheduling; bulk form/policy assignment; DST-aware rule engine; packages/passes"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -11366,25 +11583,28 @@
     "id": "BE:DSC-01",
     "requirement": "DSC-01: Provide city-specific discovery for movies, events, and sports.",
     "source": "backend-functional-requirement.md:226",
-    "role": "Customer",
-    "journey": "Search published listings, apply metadata filters and navigate pages",
-    "frontendRoute": "/movies; /events; /sports; /explore",
-    "backendModule": "catalog",
-    "apiUseCase": "Discovery.search/suggestions",
-    "dataOwnership": "catalog published listings",
-    "permissions": "Published public content only",
-    "transactionRules": "Read-only keyset query; filter-scoped cursor; booking authority stays in Inventory",
+    "role": "Customer; event organizer",
+    "journey": "Find upcoming events and book a configured single session",
+    "frontendRoute": "/events; /listing/:id; /occurrence/:id; /checkout/:id; /bookings/:id",
+    "backendModule": "catalog; events; inventory; pricing; bookings; ticketing",
+    "apiUseCase": "CatalogSessions.recordSession; upcoming catalog query; real reservation/order/registration/ticket APIs",
+    "dataOwnership": "catalog rebuildable schedule projection; inventory allocation; events details/forms; bookings accepted registrations",
+    "permissions": "Published discovery; organizer writes; customer-owned checkout",
+    "transactionRules": "Atomic scheduling/projection; DB-time upcoming predicate; scoped cursors; protected capacity and confirmation",
     "acceptanceTests": [
-      "tests/discovery.test.ts"
+      "tests/discovery.test.ts",
+      "tests/cinema-sports.test.ts",
+      "scripts/verify-event-booking.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_database_http_verified_not_browser",
+    "verificationStatus": "local_demo_http_journey_verified_not_browser_or_paid",
     "evidence": [
-      "docs/evidence/cinema-sports-full-suite.txt",
-      "docs/architecture/adr-016-discovery.md"
+      "docs/evidence/upcoming-events-tests.txt",
+      "docs/evidence/events-deployed-booking.json",
+      "docs/architecture/adr-021-upcoming-events.md"
     ],
     "dependencies": [
-      "Browser/a11y; additional entities and filters; mobile drawer; load verification"
+      "Browser acceptance; recurrence/packages/passes; online access/disruptions; projection rebuild tooling; live merchant setup and paid refunds"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -13738,26 +13958,26 @@
     "id": "BE:PAY-10",
     "requirement": "PAY-10: Reconcile uncertain requests before initiating potentially duplicate financial actions.",
     "source": "backend-functional-requirement.md:363",
-    "role": "Customer; reconciliation worker",
-    "journey": "Initiate accepted order payment and recover status",
+    "role": "Customer; payment worker",
+    "journey": "Razorpay checkout and uncertain-payment recovery",
     "frontendRoute": "/bookings/:id",
-    "backendModule": "payments",
-    "apiUseCase": "Collection.initiate/callback/status/reconcileOrder",
-    "dataOwnership": "Payments provider_orders/attempts; Bookings/Inventory/Pricing public transaction contracts",
-    "permissions": "Order owner; trusted provider-query evidence for fulfillment",
-    "transactionRules": "Order lock and quote/hold revalidation; durable unique intent before network; lease tokens; failed-attempt retry watermark",
+    "backendModule": "payments; bookings",
+    "apiUseCase": "Collection.initiate/callback/requestRecovery; webhook ingestion; PaymentReconciliation",
+    "dataOwnership": "payments provider orders, attempts and webhook inbox; bookings confirmation",
+    "permissions": "Owner-only commands; signed provider webhook",
+    "transactionRules": "Trusted amount/mapping; raw-body HMAC; durable deduplicated recovery; preserve lease/backoff; atomic capture fulfillment",
     "acceptanceTests": [
-      "tests/payment.test.ts"
+      "tests/payment.test.ts",
+      "tests/inventory.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_database_http_subset_verified_browser_and_provider_unverified",
+    "verificationStatus": "database_http_verified_not_live_provider",
     "evidence": [
-      "docs/evidence/integration-tests.txt",
-      "docs/evidence/container-tests.txt",
-      "docs/evidence/local-smoke.json"
+      "docs/evidence/razorpay-full-suite.txt",
+      "docs/architecture/adr-020-payment-recovery.md"
     ],
     "dependencies": [
-      "Live provider/hosted checkout verification blocked; refunds/disputes and operational review UI remain outstanding"
+      "Reference repository inaccessible; merchant credentials; public HTTPS webhooks; authorized live charge; browser acceptance; paid refunds/disputes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -13792,24 +14012,26 @@
     "id": "BE:PAY-12",
     "requirement": "PAY-12: Detect multiple successful charges and initiate a controlled excess-payment recovery workflow.",
     "source": "backend-functional-requirement.md:365",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "backend adapter / worker",
-    "backendModule": "payments",
-    "apiUseCase": "Provider order, verification, inbox, capture recovery",
-    "dataOwnership": "payments",
-    "permissions": "Server credentials / webhook HMAC",
-    "transactionRules": "Durable inbox; order lock; no network within DB transaction",
+    "role": "Customer; payment worker",
+    "journey": "Razorpay checkout and uncertain-payment recovery",
+    "frontendRoute": "/bookings/:id",
+    "backendModule": "payments; bookings",
+    "apiUseCase": "Collection.initiate/callback/requestRecovery; webhook ingestion; PaymentReconciliation",
+    "dataOwnership": "payments provider orders, attempts and webhook inbox; bookings confirmation",
+    "permissions": "Owner-only commands; signed provider webhook",
+    "transactionRules": "Trusted amount/mapping; raw-body HMAC; durable deduplicated recovery; preserve lease/backoff; atomic capture fulfillment",
     "acceptanceTests": [
-      "tests/inventory.test.ts (see named subset; not full requirement coverage)"
+      "tests/payment.test.ts",
+      "tests/inventory.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "database_subset_verified",
+    "verificationStatus": "database_http_verified_not_live_provider",
     "evidence": [
-      "docs/evidence/integration-tests.txt"
+      "docs/evidence/razorpay-full-suite.txt",
+      "docs/architecture/adr-020-payment-recovery.md"
     ],
     "dependencies": [
-      "Complete detailed acceptance coverage; see docs/progress.md"
+      "Reference repository inaccessible; merchant credentials; public HTTPS webhooks; authorized live charge; browser acceptance; paid refunds/disputes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -13817,26 +14039,26 @@
     "id": "BE:PAY-13",
     "requirement": "PAY-13: Prevent payment retry when an existing attempt is unresolved unless reconciliation establishes safety.",
     "source": "backend-functional-requirement.md:366",
-    "role": "Customer; reconciliation worker",
-    "journey": "Initiate accepted order payment and recover status",
+    "role": "Customer; payment worker",
+    "journey": "Razorpay checkout and uncertain-payment recovery",
     "frontendRoute": "/bookings/:id",
-    "backendModule": "payments",
-    "apiUseCase": "Collection.initiate/callback/status/reconcileOrder",
-    "dataOwnership": "Payments provider_orders/attempts; Bookings/Inventory/Pricing public transaction contracts",
-    "permissions": "Order owner; trusted provider-query evidence for fulfillment",
-    "transactionRules": "Order lock and quote/hold revalidation; durable unique intent before network; lease tokens; failed-attempt retry watermark",
+    "backendModule": "payments; bookings",
+    "apiUseCase": "Collection.initiate/callback/requestRecovery; webhook ingestion; PaymentReconciliation",
+    "dataOwnership": "payments provider orders, attempts and webhook inbox; bookings confirmation",
+    "permissions": "Owner-only commands; signed provider webhook",
+    "transactionRules": "Trusted amount/mapping; raw-body HMAC; durable deduplicated recovery; preserve lease/backoff; atomic capture fulfillment",
     "acceptanceTests": [
-      "tests/payment.test.ts"
+      "tests/payment.test.ts",
+      "tests/inventory.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "local_database_http_subset_verified_browser_and_provider_unverified",
+    "verificationStatus": "database_http_verified_not_live_provider",
     "evidence": [
-      "docs/evidence/integration-tests.txt",
-      "docs/evidence/container-tests.txt",
-      "docs/evidence/local-smoke.json"
+      "docs/evidence/razorpay-full-suite.txt",
+      "docs/architecture/adr-020-payment-recovery.md"
     ],
     "dependencies": [
-      "Live provider/hosted checkout verification blocked; refunds/disputes and operational review UI remain outstanding"
+      "Reference repository inaccessible; merchant credentials; public HTTPS webhooks; authorized live charge; browser acceptance; paid refunds/disputes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -13976,24 +14198,26 @@
     "id": "BE:WHK-01",
     "requirement": "WHK-01: Validate provider signatures against the exact required request bytes.",
     "source": "backend-functional-requirement.md:377",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "backend adapter / worker",
-    "backendModule": "payments",
-    "apiUseCase": "Provider order, verification, inbox, capture recovery",
-    "dataOwnership": "payments",
-    "permissions": "Server credentials / webhook HMAC",
-    "transactionRules": "Durable inbox; order lock; no network within DB transaction",
+    "role": "Customer; payment worker",
+    "journey": "Razorpay checkout and uncertain-payment recovery",
+    "frontendRoute": "/bookings/:id",
+    "backendModule": "payments; bookings",
+    "apiUseCase": "Collection.initiate/callback/requestRecovery; webhook ingestion; PaymentReconciliation",
+    "dataOwnership": "payments provider orders, attempts and webhook inbox; bookings confirmation",
+    "permissions": "Owner-only commands; signed provider webhook",
+    "transactionRules": "Trusted amount/mapping; raw-body HMAC; durable deduplicated recovery; preserve lease/backoff; atomic capture fulfillment",
     "acceptanceTests": [
-      "tests/inventory.test.ts (see named subset; not full requirement coverage)"
+      "tests/payment.test.ts",
+      "tests/inventory.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "database_subset_verified",
+    "verificationStatus": "database_http_verified_not_live_provider",
     "evidence": [
-      "docs/evidence/integration-tests.txt"
+      "docs/evidence/razorpay-full-suite.txt",
+      "docs/architecture/adr-020-payment-recovery.md"
     ],
     "dependencies": [
-      "Complete detailed acceptance coverage; see docs/progress.md"
+      "Reference repository inaccessible; merchant credentials; public HTTPS webhooks; authorized live charge; browser acceptance; paid refunds/disputes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -14020,24 +14244,26 @@
     "id": "BE:WHK-03",
     "requirement": "WHK-03: Persist accepted events durably before acknowledging successful receipt.",
     "source": "backend-functional-requirement.md:379",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "backend adapter / worker",
-    "backendModule": "payments",
-    "apiUseCase": "Provider order, verification, inbox, capture recovery",
-    "dataOwnership": "payments",
-    "permissions": "Server credentials / webhook HMAC",
-    "transactionRules": "Durable inbox; order lock; no network within DB transaction",
+    "role": "Customer; payment worker",
+    "journey": "Razorpay checkout and uncertain-payment recovery",
+    "frontendRoute": "/bookings/:id",
+    "backendModule": "payments; bookings",
+    "apiUseCase": "Collection.initiate/callback/requestRecovery; webhook ingestion; PaymentReconciliation",
+    "dataOwnership": "payments provider orders, attempts and webhook inbox; bookings confirmation",
+    "permissions": "Owner-only commands; signed provider webhook",
+    "transactionRules": "Trusted amount/mapping; raw-body HMAC; durable deduplicated recovery; preserve lease/backoff; atomic capture fulfillment",
     "acceptanceTests": [
-      "tests/inventory.test.ts (see named subset; not full requirement coverage)"
+      "tests/payment.test.ts",
+      "tests/inventory.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "database_subset_verified",
+    "verificationStatus": "database_http_verified_not_live_provider",
     "evidence": [
-      "docs/evidence/integration-tests.txt"
+      "docs/evidence/razorpay-full-suite.txt",
+      "docs/architecture/adr-020-payment-recovery.md"
     ],
     "dependencies": [
-      "Complete detailed acceptance coverage; see docs/progress.md"
+      "Reference repository inaccessible; merchant credentials; public HTTPS webhooks; authorized live charge; browser acceptance; paid refunds/disputes"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -14045,24 +14271,26 @@
     "id": "BE:WHK-04",
     "requirement": "WHK-04: Deduplicate events using provider identifiers and documented fallback rules.",
     "source": "backend-functional-requirement.md:380",
-    "role": "pending mapping",
-    "journey": "pending mapping",
-    "frontendRoute": "backend adapter / worker",
-    "backendModule": "payments",
-    "apiUseCase": "Provider order, verification, inbox, capture recovery",
-    "dataOwnership": "payments",
-    "permissions": "Server credentials / webhook HMAC",
-    "transactionRules": "Durable inbox; order lock; no network within DB transaction",
+    "role": "Customer; payment worker",
+    "journey": "Razorpay checkout and uncertain-payment recovery",
+    "frontendRoute": "/bookings/:id",
+    "backendModule": "payments; bookings",
+    "apiUseCase": "Collection.initiate/callback/requestRecovery; webhook ingestion; PaymentReconciliation",
+    "dataOwnership": "payments provider orders, attempts and webhook inbox; bookings confirmation",
+    "permissions": "Owner-only commands; signed provider webhook",
+    "transactionRules": "Trusted amount/mapping; raw-body HMAC; durable deduplicated recovery; preserve lease/backoff; atomic capture fulfillment",
     "acceptanceTests": [
-      "tests/inventory.test.ts (see named subset; not full requirement coverage)"
+      "tests/payment.test.ts",
+      "tests/inventory.test.ts"
     ],
     "implementationStatus": "partial",
-    "verificationStatus": "database_subset_verified",
+    "verificationStatus": "database_http_verified_not_live_provider",
     "evidence": [
-      "docs/evidence/integration-tests.txt"
+      "docs/evidence/razorpay-full-suite.txt",
+      "docs/architecture/adr-020-payment-recovery.md"
     ],
     "dependencies": [
-      "Complete detailed acceptance coverage; see docs/progress.md"
+      "Reference repository inaccessible; merchant credentials; public HTTPS webhooks; authorized live charge; browser acceptance; paid refunds/disputes"
     ],
     "decompositionStatus": "pending compound review"
   },

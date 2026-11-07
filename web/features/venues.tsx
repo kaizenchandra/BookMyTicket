@@ -1,3 +1,4 @@
+import { OnlineAccessEditor } from "./online-access.tsx";
 import { CategoryEditor } from "./category-editor.tsx";
 import { AttendeeExportPanel } from "./attendee-exports.tsx";
 import { RegistrationEditor } from "./registration.tsx";
@@ -160,6 +161,11 @@ function Workspace({
     [spaceId, setSpaceId] = useState(""),
     [editingVersion, setEditingVersion] = useState<number | null>(null),
     [planId, setPlanId] = useState(""),
+    [frequency, setFrequency] = useState("single"),
+    [seriesPreview, setSeriesPreview] = useState<{
+      items: { startsAt: string; endsAt: string }[];
+      timeZone: string;
+    } | null>(null),
     [resources, setResources] = useState<PlanResource[]>([]),
     [orientation, setOrientation] = useState(""),
     [dirty, setDirty] = useState(false);
@@ -605,7 +611,13 @@ function Workspace({
         </p>
         <label>
           Seating plan
-          <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
+          <select
+            value={planId}
+            onChange={(e) => {
+              setPlanId(e.target.value);
+              setSeriesPreview(null);
+            }}
+          >
             <option value="">Choose a saved plan</option>
             {data.plans.map((p) => (
               <option key={p.id} value={p.id}>
@@ -618,7 +630,10 @@ function Workspace({
         {selectedPlan && (
           <form
             key={planId}
-            onChange={() => setDirty(true)}
+            onChange={() => {
+              setDirty(true);
+              setSeriesPreview(null);
+            }}
             onSubmit={async (e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -648,75 +663,197 @@ function Workspace({
                   text(f, "salesClose") + ":00" + text(f, "salesCloseOffset"),
                 prices,
               };
-              const serialized = JSON.stringify(input);
+              const payload =
+                frequency === "single"
+                  ? input
+                  : {
+                      schedule: input,
+                      repeat: {
+                        frequency,
+                        interval: Number(text(f, "repeatInterval")),
+                        count: Number(text(f, "repeatCount")),
+                        excludeDates: text(f, "excludedDates")
+                          .split(",")
+                          .map((x) => x.trim())
+                          .filter(Boolean),
+                      },
+                    };
+              const serialized = JSON.stringify(payload);
               if (lastInput.current !== serialized) {
                 operation.current = crypto.randomUUID();
                 lastInput.current = serialized;
               }
-              await submit("/occurrences", input, {
-                "Idempotency-Key": operation.current,
-              });
+              if (frequency !== "single" && !seriesPreview) {
+                setBusy(true);
+                setMessage("");
+                try {
+                  setSeriesPreview(
+                    await api("/occurrences/series/preview", {
+                      method: "POST",
+                      body: serialized,
+                    }),
+                  );
+                } catch (error) {
+                  setMessage((error as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+                return;
+              }
+              const saved = await submit(
+                frequency === "single" ? "/occurrences" : "/occurrences/series",
+                payload,
+                { "Idempotency-Key": operation.current },
+              );
+              if (saved) setSeriesPreview(null);
             }}
           >
-            <p>
-              Venue timezone: {selectedVenue?.time_zone}. Turnaround:{" "}
-              {selectedSpace?.turnaround_minutes} minutes.
-            </p>
-            <label>
-              Published listing
-              <select name="listingId" required>
-                <option value="">Choose listing</option>
-                {listings
-                  .filter((l) => l.state === "published")
-                  .map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.title}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            {[
-              ["startsAt", "Starts"],
-              ["endsAt", "Ends"],
-              ["salesOpen", "Sales open"],
-              ["salesClose", "Sales close"],
-            ].map(([name, label]) => (
-              <fieldset key={name}>
-                <legend>{label}</legend>
-                <label>
-                  Venue-local date and time
-                  <input name={name} type="datetime-local" required />
-                </label>
-                <label>
-                  UTC offset on this date
+            <fieldset disabled={busy} className="schedule-fields">
+              <p>
+                Venue timezone: {selectedVenue?.time_zone}. Turnaround:{" "}
+                {selectedSpace?.turnaround_minutes} minutes.
+              </p>
+              <label>
+                Published listing
+                <select name="listingId" required>
+                  <option value="">Choose listing</option>
+                  {listings
+                    .filter((l) => l.state === "published")
+                    .map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.title}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              {[
+                ["startsAt", "Starts"],
+                ["endsAt", "Ends"],
+                ["salesOpen", "Sales open"],
+                ["salesClose", "Sales close"],
+              ].map(([name, label]) => (
+                <fieldset key={name}>
+                  <legend>{label}</legend>
+                  <label>
+                    Venue-local date and time
+                    <input name={name} type="datetime-local" required />
+                  </label>
+                  <label>
+                    UTC offset on this date
+                    <input
+                      name={name + "Offset"}
+                      defaultValue={
+                        selectedVenue?.time_zone === "Asia/Kolkata"
+                          ? "+05:30"
+                          : ""
+                      }
+                      placeholder="+05:30"
+                      pattern="[+-][0-9]{2}:[0-9]{2}"
+                      required
+                    />
+                  </label>
+                </fieldset>
+              ))}
+              {selectedPlan.configuration.resources.map((r) => (
+                <label key={r.id}>
+                  {r.section} · {r.label} price (INR)
                   <input
-                    name={name + "Offset"}
-                    defaultValue={
-                      selectedVenue?.time_zone === "Asia/Kolkata"
-                        ? "+05:30"
-                        : ""
-                    }
-                    placeholder="+05:30"
-                    pattern="[+-][0-9]{2}:[0-9]{2}"
+                    name={`price:${r.id}`}
+                    inputMode="decimal"
                     required
+                    pattern="[0-9]+([.][0-9]{1,2})?"
                   />
                 </label>
-              </fieldset>
-            ))}
-            {selectedPlan.configuration.resources.map((r) => (
-              <label key={r.id}>
-                {r.section} · {r.label} price (INR)
-                <input
-                  name={`price:${r.id}`}
-                  inputMode="decimal"
-                  required
-                  pattern="[0-9]+([.][0-9]{1,2})?"
-                />
+              ))}
+              <label>
+                Schedule type
+                <select
+                  name="repeatFrequency"
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value)}
+                >
+                  <option value="single">Single session</option>
+                  <option value="daily">Daily series</option>
+                  <option value="weekly">Weekly series</option>
+                </select>
               </label>
-            ))}
-            <button className="primary" disabled={busy}>
-              Create occurrence
-            </button>
+              {frequency !== "single" && (
+                <>
+                  <label>
+                    Repeat every (days or weeks)
+                    <input
+                      name="repeatInterval"
+                      type="number"
+                      min={1}
+                      max={12}
+                      defaultValue={1}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Number of dates before exclusions
+                    <input
+                      name="repeatCount"
+                      type="number"
+                      min={2}
+                      max={24}
+                      defaultValue={4}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Excluded start dates (YYYY-MM-DD, separated by commas)
+                    <input
+                      name="excludedDates"
+                      placeholder="2026-12-25, 2027-01-01"
+                    />
+                  </label>
+                  <p>
+                    Sales open at the same configured instant for all sessions.
+                    Start, end and sales-close dates repeat. Every offset is
+                    checked against the venue's time zone when published; split
+                    a series at daylight-saving changes.
+                  </p>
+                  {seriesPreview && (
+                    <section aria-label="Series preview">
+                      <h3>Review {seriesPreview.items.length} sessions</h3>
+                      <p>
+                        Preview only. Conflicts and permissions are checked
+                        again when publishing. If any session conflicts, none
+                        are created.
+                      </p>
+                      <ol>
+                        {seriesPreview.items.map((item) => (
+                          <li key={item.startsAt}>
+                            {new Date(item.startsAt).toLocaleString("en-IN", {
+                              timeZone: seriesPreview.timeZone,
+                            })}{" "}
+                            –{" "}
+                            {new Date(item.endsAt).toLocaleString("en-IN", {
+                              timeZone: seriesPreview.timeZone,
+                            })}{" "}
+                            · {seriesPreview.timeZone}
+                          </li>
+                        ))}
+                      </ol>
+                      <p>
+                        Pricing policies and attendee forms must be configured
+                        for each created session before booking is available.
+                      </p>
+                    </section>
+                  )}
+                </>
+              )}
+              <button className="primary" disabled={busy}>
+                {busy
+                  ? "Saving…"
+                  : frequency === "single"
+                    ? "Create occurrence"
+                    : seriesPreview
+                      ? `Publish ${seriesPreview.items.length} sessions`
+                      : "Preview recurring sessions"}
+              </button>
+            </fieldset>
           </form>
         )}
       </details>
@@ -734,6 +871,7 @@ function Workspace({
               · {o.time_zone} · {o.state}
             </p>
             <RegistrationEditor occurrenceId={o.id} />
+            <OnlineAccessEditor occurrenceId={o.id} />
             <AttendeeExportPanel occurrenceId={o.id} />
             <a href={`/occurrence/${o.id}`}>View customer seating</a>
           </article>

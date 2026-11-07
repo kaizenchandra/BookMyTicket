@@ -2,7 +2,21 @@ import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 const baseUrl = process.env.SMOKE_ORIGIN ?? "http://127.0.0.1:3000";
 const checks = [];
+for (const path of [
+  "/api/v1/occurrences/series",
+  "/api/v1/occurrences/series/preview",
+]) {
+  const response = await fetch(baseUrl + path, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: baseUrl },
+    body: "{}",
+  });
+  assert.equal(response.status, 401);
+  checks.push({ path, method: "POST", status: response.status });
+}
 for (const suffix of [
+  "online-access/00000000-0000-4000-8000-000000000001",
+  "payment/reconcile",
   "pending-cancellation/preview",
   "pending-cancellation",
   "free-cancellation/preview",
@@ -35,6 +49,8 @@ for (const suffix of [
 }
 
 for (const [path, expected] of [
+  ["/api/v1/organizations/00000000-0000-4000-8000-000000000001/events", 401],
+  ["/api/v1/catalog/00000000-0000-4000-8000-000000000001/events", 404],
   [
     "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/registration-form",
     401,
@@ -98,7 +114,7 @@ for (const [path, expected] of [
     .get("content-type")
     ?.includes("application/json");
   const body = json ? JSON.parse(content) : undefined;
-  if (path === "/health") assert.equal(body.version, "0.15.0");
+  if (path === "/health") assert.equal(body.version, "0.21.0");
   if (!json)
     assert(content.includes('<div id="root">'), `${path} frontend entrypoint`);
   checks.push({

@@ -13,6 +13,7 @@ if (
 )
   throw new Error("Requires isolated test DB");
 process.env.TICKET_ENCRYPTION_KEY = randomBytes(32).toString("hex");
+process.env.REGISTRATION_ENCRYPTION_KEY = randomBytes(32).toString("hex");
 before(migrate);
 after(() => pool.end());
 async function actor(permissions: string[] = []) {
@@ -33,8 +34,11 @@ async function actor(permissions: string[] = []) {
     ]);
   return { id, headers: { cookie: `session=${token}` } };
 }
-for (const kind of ["cinema", "sports"] as const)
-  test(`${kind}: provider draft to published schedule, customer reservation, free booking, tickets and cancellation`, async () => {
+for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
+  test(`${scenario}: provider draft to published schedule, customer reservation, free booking, tickets and cancellation`, async () => {
+    const kind = scenario === "events-seated" ? "events" : scenario;
+    const assigned = kind === "cinema" || scenario === "events-seated";
+    const quantity = kind === "events" && !assigned ? 2 : 1;
     const owner = await actor(),
       admin = await actor(["moderate", "pricing"]),
       buyer = await actor(),
@@ -61,7 +65,7 @@ for (const kind of ["cinema", "sports"] as const)
       const org = await ok(
         request("POST", "/api/v1/organizations", {
           name: "ISOLATED CATEGORY FIXTURE",
-          kind,
+          kind: kind === "events" ? "event" : kind,
         }),
       );
       const submitted = await ok(
@@ -100,16 +104,29 @@ for (const kind of ["cinema", "sports"] as const)
               cast: "Fixture performers",
               crew: "Fixture crew",
             }
-          : {
-              ...common,
-              sport: "Cricket",
-              competition: "Fixture cup",
-              season: "Fixture season",
-              homeTeam: "Fixture team A",
-              awayTeam: "Fixture team B",
-              entryInstructions: "Fixture gate instructions",
-              hospitality: "Fixture pavilion only",
-            };
+          : kind === "events"
+            ? {
+                ...common,
+                performers: "Fixture ensemble",
+                organizer: "Fixture organizer",
+                durationMinutes: 120,
+                minimumAge: 12,
+                genre: "Live music",
+                language: "Hindi",
+                inclusions: "One admission per ticket",
+                exclusions: "Food excluded",
+                entryInstructions: "Bring the ticket QR and attendee details",
+              }
+            : {
+                ...common,
+                sport: "Cricket",
+                competition: "Fixture cup",
+                season: "Fixture season",
+                homeTeam: "Fixture team A",
+                awayTeam: "Fixture team B",
+                entryInstructions: "Fixture gate instructions",
+                hospitality: "Fixture pavilion only",
+              };
       const key = randomUUID(),
         draft = await ok(
           request(
@@ -145,7 +162,9 @@ for (const kind of ["cinema", "sports"] as const)
               ...input,
               ...(kind === "cinema"
                 ? { crew: "Changed crew" }
-                : { hospitality: "Changed benefits" }),
+                : kind === "events"
+                  ? { exclusions: "Changed exclusions" }
+                  : { hospitality: "Changed benefits" }),
             },
             owner,
             key,
@@ -219,7 +238,12 @@ for (const kind of ["cinema", "sports"] as const)
           `/api/v1/organizations/${org.id}/venues/${venue.id}/spaces`,
           {
             name: "Fixture space",
-            kind: kind === "cinema" ? "screen" : "stadium",
+            kind:
+              kind === "cinema"
+                ? "screen"
+                : kind === "events"
+                  ? "hall"
+                  : "stadium",
             physicalCapacity: 10,
             turnaroundMinutes: 15,
           },
@@ -227,12 +251,12 @@ for (const kind of ["cinema", "sports"] as const)
       );
       const resource = {
         id: "A1",
-        kind: kind === "cinema" ? "seat" : "pool",
+        kind: assigned ? "seat" : "pool",
         label: "Fixture section",
         section: "Main",
         row: "A",
         gate: "Gate A",
-        capacity: kind === "cinema" ? 1 : 10,
+        capacity: assigned ? 1 : 10,
         x: 20,
         y: 20,
         accessible: true,
@@ -272,6 +296,60 @@ for (const kind of ["cinema", "sports"] as const)
         409,
         "overlap must reject",
       );
+      let attendeeForm: any;
+      const definition = {
+        title: "Event attendee registration",
+        instructions: "Details for this admission only",
+        fields: [
+          {
+            id: "name",
+            label: "Attendee name",
+            purpose: "Identify the attendee",
+            type: "text",
+            required: true,
+            maxLength: 80,
+            options: [],
+          },
+          {
+            id: "age_acknowledged",
+            label: "I meet the minimum age requirement",
+            purpose: "Entry eligibility declaration",
+            type: "checkbox",
+            required: true,
+            maxLength: 10,
+            options: [],
+          },
+        ],
+      };
+      if (kind === "events") {
+        const secondStart = new Date(start.getTime() + 86400000);
+        await ok(
+          request("POST", "/api/v1/occurrences", {
+            ...schedule,
+            startsAt: secondStart.toISOString(),
+            endsAt: new Date(secondStart.getTime() + 7200000).toISOString(),
+            salesClose: secondStart.toISOString(),
+          }),
+        );
+        attendeeForm = await ok(
+          request(
+            "PUT",
+            `/api/v1/occurrences/${occurrence.id}/registration-form`,
+            { expectedVersion: 0, definition },
+          ),
+        );
+        assert.equal(
+          (
+            await request(
+              "PUT",
+              `/api/v1/occurrences/${occurrence.id}/registration-form`,
+              { expectedVersion: 1, definition },
+              buyer,
+            )
+          ).statusCode,
+          403,
+        );
+      }
       const policy = await ok(
         request(
           "POST",
@@ -301,13 +379,31 @@ for (const kind of ["cinema", "sports"] as const)
       );
       assert.equal(sessions.items[0].is_demo, true);
       assert.equal(sessions.items[0].available_units, resource.capacity);
+      if (kind === "events") {
+        const upcoming = await ok(
+          request(
+            "GET",
+            `/api/v1/catalog?kind=event&upcoming=true&q=${encodeURIComponent(input.title)}`,
+          ),
+        );
+        assert.equal(upcoming.items.length, 1);
+        assert.equal(
+          upcoming.items[0].nextSession.startsAt,
+          start.toISOString(),
+        );
+        assert.equal(upcoming.items[0].nextSession.timeZone, "Asia/Kolkata");
+      }
       const reservation = await ok(
         request(
           "POST",
           "/api/v1/reservations",
           {
             items: [
-              { occurrenceId: occurrence.id, resourceId: "A1", quantity: 1 },
+              {
+                occurrenceId: occurrence.id,
+                resourceId: "A1",
+                quantity,
+              },
             ],
           },
           buyer,
@@ -321,6 +417,61 @@ for (const kind of ["cinema", "sports"] as const)
           buyer,
         ),
       );
+      const registration = attendeeForm
+        ? {
+            formId: attendeeForm.id,
+            answers: [
+              { name: "Fixture attendee One", age_acknowledged: true },
+              { name: "Fixture attendee Two", age_acknowledged: true },
+            ].slice(0, quantity),
+          }
+        : undefined;
+      if (kind === "events") {
+        assert.equal(sessions.items.length, 2);
+        const preview = await ok(
+          request(
+            "GET",
+            `/api/v1/reservations/${reservation.id}/registration-form`,
+            undefined,
+            buyer,
+          ),
+        );
+        assert.equal(preview.quantity, quantity);
+        assert.equal(preview.form.id, attendeeForm.id);
+        assert.equal(
+          (
+            await request(
+              "POST",
+              "/api/v1/orders",
+              {
+                reservationId: reservation.id,
+                quoteId: quote.id,
+                acceptPolicies: true,
+              },
+              buyer,
+            )
+          ).statusCode,
+          409,
+        );
+        const invalid = await request(
+          "POST",
+          "/api/v1/orders",
+          {
+            reservationId: reservation.id,
+            quoteId: quote.id,
+            acceptPolicies: true,
+            registration: {
+              ...registration,
+              answers: [
+                { name: "One", age_acknowledged: false },
+                { name: "Two", age_acknowledged: true },
+              ],
+            },
+          },
+          buyer,
+        );
+        assert.equal(invalid.statusCode, 422, invalid.body);
+      }
       const order = await ok(
         request(
           "POST",
@@ -329,10 +480,57 @@ for (const kind of ["cinema", "sports"] as const)
             reservationId: reservation.id,
             quoteId: quote.id,
             acceptPolicies: true,
+            ...(registration ? { registration } : {}),
           },
           buyer,
         ),
       );
+      if (kind === "events") {
+        await ok(
+          request(
+            "PUT",
+            `/api/v1/occurrences/${occurrence.id}/registration-form`,
+            {
+              expectedVersion: 1,
+              definition: { ...definition, title: "Revised registration" },
+            },
+          ),
+        );
+        const saved = await ok(
+          request(
+            "GET",
+            `/api/v1/bookings/${order.id}/registration`,
+            undefined,
+            buyer,
+          ),
+        );
+        assert.equal(saved.registration.form.version, 1);
+        assert.deepEqual(saved.registration.answers, registration!.answers);
+        assert.equal(
+          (
+            await request(
+              "GET",
+              `/api/v1/bookings/${order.id}/registration`,
+              undefined,
+              owner,
+            )
+          ).statusCode,
+          404,
+        );
+      }
+      if (kind === "events") {
+        assert.equal(
+          (
+            await request(
+              "POST",
+              `/api/v1/bookings/${order.id}/online-access/${occurrence.id}`,
+              {},
+              buyer,
+            )
+          ).statusCode,
+          409,
+        );
+      }
       await assert.rejects(
         commerce().paymentOrders.prepare(buyer.id, order.id, async () => {
           throw new Error("Must not contact payment provider");
@@ -347,6 +545,99 @@ for (const kind of ["cinema", "sports"] as const)
           buyer,
         ),
       );
+      if (kind === "events") {
+        const configPath = `/api/v1/occurrences/${occurrence.id}/online-access`;
+        const accessPath = `/api/v1/bookings/${order.id}/online-access/${occurrence.id}`;
+        const link = `https://example.org/join/${randomUUID()}`;
+        const settings = {
+          expectedVersion: 0,
+          url: link,
+          enabled: true,
+          opensAt: new Date(Date.now() - 60000).toISOString(),
+          closesAt: new Date(Date.now() + 3600000).toISOString(),
+        };
+        assert.equal(
+          (await request("PUT", configPath, settings, buyer)).statusCode,
+          403,
+        );
+        assert.equal(
+          (
+            await request("PUT", configPath, {
+              ...settings,
+              url: "http://example.org",
+            })
+          ).statusCode,
+          422,
+        );
+        const saved = await ok(request("PUT", configPath, settings));
+        assert.equal(saved.configuration.version, 1);
+        assert.ok(!JSON.stringify(saved).includes(link));
+        assert.equal(
+          (await request("PUT", configPath, settings)).statusCode,
+          409,
+        );
+        const stored = await pool.query(
+          "SELECT url_ciphertext FROM events.online_access WHERE occurrence_id=$1",
+          [occurrence.id],
+        );
+        assert.ok(!stored.rows[0].url_ciphertext.includes(link));
+        const status = await ok(request("GET", accessPath, undefined, buyer));
+        assert.equal(status.allowed, true);
+        assert.equal(status.url, undefined);
+        assert.equal(
+          (await ok(request("POST", accessPath, {}, buyer))).url,
+          link,
+        );
+        assert.equal(
+          (await request("POST", accessPath, {}, owner)).statusCode,
+          404,
+        );
+        const { url, ...withoutLink } = settings;
+        for (const [index, change, reason] of [
+          [0, { enabled: false }, "disabled"],
+          [
+            1,
+            { opensAt: new Date(Date.now() + 60000).toISOString() },
+            "not_open",
+          ],
+          [
+            2,
+            {
+              opensAt: new Date(Date.now() - 120000).toISOString(),
+              closesAt: new Date(Date.now() - 60000).toISOString(),
+            },
+            "expired",
+          ],
+        ] as const) {
+          await ok(
+            request("PUT", configPath, {
+              ...withoutLink,
+              ...change,
+              expectedVersion: index + 1,
+            }),
+          );
+          assert.equal(
+            (await ok(request("GET", accessPath, undefined, buyer))).reason,
+            reason,
+          );
+          assert.equal(
+            (await request("POST", accessPath, {}, buyer)).statusCode,
+            409,
+          );
+        }
+        await ok(
+          request("PUT", configPath, { ...withoutLink, expectedVersion: 4 }),
+        );
+        assert.equal(
+          (await ok(request("POST", accessPath, {}, buyer))).url,
+          link,
+        );
+        assert.ok(
+          !(
+            await request("GET", `/api/v1/catalog/${draft.id}/occurrences`)
+          ).body.includes(link),
+        );
+      }
       const wallet = await ok(
         request(
           "GET",
@@ -355,7 +646,7 @@ for (const kind of ["cinema", "sports"] as const)
           buyer,
         ),
       );
-      assert.equal(wallet.items.length, 1);
+      assert.equal(wallet.items.length, quantity);
       assert.ok(wallet.items[0].qrSvg);
       const preview = await ok(
         request(
@@ -377,6 +668,19 @@ for (const kind of ["cinema", "sports"] as const)
           buyer,
         ),
       );
+      if (kind === "events") {
+        assert.equal(
+          (
+            await request(
+              "POST",
+              `/api/v1/bookings/${order.id}/online-access/${occurrence.id}`,
+              {},
+              buyer,
+            )
+          ).statusCode,
+          409,
+        );
+      }
       assert.equal(
         (await ok(request("GET", `/api/v1/catalog/${draft.id}/occurrences`)))
           .items[0].available_units,

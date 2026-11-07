@@ -211,7 +211,11 @@ test("HTTP payments enforce authentication, ownership, strict input and invalid 
           method: "POST",
           url: path + "/callback",
           headers,
-          payload: { paymentId: "pay_fixture", signature: "0".repeat(64) },
+          payload: {
+            providerOrderId: "order_fixture",
+            paymentId: "pay_fixture",
+            signature: "0".repeat(64),
+          },
         })
       ).json().code,
       "INVALID_PAYMENT_SIGNATURE",
@@ -229,5 +233,176 @@ test("HTTP payments enforce authentication, ownership, strict input and invalid 
     assert.equal(await store.get(f.order.id), undefined);
   } finally {
     await app.close();
+  }
+});
+
+test("Customer recovery requests persist once under concurrency and preserve worker leases, backoff and review", async () => {
+  const f = await fixture();
+  await stage(f);
+  await store.created(f.order.id, "order_" + randomBytes(8).toString("hex"));
+  const results = await Promise.all(
+    Array.from({ length: 12 }, () => store.requestRecovery(f.order.id)),
+  );
+  assert.equal(results.filter((x) => x.state === "queued").length, 1);
+  const row = await store.get(f.order.id);
+  assert(row.recovery_requested_at);
+  await pool.query(
+    "UPDATE payments.provider_orders SET recovery_requested_at=NULL,lease_until=clock_timestamp()+interval '1 minute',lease_token=$2,available_at=clock_timestamp()+interval '1 hour' WHERE order_id=$1",
+    [f.order.id, randomUUID()],
+  );
+  const before = await store.get(f.order.id);
+  assert.equal((await store.requestRecovery(f.order.id)).state, "pending");
+  assert.equal(
+    (await store.get(f.order.id)).available_at.getTime(),
+    before.available_at.getTime(),
+  );
+  await pool.query(
+    "UPDATE payments.provider_orders SET lease_until=NULL,failures=2 WHERE order_id=$1",
+    [f.order.id],
+  );
+  assert.equal((await store.requestRecovery(f.order.id)).state, "pending");
+  await pool.query(
+    "UPDATE payments.provider_orders SET review_required=true WHERE order_id=$1",
+    [f.order.id],
+  );
+  await assert.rejects(store.requestRecovery(f.order.id), {
+    code: "PAYMENT_REVIEW_REQUIRED",
+  });
+  await assert.rejects(c.collection.requestRecovery(randomUUID(), f.order.id), {
+    code: "NOT_FOUND",
+  });
+});
+
+test("Raw signed webhook HTTP ingestion rejects malformed content, deduplicates deliveries and detects reused IDs", async () => {
+  const { createHmac } = await import("node:crypto");
+  const original = process.env.RAZORPAY_WEBHOOK_SECRET;
+  process.env.RAZORPAY_WEBHOOK_SECRET = randomBytes(32).toString("hex");
+  const app = await buildApp(),
+    eventId = "evt_" + randomBytes(12).toString("hex");
+  const body = JSON.stringify({
+    event: "payment.captured",
+    payload: { payment: { entity: { id: "pay_fixture", status: "captured" } } },
+  });
+  const send = (raw: string, id = eventId, signature?: string) =>
+    app.inject({
+      method: "POST",
+      url: "/api/v1/payments/webhook",
+      headers: {
+        "content-type": "application/json",
+        "x-razorpay-event-id": id,
+        "x-razorpay-signature":
+          signature ??
+          createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET!)
+            .update(raw)
+            .digest("hex"),
+      },
+      payload: raw,
+    });
+  try {
+    assert.equal((await send(body, eventId, "0".repeat(64))).statusCode, 401);
+    assert.equal((await send("null")).statusCode, 400);
+    const responses = await Promise.all(
+      Array.from({ length: 8 }, () => send(body)),
+    );
+    assert(responses.every((r) => r.statusCode === 200));
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM payments.webhook_events WHERE provider_event_id=$1",
+          [eventId],
+        )
+      ).rowCount,
+      1,
+    );
+    assert.equal(
+      (await send(body.replace("captured", "failed"))).statusCode,
+      409,
+    );
+    assert.equal((await send(body, "x".repeat(201))).statusCode, 400);
+  } finally {
+    await app.close();
+    if (original === undefined) delete process.env.RAZORPAY_WEBHOOK_SECRET;
+    else process.env.RAZORPAY_WEBHOOK_SECRET = original;
+  }
+});
+
+test("Recovery HTTP command is owner scoped; callback rejects a different provider order before contacting Razorpay", async () => {
+  const f = await fixture();
+  await stage(f);
+  const providerOrderId = "order_" + randomBytes(8).toString("hex");
+  await store.created(f.order.id, providerOrderId);
+  const token = randomBytes(24).toString("hex");
+  await pool.query(
+    "INSERT INTO identity.sessions(token_hash,account_id,expires_at) VALUES($1,$2,now()+interval '1 hour')",
+    [hashToken(token), f.owner],
+  );
+  // Synthetic credentials are confined to this process; these requests do not invoke a provider network operation.
+  const priorId = process.env.RAZORPAY_KEY_ID,
+    priorSecret = process.env.RAZORPAY_KEY_SECRET;
+  process.env.RAZORPAY_KEY_ID = "rzp_live_ISOLATED_CONFIGURATION_FIXTURE";
+  process.env.RAZORPAY_KEY_SECRET = randomBytes(32).toString("hex");
+  const app = await buildApp(),
+    headers = { cookie: `session=${token}` },
+    path = `/api/v1/bookings/${f.order.id}/payment`;
+  try {
+    assert.equal(
+      (
+        await app.inject({
+          url: path + "/reconcile",
+          method: "POST",
+          payload: {},
+        })
+      ).statusCode,
+      401,
+    );
+    assert.equal(
+      (
+        await app.inject({
+          url: path + "/reconcile",
+          method: "POST",
+          headers,
+          payload: { amount: 1 },
+        })
+      ).statusCode,
+      422,
+    );
+    assert.equal(
+      (
+        await app.inject({
+          url: `/api/v1/bookings/${randomUUID()}/payment/reconcile`,
+          method: "POST",
+          headers,
+          payload: {},
+        })
+      ).statusCode,
+      404,
+    );
+    const response = await app.inject({
+      url: path + "/reconcile",
+      method: "POST",
+      headers,
+      payload: {},
+    });
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().state, "queued");
+    const { createHmac } = await import("node:crypto");
+    const paymentId = "pay_isolated";
+    const signature = createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .update(providerOrderId + "|" + paymentId)
+      .digest("hex");
+    const callback = await app.inject({
+      url: path + "/callback",
+      method: "POST",
+      headers,
+      payload: { providerOrderId: "order_wrong", paymentId, signature },
+    });
+    assert.equal(callback.statusCode, 422);
+    assert.equal(callback.json().code, "INVALID_PAYMENT_SIGNATURE");
+  } finally {
+    await app.close();
+    if (priorId === undefined) delete process.env.RAZORPAY_KEY_ID;
+    else process.env.RAZORPAY_KEY_ID = priorId;
+    if (priorSecret === undefined) delete process.env.RAZORPAY_KEY_SECRET;
+    else process.env.RAZORPAY_KEY_SECRET = priorSecret;
   }
 });

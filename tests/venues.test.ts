@@ -493,3 +493,215 @@ test("Draft edits preserve revisions, reject stale versions and stay private unt
     await f.app.close();
   }
 });
+
+const localOffset = (value: string) =>
+  new Date(Date.parse(value) + 330 * 60000)
+    .toISOString()
+    .replace("Z", "+05:30");
+test("Recurring series preview, excluded dates and concurrent retry create each occurrence exactly once", async () => {
+  const f = await fixture();
+  const schedule = {
+    ...f.input,
+    startsAt: localOffset(f.input.startsAt),
+    endsAt: localOffset(f.input.endsAt),
+    salesClose: localOffset(f.input.salesClose),
+  };
+  const second = new Date(Date.parse(f.input.startsAt) + 7 * 86400000);
+  const excluded = localOffset(second.toISOString()).slice(0, 10);
+  const input = {
+    schedule,
+    repeat: {
+      frequency: "weekly",
+      interval: 1,
+      count: 4,
+      excludeDates: [excluded],
+    },
+  };
+  try {
+    const preview = await f.request(
+      "POST",
+      "/api/v1/occurrences/series/preview",
+      input,
+    );
+    assert.equal(preview.statusCode, 200, preview.body);
+    assert.equal(preview.json().items.length, 3);
+    assert.equal(preview.json().conflictsChecked, false);
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM inventory.occurrences WHERE listing_id=$1",
+          [f.listing],
+        )
+      ).rowCount,
+      0,
+    );
+    const key = randomUUID();
+    const results = await Promise.all(
+      Array.from({ length: 6 }, () =>
+        f.request("POST", "/api/v1/occurrences/series", input, key),
+      ),
+    );
+    assert(
+      results.every((r) => r.statusCode === 200),
+      results.map((r) => r.body).join("\n"),
+    );
+    assert(
+      results.every(
+        (r) =>
+          JSON.stringify(r.json().ids) ===
+          JSON.stringify(results[0].json().ids),
+      ),
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM inventory.occurrences WHERE listing_id=$1",
+          [f.listing],
+        )
+      ).rowCount,
+      3,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM catalog.session_projection WHERE listing_id=$1",
+          [f.listing],
+        )
+      ).rowCount,
+      3,
+    );
+    assert.equal(
+      (
+        await f.request(
+          "POST",
+          "/api/v1/occurrences/series",
+          { ...input, repeat: { ...input.repeat, count: 5 } },
+          key,
+        )
+      ).statusCode,
+      409,
+    );
+    await pool.query(
+      "DELETE FROM providers.memberships WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    assert.equal(
+      (await f.request("POST", "/api/v1/occurrences/series", input, key))
+        .statusCode,
+      403,
+    );
+  } finally {
+    await f.app.close();
+  }
+});
+test("A conflict in a later recurring session rolls back earlier sessions, resources, commands and projection", async () => {
+  const f = await fixture();
+  try {
+    const shift = (value: string) =>
+      new Date(Date.parse(value) + 7 * 86400000).toISOString();
+    const conflict = {
+      ...f.input,
+      startsAt: shift(f.input.startsAt),
+      endsAt: shift(f.input.endsAt),
+      salesClose: shift(f.input.salesClose),
+    };
+    assert.equal(
+      (await f.request("POST", "/api/v1/occurrences", conflict, randomUUID()))
+        .statusCode,
+      200,
+    );
+    const input = {
+      schedule: {
+        ...f.input,
+        startsAt: localOffset(f.input.startsAt),
+        endsAt: localOffset(f.input.endsAt),
+        salesClose: localOffset(f.input.salesClose),
+      },
+      repeat: { frequency: "weekly", interval: 1, count: 3, excludeDates: [] },
+    };
+    const result = await f.request(
+      "POST",
+      "/api/v1/occurrences/series",
+      input,
+      randomUUID(),
+    );
+    assert.equal(result.statusCode, 409, result.body);
+    assert.equal(result.json().code, "SCHEDULE_CONFLICT");
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM inventory.occurrences WHERE listing_id=$1",
+          [f.listing],
+        )
+      ).rowCount,
+      1,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM catalog.session_projection WHERE listing_id=$1",
+          [f.listing],
+        )
+      ).rowCount,
+      1,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM inventory.schedule_series WHERE actor_id=$1",
+          [f.owner],
+        )
+      ).rowCount,
+      0,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT * FROM inventory.schedule_commands WHERE actor_id=$1",
+          [f.owner],
+        )
+      ).rowCount,
+      1,
+    );
+  } finally {
+    await f.app.close();
+  }
+});
+test("Recurrence bounds, explicit offsets and calendar exclusions are validated", async () => {
+  const { expandRecurrence } =
+    await import("../src/modules/inventory/domain/recurrence.ts");
+  const schedule = {
+    startsAt: "2027-01-30T18:00:00+05:30",
+    endsAt: "2027-01-30T20:00:00+05:30",
+    salesOpen: "2027-01-01T00:00:00Z",
+    salesClose: "2027-01-30T17:00:00+05:30",
+  };
+  const repeat = {
+    frequency: "daily" as const,
+    interval: 1,
+    count: 4,
+    excludeDates: ["2027-01-31"],
+  };
+  const expanded = expandRecurrence(schedule, repeat);
+  assert.deepEqual(
+    expanded.map((s) => s.startsAt.slice(0, 10)),
+    ["2027-01-30", "2027-02-01", "2027-02-02"],
+  );
+  assert(expanded.every((s) => s.salesOpen === schedule.salesOpen));
+  assert.throws(() => expandRecurrence(schedule, { ...repeat, count: 25 }), {
+    code: "INVALID_RECURRENCE",
+  });
+  assert.throws(
+    () =>
+      expandRecurrence(schedule, { ...repeat, excludeDates: ["2027-03-01"] }),
+    { code: "INVALID_RECURRENCE" },
+  );
+  assert.throws(
+    () =>
+      expandRecurrence(
+        { ...schedule, startsAt: "2027-01-30T12:30:00Z" },
+        repeat,
+      ),
+    { code: "RECURRENCE_OFFSET_REQUIRED" },
+  );
+});

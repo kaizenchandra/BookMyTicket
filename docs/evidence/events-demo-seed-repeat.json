@@ -1,0 +1,94 @@
+{
+  "label": "USER-AUTHORIZED FICTIONAL DEMO DATA",
+  "database": "bookmyticket",
+  "items": [
+    {
+      "id": "661901ad-0e34-48ee-9bdc-671e354dd16e",
+      "title": "[DEMO] Neon Monsoon",
+      "city": "Bengaluru",
+      "kind": "cinema",
+      "sessions": 2,
+      "url": "/listing/661901ad-0e34-48ee-9bdc-671e354dd16e"
+    },
+    {
+      "id": "3f0b7592-1c9a-4b12-9171-6ac34b85975f",
+      "title": "[DEMO] The Last Metro",
+      "city": "Mumbai",
+      "kind": "cinema",
+      "sessions": 2,
+      "url": "/listing/3f0b7592-1c9a-4b12-9171-6ac34b85975f"
+    },
+    {
+      "id": "f87bd742-c40d-4904-9d37-3fe47e52cc0d",
+      "title": "[DEMO] A Map of Stars",
+      "city": "Bengaluru",
+      "kind": "cinema",
+      "sessions": 2,
+      "url": "/listing/f87bd742-c40d-4904-9d37-3fe47e52cc0d"
+    },
+    {
+      "id": "3b19e18a-bb66-4a77-a871-8a690ca4b506",
+      "title": "[DEMO] Midnight Marina",
+      "city": "Chennai",
+      "kind": "cinema",
+      "sessions": 2,
+      "url": "/listing/3b19e18a-bb66-4a77-a871-8a690ca4b506"
+    },
+    {
+      "id": "a9108493-441a-4ca2-9d16-b16c03f6870a",
+      "title": "[DEMO] Bengaluru Falcons vs Mumbai Mariners",
+      "city": "Bengaluru",
+      "kind": "sports",
+      "sessions": 2,
+      "url": "/listing/a9108493-441a-4ca2-9d16-b16c03f6870a"
+    },
+    {
+      "id": "b43f9fff-7351-42ed-a52a-77082c97471b",
+      "title": "[DEMO] Mumbai Comets vs Delhi Strikers",
+      "city": "Mumbai",
+      "kind": "sports",
+      "sessions": 2,
+      "url": "/listing/b43f9fff-7351-42ed-a52a-77082c97471b"
+    },
+    {
+      "id": "914a0a13-7649-4390-b2f0-b9ef86fc8216",
+      "title": "[DEMO] Chennai Waves vs Hyderabad Arrows",
+      "city": "Chennai",
+      "kind": "sports",
+      "sessions": 2,
+      "url": "/listing/914a0a13-7649-4390-b2f0-b9ef86fc8216"
+    },
+    {
+      "id": "56b00c1a-8b36-49dd-9a11-db7e85ec56ce",
+      "title": "[DEMO] Moonlight Sessions",
+      "city": "Bengaluru",
+      "kind": "events",
+      "sessions": 2,
+      "url": "/listing/56b00c1a-8b36-49dd-9a11-db7e85ec56ce"
+    },
+    {
+      "id": "f8d96968-5824-46a5-a571-598c9a1876af",
+      "title": "[DEMO] The Laugh Laboratory",
+      "city": "Mumbai",
+      "kind": "events",
+      "sessions": 2,
+      "url": "/listing/f8d96968-5824-46a5-a571-598c9a1876af"
+    },
+    {
+      "id": "1ff9b19d-8cbb-4cd6-9fc5-600bb7b1d421",
+      "title": "[DEMO] Clay and Coffee Studio",
+      "city": "Chennai",
+      "kind": "events",
+      "sessions": 2,
+      "url": "/listing/1ff9b19d-8cbb-4cd6-9fc5-600bb7b1d421"
+    },
+    {
+      "id": "dbb3ccec-de3b-4d14-a465-7f076aa8febf",
+      "title": "[DEMO] Stories Under the Stars",
+      "city": "Bengaluru",
+      "kind": "events",
+      "sessions": 2,
+      "url": "/listing/dbb3ccec-de3b-4d14-a465-7f076aa8febf"
+    }
+  ]
+}

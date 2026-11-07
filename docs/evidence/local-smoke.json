@@ -1,8 +1,28 @@
 {
-  "checkedAt": "2026-11-07T01:24:17.550Z",
+  "checkedAt": "2026-11-07T06:32:14.360Z",
   "baseUrl": "http://127.0.0.1:3101",
   "verificationLevel": "HTTP only; no browser rendering or authenticated live workflows",
   "checks": [
+    {
+      "path": "/api/v1/occurrences/series",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/occurrences/series/preview",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/online-access/00000000-0000-4000-8000-000000000001",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/payment/reconcile",
+      "method": "POST",
+      "status": 401
+    },
     {
       "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/pending-cancellation/preview",
       "method": "POST",
@@ -29,13 +49,33 @@
       "status": 401
     },
     {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/events",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-i"
+      }
+    },
+    {
+      "path": "/api/v1/catalog/00000000-0000-4000-8000-000000000001/events",
+      "status": 404,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "NOT_FOUND",
+        "message": "This listing is not available.",
+        "requestId": "req-j"
+      }
+    },
+    {
       "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/registration-form",
       "status": 401,
       "contentType": "application/json; charset=utf-8",
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1e"
+        "requestId": "req-k"
       }
     },
     {
@@ -45,7 +85,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1f"
+        "requestId": "req-l"
       }
     },
     {
@@ -55,7 +95,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1g"
+        "requestId": "req-m"
       }
     },
     {
@@ -65,7 +105,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1h"
+        "requestId": "req-n"
       }
     },
     {
@@ -75,7 +115,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1i"
+        "requestId": "req-o"
       }
     },
     {
@@ -85,7 +125,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1j"
+        "requestId": "req-p"
       }
     },
     {
@@ -95,7 +135,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1k"
+        "requestId": "req-q"
       }
     },
     {
@@ -105,7 +145,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1l"
+        "requestId": "req-r"
       }
     },
     {
@@ -114,7 +154,7 @@
       "contentType": "application/json; charset=utf-8",
       "body": {
         "status": "ok",
-        "version": "0.14.0"
+        "version": "0.21.0"
       }
     },
     {
@@ -132,6 +172,98 @@
       "body": {
         "items": [
           {
+            "id": "dbb3ccec-de3b-4d14-a465-7f076aa8febf",
+            "title": "[DEMO] Stories Under the Stars",
+            "kind": "event",
+            "city": "Bengaluru",
+            "description": "Fictional local demonstration event. Stories Under the Stars is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/stories-stars.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Storytelling",
+              "duration": "100 min",
+              "language": "Kannada",
+              "managedBy": "events",
+              "minimumAge": "0",
+              "performers": "The Story Grove (fictional)"
+            },
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-12T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Bengaluru Event Studio 4 · Event Hall"
+            }
+          },
+          {
+            "id": "1ff9b19d-8cbb-4cd6-9fc5-600bb7b1d421",
+            "title": "[DEMO] Clay and Coffee Studio",
+            "kind": "event",
+            "city": "Chennai",
+            "description": "Fictional local demonstration event. Clay and Coffee Studio is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/clay-coffee.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Workshop",
+              "duration": "150 min",
+              "language": "Tamil",
+              "managedBy": "events",
+              "minimumAge": "8",
+              "performers": "Mira Arts Collective (fictional)"
+            },
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-11T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Chennai Event Studio 3 · Event Hall"
+            }
+          },
+          {
+            "id": "f8d96968-5824-46a5-a571-598c9a1876af",
+            "title": "[DEMO] The Laugh Laboratory",
+            "kind": "event",
+            "city": "Mumbai",
+            "description": "Fictional local demonstration event. The Laugh Laboratory is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/laugh-laboratory.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Comedy",
+              "duration": "90 min",
+              "language": "Hindi",
+              "managedBy": "events",
+              "minimumAge": "18",
+              "performers": "Aditi Verma and Kabir Lal (fictional)"
+            },
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-10T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Mumbai Event Studio 2 · Event Hall"
+            }
+          },
+          {
+            "id": "56b00c1a-8b36-49dd-9a11-db7e85ec56ce",
+            "title": "[DEMO] Moonlight Sessions",
+            "kind": "event",
+            "city": "Bengaluru",
+            "description": "Fictional local demonstration event. Moonlight Sessions is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/moonlight-sessions.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Live music",
+              "duration": "120 min",
+              "language": "English",
+              "managedBy": "events",
+              "minimumAge": "12",
+              "performers": "The Paper Satellites (fictional)"
+            },
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-09T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Bengaluru Event Studio 1 · Event Hall"
+            }
+          },
+          {
             "id": "914a0a13-7649-4390-b2f0-b9ef86fc8216",
             "title": "[DEMO] Chennai Waves vs Hyderabad Arrows",
             "kind": "sports",
@@ -146,7 +278,12 @@
               "competition": "Demo Racquet Championship",
               "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-10T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Chennai Arena 3 · Main stadium"
+            }
           },
           {
             "id": "b43f9fff-7351-42ed-a52a-77082c97471b",
@@ -163,7 +300,12 @@
               "competition": "Demo Football League",
               "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-09T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Mumbai Arena 2 · Main stadium"
+            }
           },
           {
             "id": "a9108493-441a-4ca2-9d16-b16c03f6870a",
@@ -180,7 +322,12 @@
               "competition": "Demo Premier Cup",
               "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-08T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Bengaluru Arena 1 · Main stadium"
+            }
           },
           {
             "id": "3b19e18a-bb66-4a77-a871-8a690ca4b506",
@@ -200,7 +347,12 @@
               "releaseDate": "2026-11-06",
               "certification": "Unrated (demo)"
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-11T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Chennai Aurora Cinema 4 · Screen 1"
+            }
           },
           {
             "id": "f87bd742-c40d-4904-9d37-3fe47e52cc0d",
@@ -220,7 +372,12 @@
               "releaseDate": "2026-11-06",
               "certification": "Unrated (demo)"
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-10T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Bengaluru Aurora Cinema 3 · Screen 1"
+            }
           },
           {
             "id": "3f0b7592-1c9a-4b12-9171-6ac34b85975f",
@@ -240,7 +397,12 @@
               "releaseDate": "2026-11-06",
               "certification": "Unrated (demo)"
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-09T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Mumbai Aurora Cinema 2 · Screen 1"
+            }
           },
           {
             "id": "661901ad-0e34-48ee-9bdc-671e354dd16e",
@@ -260,10 +422,15 @@
               "releaseDate": "2026-11-06",
               "certification": "Unrated (demo)"
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-08T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Bengaluru Aurora Cinema 1 · Screen 1"
+            }
           }
         ],
-        "total": 7,
+        "total": 11,
         "facets": {
           "language": [
             "English",
@@ -273,16 +440,20 @@
           ],
           "genre": [
             "Adventure",
+            "Comedy",
             "Drama",
+            "Live music",
             "Sci-Fi",
-            "Thriller"
+            "Storytelling",
+            "Thriller",
+            "Workshop"
           ],
           "format": [
             "2D"
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-07T01:24:17.526Z"
+        "serverTime": "2026-11-07T06:32:14.330Z"
       }
     },
     {
@@ -309,10 +480,38 @@
               "releaseDate": "2026-11-06",
               "certification": "Unrated (demo)"
             },
-            "version": 3
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-09T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Mumbai Aurora Cinema 2 · Screen 1"
+            }
+          },
+          {
+            "id": "f8d96968-5824-46a5-a571-598c9a1876af",
+            "title": "[DEMO] The Laugh Laboratory",
+            "kind": "event",
+            "city": "Mumbai",
+            "description": "Fictional local demonstration event. The Laugh Laboratory is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/laugh-laboratory.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Comedy",
+              "duration": "90 min",
+              "language": "Hindi",
+              "managedBy": "events",
+              "minimumAge": "18",
+              "performers": "Aditi Verma and Kabir Lal (fictional)"
+            },
+            "version": 3,
+            "nextSession": {
+              "startsAt": "2026-11-10T09:00:00.000Z",
+              "timeZone": "Asia/Kolkata",
+              "venueName": "DEMO Mumbai Event Studio 2 · Event Hall"
+            }
           }
         ],
-        "total": 1,
+        "total": 2,
         "facets": {
           "language": [
             "English",
@@ -321,6 +520,7 @@
             "Tamil"
           ],
           "genre": [
+            "Comedy",
             "Thriller"
           ],
           "format": [
@@ -328,7 +528,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-07T01:24:17.528Z"
+        "serverTime": "2026-11-07T06:32:14.334Z"
       }
     },
     {
@@ -337,7 +537,7 @@
       "contentType": "application/json; charset=utf-8",
       "body": {
         "groups": [],
-        "serverTime": "2026-11-07T01:24:17.530Z"
+        "serverTime": "2026-11-07T06:32:14.336Z"
       }
     },
     {
@@ -377,7 +577,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1t"
+        "requestId": "req-z"
       }
     },
     {
@@ -387,7 +587,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1u"
+        "requestId": "req-10"
       }
     },
     {
@@ -397,7 +597,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1v"
+        "requestId": "req-11"
       }
     },
     {
@@ -407,7 +607,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1w"
+        "requestId": "req-12"
       }
     },
     {
@@ -429,7 +629,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1z"
+        "requestId": "req-15"
       }
     },
     {
@@ -439,7 +639,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-20"
+        "requestId": "req-16"
       }
     },
     {
@@ -473,7 +673,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-25"
+        "requestId": "req-1b"
       }
     },
     {
@@ -483,7 +683,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-26"
+        "requestId": "req-1c"
       }
     },
     {
@@ -493,7 +693,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-27"
+        "requestId": "req-1d"
       }
     },
     {
@@ -503,7 +703,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-28"
+        "requestId": "req-1e"
       }
     },
     {
@@ -525,7 +725,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2b"
+        "requestId": "req-1h"
       }
     },
     {
@@ -535,7 +735,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2c"
+        "requestId": "req-1i"
       }
     },
     {
@@ -557,7 +757,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2f"
+        "requestId": "req-1l"
       }
     },
     {
@@ -567,7 +767,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2g"
+        "requestId": "req-1m"
       }
     },
     {

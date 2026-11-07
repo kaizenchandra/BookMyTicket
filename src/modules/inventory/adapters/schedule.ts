@@ -5,7 +5,10 @@ import {
   type Transaction,
 } from "../../../shared/database.ts";
 import type { OrganizationAccess } from "../../providers/contracts/index.ts";
-import type { PublishedCatalog } from "../../catalog/contracts/index.ts";
+import type {
+  PublishedCatalog,
+  CatalogSessions,
+} from "../../catalog/contracts/index.ts";
 import type { ScheduledPlan } from "../../venues/contracts/index.ts";
 import type { SecurityAudit } from "../../reporting/contracts/index.ts";
 import type {
@@ -16,11 +19,47 @@ import { AppError } from "../../../shared/errors.ts";
 export class PostgresSchedule implements ScheduleStore {
   constructor(
     private access: OrganizationAccess,
-    private catalog: PublishedCatalog,
+    private catalog: PublishedCatalog & CatalogSessions,
     private audit: SecurityAudit,
   ) {}
   unitOfWork<T>(work: (tx: Transaction) => Promise<T>) {
     return transaction(work);
+  }
+  async previousSeries(
+    tx: Transaction,
+    actor: string,
+    key: string,
+    fingerprint: string,
+  ) {
+    await tx.query("SELECT pg_advisory_xact_lock(hashtextextended($1,5))", [
+      actor,
+    ]);
+    const row = (
+      await tx.query(
+        "SELECT fingerprint,occurrence_ids FROM inventory.schedule_series WHERE actor_id=$1 AND operation_key=$2",
+        [actor, key],
+      )
+    ).rows[0];
+    if (!row) return null;
+    if (row.fingerprint !== fingerprint)
+      throw new AppError(
+        "IDEMPOTENCY_CONFLICT",
+        "This series key was used with different input.",
+        409,
+      );
+    return { ids: row.occurrence_ids as string[] };
+  }
+  async saveSeries(
+    tx: Transaction,
+    actor: string,
+    key: string,
+    fingerprint: string,
+    ids: string[],
+  ) {
+    await tx.query(
+      "INSERT INTO inventory.schedule_series(actor_id,operation_key,fingerprint,occurrence_ids) VALUES($1,$2,$3,$4)",
+      [actor, key, fingerprint, JSON.stringify(ids)],
+    );
   }
   async previous(
     tx: Transaction,
@@ -95,6 +134,14 @@ export class PostgresSchedule implements ScheduleStore {
         input.demo ?? false,
       ],
     );
+    await this.catalog.recordSession(tx, {
+      id,
+      listingId: input.listingId,
+      startsAt: input.startsAt,
+      timeZone: plan.timeZone,
+      venueName: `${plan.venueName} · ${plan.spaceName}`,
+      state: "open",
+    });
     for (const r of plan.configuration.resources)
       await tx.query(
         "INSERT INTO inventory.resources(occurrence_id,id,kind,label,capacity,price_paise) VALUES($1,$2,$3,$4,$5,$6)",
