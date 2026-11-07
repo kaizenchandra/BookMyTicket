@@ -1,0 +1,112 @@
+ Image bookmyticket:local Building 
+ Image bookmyticket-tests:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.79kB done
+#1 DONE 0.0s
+
+#2 [tests internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.07kB done
+#2 DONE 0.0s
+
+#3 [tests internal] load metadata for docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#3 DONE 0.0s
+
+#4 [tests internal] load .dockerignore
+#4 transferring context: 97B done
+#4 DONE 0.0s
+
+#5 [tests internal] load build context
+#5 transferring context: 78.27kB done
+#5 DONE 0.0s
+
+#6 [tests dependencies 1/4] FROM docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#6 resolve docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 0.0s done
+#6 DONE 0.0s
+
+#7 [app dependencies 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [app dependencies 3/4] COPY package.json package-lock.json ./
+#8 CACHED
+
+#9 [app dependencies 4/4] RUN npm ci
+#9 CACHED
+
+#10 [app verify 1/2] COPY . .
+#10 DONE 0.1s
+
+#11 [tests verify 2/2] RUN npm run build && npm run check:architecture
+#11 0.311 
+#11 0.311 > bookmyticket@0.4.0 build
+#11 0.311 > tsc --noEmit && vite build
+#11 0.311 
+#11 0.768 vite v8.3.5 building client environment for production...
+#11 0.773 transforming...
+#11 0.811 ✓ 24 modules transformed.
+#11 0.835 rendering chunks...
+#11 0.855 computing gzip size...
+#11 0.858 dist/index.html                   0.71 kB │ gzip:  0.40 kB
+#11 0.858 dist/assets/index-CkbmjDyo.css    9.03 kB │ gzip:  2.69 kB
+#11 0.858 dist/assets/index-b7sq8WdQ.js   293.34 kB │ gzip: 88.54 kB
+#11 0.858 
+#11 0.859 ✓ built in 90ms
+#11 0.909 
+#11 0.909 > bookmyticket@0.4.0 check:architecture
+#11 0.909 > node scripts/check-architecture.mjs
+#11 0.909 
+#11 0.926 Architecture import checks passed for 72 module files. SQL ownership and runtime composition require separate review.
+#11 DONE 0.9s
+
+#12 [app production-dependencies 4/4] RUN npm ci --omit=dev && npm cache clean --force
+#12 CACHED
+
+#13 [app runtime 3/8] COPY --from=production-dependencies /app/node_modules ./node_modules
+#13 CACHED
+
+#14 [app runtime 4/8] COPY --from=verify /app/dist ./dist
+#14 DONE 0.0s
+
+#15 [tests] exporting to image
+#15 exporting layers
+#15 ...
+
+#16 [app runtime 5/8] COPY package.json package-lock.json tsconfig.json ./
+#16 DONE 0.0s
+
+#17 [app runtime 6/8] COPY src ./src
+#17 DONE 0.1s
+
+#15 [tests] exporting to image
+#15 exporting layers 0.1s done
+#15 exporting manifest sha256:ec51ac6540f2c5116bb9ae954a6cf665e263dd1c49b4977d19d5b144b4a4a771 done
+#15 exporting config sha256:2ae77a5299692ac108f906afe98b342023a2a3980f5ade02ae18221dc67c3d92 done
+#15 exporting attestation manifest sha256:1e9f84af9bda95b069683630320d841ec933b9e09860b44c9021e1ee7aaed8e6 0.0s done
+#15 exporting manifest list sha256:b85640a2f1c86d6c9827e03e55579083aec2104005dcc7b1eb3b9f2f8914b00a 0.0s done
+#15 naming to docker.io/library/bookmyticket-tests:local done
+#15 unpacking to docker.io/library/bookmyticket-tests:local
+#15 unpacking to docker.io/library/bookmyticket-tests:local 0.1s done
+#15 DONE 0.2s
+
+#18 [app runtime 7/8] COPY migrations ./migrations
+#18 DONE 0.0s
+
+#19 [app runtime 8/8] COPY scripts/migrate.ts scripts/worker-health.mjs ./scripts/
+#19 DONE 0.0s
+
+#20 [tests] resolving provenance for metadata file
+#20 DONE 0.0s
+
+#21 [app] exporting to image
+#21 exporting layers 0.1s done
+#21 exporting manifest sha256:2ac181e5c2ab3ea726bc1649c9421f66626170c97a83f04fc6d191d9ae2aa22a done
+#21 exporting config sha256:2f32cc6c7c3456f9b07763b1ef0d8079758a5fffcbd8142af3bfdd5a26e3c23c done
+#21 exporting attestation manifest sha256:fb8009d1335441faa4e24fe44852ee909c5d659dc006ee1b57dcd1809b53b9e9 done
+#21 exporting manifest list sha256:b0fa5801cdbb1429a507186a7f765c70dbf3f19a83b1c2dee5b86ba178e23abb done
+#21 naming to docker.io/library/bookmyticket:local done
+#21 unpacking to docker.io/library/bookmyticket:local 0.1s done
+#21 DONE 0.2s
+
+#22 [app] resolving provenance for metadata file
+#22 DONE 0.0s
+ Image bookmyticket:local Built 
+ Image bookmyticket-tests:local Built 

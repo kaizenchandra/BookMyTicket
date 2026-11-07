@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>BookMyTicket — Movies, Events & Sports</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("bmt-theme") === "DARK" ? "DARK" : "LIGHT";
+      } catch {
+        document.documentElement.dataset.theme = "LIGHT";
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
+</html>

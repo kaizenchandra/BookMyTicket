@@ -1,0 +1,34 @@
+name: application checks
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mailpit:
+        image: axllent/mailpit:v1.33.0@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231
+        ports: ["8025:8025", "1025:1025"]
+        options: --health-cmd "/mailpit readyz" --health-interval 5s --health-timeout 3s --health-retries 10
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: fixture
+          POSTGRES_PASSWORD: fixture-only
+          POSTGRES_DB: bookmyticket_test
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U fixture -d bookmyticket_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      MAILPIT_TEST_URL: http://127.0.0.1:8025
+      MAILPIT_TEST_SMTP_HOST: 127.0.0.1
+      MAILPIT_TEST_SMTP_PORT: "1025"
+      DATABASE_URL: postgresql://fixture:fixture-only@localhost:5432/bookmyticket_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.13.0
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run check:architecture
+      - run: npm test
+      - run: npm audit --audit-level=high

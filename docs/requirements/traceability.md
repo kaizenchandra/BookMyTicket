@@ -1,0 +1,7 @@
+# Traceability register
+
+[Machine-readable register](traceability.json): 399 FE IDs, 469 BE IDs, 197 BASE bullet clauses. BASE IDs use source section + bullet index because the prompt has no individual IDs. Source files are unchanged.
+
+Statuses distinguish implementation from verification. `partial` is never accepted/completed. Evidence references apply only to named test subsets. Untested API adapters and browser behavior are not inferred to pass from adjacent tests. Role/journey mappings and compound decomposition remain pending where marked.
+
+Unnumbered normative paragraphs, tables and compound clauses still need complete decomposition and mapping; the source documents remain mandatory. Missing earlier BE/BR originals are recorded in the architecture assessment. No full attachment/requirement coverage is claimed.

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Persisted business outbox record",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "aggregate_id",
+    "payload"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "type": {
+      "enum": [
+        "booking.confirmed",
+        "payment.recovery_required",
+        "booking.pending_cancelled",
+        "booking.free_cancelled"
+      ]
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "version",
+        "ownerId"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "ownerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "paymentId": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "booking.pending_cancelled"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "version",
+              "ownerId"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

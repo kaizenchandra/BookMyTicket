@@ -1,0 +1,188 @@
+ Image bookmyticket:local Building 
+ Image bookmyticket:local Building 
+ Image bookmyticket:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.80kB done
+#1 DONE 0.0s
+
+#2 [migrate internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.07kB done
+#2 DONE 0.0s
+
+#3 [worker internal] load metadata for docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#3 DONE 1.8s
+
+#4 [app internal] load .dockerignore
+#4 transferring context: 97B done
+#4 DONE 0.0s
+
+#5 [app dependencies 1/4] FROM docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#5 resolve docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 0.0s done
+#5 DONE 0.0s
+
+#6 [app internal] load build context
+#6 transferring context: 1.38MB 0.0s done
+#6 DONE 0.1s
+
+#7 [app dependencies 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [migrate dependencies 3/4] COPY package.json package-lock.json ./
+#8 DONE 0.1s
+
+#9 [worker dependencies 4/4] RUN npm ci
+#9 ...
+
+#10 [app production-dependencies 4/4] RUN npm ci --omit=dev && npm cache clean --force
+#10 4.386 
+#10 4.386 added 120 packages, and audited 121 packages in 4s
+#10 4.386 
+#10 4.386 32 packages are looking for funding
+#10 4.386   run `npm fund` for details
+#10 4.387 
+#10 4.387 found 0 vulnerabilities
+#10 4.387 npm warn install-scripts 1 package has install scripts not yet covered by allowScripts:
+#10 4.387 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#10 4.387 npm warn install-scripts
+#10 4.387 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#10 4.388 npm notice
+#10 4.388 npm notice New major version of npm available! 11.20.0 -> 12.2.2
+#10 4.388 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#10 4.388 npm notice To update run: npm install -g npm@12.2.2
+#10 4.388 npm notice
+#10 4.440 npm warn using --force Recommended protections disabled.
+#10 DONE 4.6s
+
+#11 [worker runtime 3/8] COPY --from=production-dependencies /app/node_modules ./node_modules
+#11 DONE 0.2s
+
+#9 [worker dependencies 4/4] RUN npm ci
+#9 6.254 
+#9 6.254 added 150 packages, and audited 151 packages in 6s
+#9 6.254 
+#9 6.254 42 packages are looking for funding
+#9 6.254   run `npm fund` for details
+#9 6.254 
+#9 6.254 found 0 vulnerabilities
+#9 6.255 npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+#9 6.255 npm warn install-scripts   @embedded-postgres/linux-arm64@18.6.0-beta.19 (postinstall: node scripts/hydrate-symlinks.js)
+#9 6.255 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#9 6.255 npm warn install-scripts
+#9 6.255 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#9 6.255 npm notice
+#9 6.255 npm notice New major version of npm available! 11.20.0 -> 12.2.2
+#9 6.255 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#9 6.255 npm notice To update run: npm install -g npm@12.2.2
+#9 6.255 npm notice
+#9 DONE 6.3s
+
+#12 [migrate verify 1/2] COPY . .
+#12 DONE 0.1s
+
+#13 [worker verify 2/2] RUN npm run build && npm run check:architecture
+#13 0.153 
+#13 0.153 > bookmyticket@0.6.0 build
+#13 0.153 > tsc --noEmit && vite build
+#13 0.153 
+#13 0.585 vite v8.3.5 building client environment for production...
+#13 0.591 transforming...
+#13 0.633 ✓ 27 modules transformed.
+#13 0.648 rendering chunks...
+#13 0.672 computing gzip size...
+#13 0.675 dist/index.html                   0.71 kB │ gzip:  0.40 kB
+#13 0.675 dist/assets/index-BGiPeZMb.css    9.51 kB │ gzip:  2.79 kB
+#13 0.675 dist/assets/index-nBKOdy96.js   307.65 kB │ gzip: 92.19 kB
+#13 0.675 
+#13 0.675 ✓ built in 89ms
+#13 0.724 
+#13 0.724 > bookmyticket@0.6.0 check:architecture
+#13 0.724 > node scripts/check-architecture.mjs
+#13 0.724 
+#13 0.743 Architecture import checks passed for 92 module files. SQL ownership and runtime composition require separate review.
+#13 DONE 0.8s
+
+#14 [app runtime 4/8] COPY --from=verify /app/dist ./dist
+#14 DONE 0.1s
+
+#15 [migrate runtime 5/8] COPY package.json package-lock.json tsconfig.json ./
+#15 DONE 0.1s
+
+#16 [app runtime 6/8] COPY src ./src
+#16 DONE 0.0s
+
+#17 [app runtime 7/8] COPY migrations ./migrations
+#17 DONE 0.0s
+
+#18 [app runtime 8/8] COPY scripts/migrate.ts scripts/worker-health.mjs ./scripts/
+#18 DONE 0.0s
+
+#19 [worker] exporting to image
+#19 exporting layers
+#19 exporting layers 1.0s done
+#19 exporting manifest sha256:4f8309c0f09d0cb0436230ea1d6e304e6aafd0c6c2d9db218f8c2848723798b2 0.0s done
+#19 exporting config sha256:70794e8a0f94a7acdfa347078c6af115a73d45b27b29f2102265379de3521ad9 0.0s done
+#19 exporting attestation manifest sha256:673351e66cbe802587bd14c5ef52500f8311d9d19f25574d59ce530e6d862233 0.0s done
+#19 exporting manifest list sha256:7ee7a6bfcbbe5aea5aaa6690e0efad6deaa120aa19d018ee5f0822dff7b5cea2 0.0s done
+#19 naming to docker.io/library/bookmyticket:local done
+#19 unpacking to docker.io/library/bookmyticket:local
+#19 unpacking to docker.io/library/bookmyticket:local 0.6s done
+#19 DONE 1.6s
+
+#20 [app] exporting to image
+#20 exporting layers 1.0s done
+#20 exporting manifest sha256:11ca05a30b2c8dab05f9c0a766a536d8643f00c88d4e4196538022eaef1f8bae 0.0s done
+#20 exporting config sha256:1699e6abdd500100b2c97f9f7a1bbcf85a07fd1309639f24d5f293f3f5c4105b 0.0s done
+#20 exporting attestation manifest sha256:1f780c7196c9c52b9527aeec82b7fa712453f49594acd3f49b18f75ab3147b28 0.0s done
+#20 exporting manifest list sha256:b0f1a6516df18881690803fbcb8f3a8720a4e7bddb9d9e97b0b832b3bc1ee60a 0.0s done
+#20 naming to docker.io/library/bookmyticket:local done
+#20 unpacking to docker.io/library/bookmyticket:local 0.6s done
+#20 DONE 1.6s
+
+#21 [migrate] exporting to image
+#21 exporting layers 1.0s done
+#21 exporting manifest sha256:2d4981c58c2670d4f8b4bdfdd926b8dfb83679b819cc0252295f9ece5410aa29 0.0s done
+#21 exporting config sha256:55366a0fc2329c0b2b331b40942510022476e830cc24f3010e7cffb39e963f13 0.0s done
+#21 exporting attestation manifest sha256:9012575ac53edb42ed7630036e623108747df50161ecd269ce402e382f1897a4 0.0s done
+#21 exporting manifest list sha256:0ae70a338cca36e08a3d0eead3ee02b32507b5ef4e866f8b7d9772e5d97fb7e2 0.0s done
+#21 naming to docker.io/library/bookmyticket:local done
+#21 unpacking to docker.io/library/bookmyticket:local 0.6s done
+#21 DONE 1.7s
+
+#22 [app] resolving provenance for metadata file
+#22 DONE 0.1s
+
+#23 [worker] resolving provenance for metadata file
+#23 DONE 0.0s
+
+#24 [migrate] resolving provenance for metadata file
+#24 DONE 0.0s
+ Image bookmyticket:local Built 
+ Image bookmyticket:local Built 
+ Image bookmyticket:local Built 
+ Container bookmyticket-verify-database-1 Running 
+ Container bookmyticket-verify-migrate-1 Recreate 
+ Container bookmyticket-verify-migrate-1 Recreated 
+ Container bookmyticket-verify-app-1 Recreate 
+ Container bookmyticket-verify-worker-1 Recreate 
+ Container bookmyticket-verify-app-1 Recreated 
+ Container bookmyticket-verify-worker-1 Recreated 
+ Container bookmyticket-verify-database-1 Waiting 
+ Container bookmyticket-verify-database-1 Healthy 
+ Container bookmyticket-verify-migrate-1 Starting 
+ Container bookmyticket-verify-migrate-1 Started 
+ Container bookmyticket-verify-migrate-1 Waiting 
+ Container bookmyticket-verify-migrate-1 Waiting 
+ Container bookmyticket-verify-migrate-1 Exited 
+ Container bookmyticket-verify-migrate-1 Exited 
+ Container bookmyticket-verify-worker-1 Starting 
+ Container bookmyticket-verify-app-1 Starting 
+ Container bookmyticket-verify-worker-1 Started 
+ Container bookmyticket-verify-app-1 Started 
+ Container bookmyticket-verify-app-1 Waiting 
+ Container bookmyticket-verify-worker-1 Waiting 
+ Container bookmyticket-verify-database-1 Waiting 
+ Container bookmyticket-verify-migrate-1 Waiting 
+ Container bookmyticket-verify-migrate-1 Exited 
+ Container bookmyticket-verify-database-1 Healthy 
+ Container bookmyticket-verify-app-1 Healthy 
+ Container bookmyticket-verify-worker-1 Healthy 

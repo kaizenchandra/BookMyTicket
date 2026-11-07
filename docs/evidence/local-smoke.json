@@ -1,0 +1,580 @@
+{
+  "checkedAt": "2026-11-07T01:24:17.550Z",
+  "baseUrl": "http://127.0.0.1:3101",
+  "verificationLevel": "HTTP only; no browser rendering or authenticated live workflows",
+  "checks": [
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/pending-cancellation/preview",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/pending-cancellation",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/free-cancellation/preview",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/free-cancellation",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/free-confirmation",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/registration-form",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1e"
+      }
+    },
+    {
+      "path": "/api/v1/reservations/00000000-0000-4000-8000-000000000001/registration-form",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1f"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/registration",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1g"
+      }
+    },
+    {
+      "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/attendee-exports",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1h"
+      }
+    },
+    {
+      "path": "/api/v1/attendee-exports/00000000-0000-4000-8000-000000000001/download",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1i"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/tickets",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1j"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/tickets/download",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1k"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/calendar",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1l"
+      }
+    },
+    {
+      "path": "/health",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "status": "ok",
+        "version": "0.14.0"
+      }
+    },
+    {
+      "path": "/ready",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "status": "ready"
+      }
+    },
+    {
+      "path": "/api/v1/catalog",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "items": [
+          {
+            "id": "914a0a13-7649-4390-b2f0-b9ef86fc8216",
+            "title": "[DEMO] Chennai Waves vs Hyderabad Arrows",
+            "kind": "sports",
+            "city": "Chennai",
+            "description": "Fictional local demonstration sports fixture. Chennai Waves vs Hyderabad Arrows is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/racquet-cup.svg",
+            "metadata": {
+              "demo": "true",
+              "sport": "Badminton",
+              "teams": "Chennai Waves vs Hyderabad Arrows",
+              "managedBy": "sports",
+              "competition": "Demo Racquet Championship",
+              "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
+            },
+            "version": 3
+          },
+          {
+            "id": "b43f9fff-7351-42ed-a52a-77082c97471b",
+            "title": "[DEMO] Mumbai Comets vs Delhi Strikers",
+            "kind": "sports",
+            "city": "Mumbai",
+            "description": "Fictional local demonstration sports fixture. Mumbai Comets vs Delhi Strikers is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/football-league.svg",
+            "metadata": {
+              "demo": "true",
+              "sport": "Football",
+              "teams": "Mumbai Comets vs Delhi Strikers",
+              "managedBy": "sports",
+              "competition": "Demo Football League",
+              "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
+            },
+            "version": 3
+          },
+          {
+            "id": "a9108493-441a-4ca2-9d16-b16c03f6870a",
+            "title": "[DEMO] Bengaluru Falcons vs Mumbai Mariners",
+            "kind": "sports",
+            "city": "Bengaluru",
+            "description": "Fictional local demonstration sports fixture. Bengaluru Falcons vs Mumbai Mariners is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/cricket-cup.svg",
+            "metadata": {
+              "demo": "true",
+              "sport": "Cricket",
+              "teams": "Bengaluru Falcons vs Mumbai Mariners",
+              "managedBy": "sports",
+              "competition": "Demo Premier Cup",
+              "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
+            },
+            "version": 3
+          },
+          {
+            "id": "3b19e18a-bb66-4a77-a871-8a690ca4b506",
+            "title": "[DEMO] Midnight Marina",
+            "kind": "movie",
+            "city": "Chennai",
+            "description": "Fictional local demonstration film. Midnight Marina is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/midnight-marina.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Drama",
+              "format": "2D",
+              "duration": "142 min",
+              "language": "Tamil",
+              "managedBy": "cinema",
+              "performers": "Nila Kumar, Adi Raman (fictional)",
+              "releaseDate": "2026-11-06",
+              "certification": "Unrated (demo)"
+            },
+            "version": 3
+          },
+          {
+            "id": "f87bd742-c40d-4904-9d37-3fe47e52cc0d",
+            "title": "[DEMO] A Map of Stars",
+            "kind": "movie",
+            "city": "Bengaluru",
+            "description": "Fictional local demonstration film. A Map of Stars is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/map-of-stars.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Adventure",
+              "format": "2D",
+              "duration": "125 min",
+              "language": "English",
+              "managedBy": "cinema",
+              "performers": "Anya Roy, Dev Anand Rao (fictional)",
+              "releaseDate": "2026-11-06",
+              "certification": "Unrated (demo)"
+            },
+            "version": 3
+          },
+          {
+            "id": "3f0b7592-1c9a-4b12-9171-6ac34b85975f",
+            "title": "[DEMO] The Last Metro",
+            "kind": "movie",
+            "city": "Mumbai",
+            "description": "Fictional local demonstration film. The Last Metro is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/last-metro.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Thriller",
+              "format": "2D",
+              "duration": "118 min",
+              "language": "Hindi",
+              "managedBy": "cinema",
+              "performers": "Kabir Shah, Tara Mehta (fictional)",
+              "releaseDate": "2026-11-06",
+              "certification": "Unrated (demo)"
+            },
+            "version": 3
+          },
+          {
+            "id": "661901ad-0e34-48ee-9bdc-671e354dd16e",
+            "title": "[DEMO] Neon Monsoon",
+            "kind": "movie",
+            "city": "Bengaluru",
+            "description": "Fictional local demonstration film. Neon Monsoon is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/neon-monsoon.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Sci-Fi",
+              "format": "2D",
+              "duration": "132 min",
+              "language": "Kannada",
+              "managedBy": "cinema",
+              "performers": "Mira Rao, Arjun Dev (fictional)",
+              "releaseDate": "2026-11-06",
+              "certification": "Unrated (demo)"
+            },
+            "version": 3
+          }
+        ],
+        "total": 7,
+        "facets": {
+          "language": [
+            "English",
+            "Hindi",
+            "Kannada",
+            "Tamil"
+          ],
+          "genre": [
+            "Adventure",
+            "Drama",
+            "Sci-Fi",
+            "Thriller"
+          ],
+          "format": [
+            "2D"
+          ]
+        },
+        "nextCursor": null,
+        "serverTime": "2026-11-07T01:24:17.526Z"
+      }
+    },
+    {
+      "path": "/api/v1/catalog?sort=title&language=Hindi",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "items": [
+          {
+            "id": "3f0b7592-1c9a-4b12-9171-6ac34b85975f",
+            "title": "[DEMO] The Last Metro",
+            "kind": "movie",
+            "city": "Mumbai",
+            "description": "Fictional local demonstration film. The Last Metro is invented sample content, not a real event or real availability. Choose a free demo session to test reservation, confirmation, tickets and cancellation.",
+            "poster_url": "/demo/last-metro.svg",
+            "metadata": {
+              "demo": "true",
+              "genre": "Thriller",
+              "format": "2D",
+              "duration": "118 min",
+              "language": "Hindi",
+              "managedBy": "cinema",
+              "performers": "Kabir Shah, Tara Mehta (fictional)",
+              "releaseDate": "2026-11-06",
+              "certification": "Unrated (demo)"
+            },
+            "version": 3
+          }
+        ],
+        "total": 1,
+        "facets": {
+          "language": [
+            "English",
+            "Hindi",
+            "Kannada",
+            "Tamil"
+          ],
+          "genre": [
+            "Thriller"
+          ],
+          "format": [
+            "2D"
+          ]
+        },
+        "nextCursor": null,
+        "serverTime": "2026-11-07T01:24:17.528Z"
+      }
+    },
+    {
+      "path": "/api/v1/catalog/suggestions?q=movie",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "groups": [],
+        "serverTime": "2026-11-07T01:24:17.530Z"
+      }
+    },
+    {
+      "path": "/api/v1/cities",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "items": [
+          "Bengaluru",
+          "Chennai",
+          "Mumbai"
+        ]
+      }
+    },
+    {
+      "path": "/api/v1/config",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "brand": "BookMyTicket",
+        "environment": "development",
+        "themes": [
+          "LIGHT",
+          "DARK"
+        ],
+        "otpAvailable": true,
+        "otpDelivery": "mailpit",
+        "localMailpitUrl": "http://127.0.0.1:8025",
+        "paymentsAvailable": false,
+        "releaseStatus": "implementation_in_progress"
+      }
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1t"
+      }
+    },
+    {
+      "path": "/api/v1/auth/sessions",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1u"
+      }
+    },
+    {
+      "path": "/api/v1/favorites",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1v"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/payment",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1w"
+      }
+    },
+    {
+      "path": "/favorites",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/partner/venues",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/venues",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1z"
+      }
+    },
+    {
+      "path": "/api/v1/admin/pricing/policies",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-20"
+      }
+    },
+    {
+      "path": "/explore",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/profile",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/admin/pricing",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/operations",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/operations/cases",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-25"
+      }
+    },
+    {
+      "path": "/api/v1/provider-invitations",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-26"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/cinema",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-27"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/sports",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-28"
+      }
+    },
+    {
+      "path": "/movies",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/sports",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/notifications",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2b"
+      }
+    },
+    {
+      "path": "/api/v1/operations/notification-deliveries",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2c"
+      }
+    },
+    {
+      "path": "/notifications",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/partner",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2f"
+      }
+    },
+    {
+      "path": "/api/v1/operations/cases/00000000-0000-4000-8000-000000000001",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2g"
+      }
+    },
+    {
+      "path": "/scanner",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+(node:4126) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1793988402951,"pid":4126,"hostname":"PHOENIXAs-MacBook-Pro.local","msg":"Server listening at http://127.0.0.1:49869"}
+✔ Mailpit SMTP -> email verification -> signup -> authenticated session -> logout -> returning login (2288.034875ms)
+✔ real emailed OTP enforces resend cooldown, expiry and attempt limits (75.952ms)
+✔ Mailpit is prohibited in production and configuration reflects pepper availability (2.262ms)
+✔ SMTP connection failure returns truthful unavailable state and does not create an account (4.509042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2698.444917

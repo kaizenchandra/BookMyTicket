@@ -1,0 +1,5 @@
+NAME                             IMAGE                                                                                   COMMAND                  SERVICE    CREATED              STATUS                     PORTS
+bookmyticket-verify-app-1        bookmyticket:local                                                                      "docker-entrypoint.s…"   app        About a minute ago   Up 7 seconds (healthy)     127.0.0.1:3101->3000/tcp
+bookmyticket-verify-database-1   postgres:18.6@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81   "docker-entrypoint.s…"   database   34 minutes ago       Up 7 seconds (healthy)     5432/tcp
+bookmyticket-verify-migrate-1    bookmyticket:local                                                                      "docker-entrypoint.s…"   migrate    About a minute ago   Exited (0) 2 seconds ago   
+bookmyticket-verify-worker-1     bookmyticket:local                                                                      "docker-entrypoint.s…"   worker     About a minute ago   Up 7 seconds (healthy)     3000/tcp

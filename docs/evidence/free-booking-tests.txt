@@ -1,0 +1,14 @@
+(node:11387) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ free HTTP confirmation is idempotent, issues tickets once, and never invents payment (234.438959ms)
+✔ free confirmation rejects paid orders, missing eligibility, expired holds and closed sales (33.893041ms)
+✔ ticket configuration failure rolls inventory and booking back, then a retry can succeed (13.75475ms)
+✔ cancellation racing free confirmation produces one terminal outcome and consistent inventory (12.153917ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 651.9015

@@ -1,0 +1,17 @@
+# ADR 013 — Durable in-app notifications
+
+Status: implemented locally; browser acceptance pending.
+
+Notifications owns customer inbox records, templates and read state. Reporting owns durable source events and per-consumer delivery records. The Notifications application invokes Reporting's public DurableConsumer port and receives a local transaction for atomic persistence. No Notifications adapter mutates Reporting tables. Existing booking confirmation and pending cancellation events supply recipient account IDs; new payment recovery events now include that field too.
+
+Delivery is internal PostgreSQL work, with no external call. Each consumer has a separate delivery row per source event. A worker locks a pending row with SKIP LOCKED, writes the inbox message and marks delivery done in one transaction. A transaction-scoped row lock provides stale-worker protection; a lease is unnecessary because no external side effect or transaction boundary intervenes. Process termination rolls back both notification and acknowledgment. A unique event_id prevents duplicate inbox messages.
+
+A savepoint rolls back failed handler writes before recording a bounded exponential retry (2, 4, 8, 16, 32 seconds). Five failed attempts leave a dead delivery. Support staff with current permission and fresh MFA can inspect the latest 100 exhausted deliveries and request replay with an audited reason. Replay never changes payment/booking state. Source events remain available for other consumers; reporting.outbox.state is not consumed globally. Malformed or historical recovery events lacking ownerId exhaust safely; do not guess recipients or edit immutable historical evidence to bypass validation.
+
+Templates are English version 1 and describe historical events, with explicit guidance to open the booking for current status. Recovery/cancellation messages never claim a completed refund. Links contain only booking IDs, never ticket credentials, email addresses or payment secrets. Booking endpoints enforce ownership independently. All available notifications are transactional; marketing preferences do not suppress them. Localization, configurable preferences, reminders and actual email/SMS/push delivery remain open.
+
+Inbox retrieval is owner-scoped with stable created_at/id cursor ordering, 20 entries per page, optional unread filtering and server time. Cursor lookup is owner-scoped. Mark-as-read is owner-scoped and idempotent, retaining the original read timestamp. Notifications and operational frontend state are partitioned by authenticated identity. The canonical `/partner` route also now reaches its provider component, fixing existing invitation/navigation links.
+
+Migration 018 adds consumer delivery and notification tables and indexes. Recovery preserves source outbox events; do not truncate them to silence failures. Rollback uses a compatible artifact while retaining notification data. Production retention, backup/restore acceptance, deletion integration and monitoring alert thresholds still require implementation.
+
+Evidence: tests/notifications.test.ts exercises real PostgreSQL/HTTP components. Unique isolated fixture event types prevent cross-test worker interference; this is not live payment verification. Tests cover concurrency/deduplication, handler rollback, backoff/exhaustion, support authorization and audited replay, invalid envelopes, pagination, private cursor denial and read idempotency. No browser/a11y, external delivery or process-kill test is claimed.

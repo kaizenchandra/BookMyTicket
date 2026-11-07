@@ -1,0 +1,61 @@
+{
+  "checkedAt": "2026-11-06T17:58:53.540Z",
+  "project": "bookmyticket-verify",
+  "scope": "Local container recovery; isolated test fixtures only",
+  "checks": [
+    {
+      "name": "database/application/worker restart retains fixture records",
+      "passed": true,
+      "counts": {
+        "accounts": 767,
+        "orders": 173,
+        "reservations": 363,
+        "journals": 70,
+        "lines": 140,
+        "migrations": 15,
+        "venues": 42,
+        "spaces": 42,
+        "plans": 54,
+        "forms": 36,
+        "registrations": 28,
+        "attendeeExports": 30,
+        "tickets": 140,
+        "admissions": 98,
+        "pendingCancellations": 6
+      }
+    },
+    {
+      "name": "custom-format backup restored into separate database",
+      "passed": true,
+      "database": "bookmyticket_restore_1793987940642",
+      "bytes": 613914,
+      "counts": {
+        "accounts": 767,
+        "orders": 173,
+        "reservations": 363,
+        "journals": 70,
+        "lines": 140,
+        "migrations": 15,
+        "venues": 42,
+        "spaces": 42,
+        "plans": 54,
+        "forms": 36,
+        "registrations": 28,
+        "attendeeExports": 30,
+        "tickets": 140,
+        "admissions": 98,
+        "pendingCancellations": 6
+      },
+      "balancedJournals": true,
+      "noOrphanSeatOwners": true,
+      "planSnapshotsMatchImmutableVersions": true
+    }
+  ],
+  "elapsedMs": 8143,
+  "limitations": [
+    "No production RPO/RTO claim",
+    "Ticket/registration/export fixture keys are ephemeral: restoration checks records, not historical key recovery or decryption",
+    "No point-in-time recovery or traffic failover tested",
+    "Application rollback across schema versions not tested"
+  ]
+}

@@ -1,0 +1,168 @@
+name: bookmyticket-local
+x-application: &application
+  image: bookmyticket:${APP_IMAGE_TAG:-local}
+  build:
+    context: .
+    target: runtime
+  init: true
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=32m,mode=1777
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  pids_limit: 128
+  stop_grace_period: 30s
+  environment: &app-environment
+    NODE_ENV: development
+    PGHOST: database
+    PGPORT: "5432"
+    PGDATABASE: bookmyticket
+    PGUSER: bookmyticket
+    PGPASSWORD_FILE: /run/secrets/postgres_password
+    APP_ORIGIN: ${APP_ORIGIN:-http://127.0.0.1:3100}
+    HOST: 0.0.0.0
+    PORT: "3000"
+    OTP_PEPPER_FILE: /run/secrets/otp_pepper
+    MFA_ENCRYPTION_KEY_FILE: /run/secrets/mfa_key
+    EXPORT_ENCRYPTION_KEY_FILE: /run/secrets/export_key
+    REGISTRATION_ENCRYPTION_KEY_FILE: /run/secrets/registration_key
+    TICKET_ENCRYPTION_KEY_FILE: /run/secrets/ticket_key
+    RESEND_API_KEY_FILE: /run/secrets/resend_key
+    OTP_DELIVERY: ${OTP_DELIVERY:-mailpit}
+    OTP_FROM: ${OTP_FROM:-BookMyTicket <no-reply@bookmyticket.test>}
+    MAILPIT_SMTP_HOST: mailpit
+    MAILPIT_SMTP_PORT: "1025"
+    MAILPIT_WEB_URL: http://127.0.0.1:${MAILPIT_WEB_PORT:-8025}
+    RAZORPAY_KEY_ID_FILE: /run/secrets/razorpay_key_id
+    RAZORPAY_KEY_SECRET_FILE: /run/secrets/razorpay_key_secret
+    RAZORPAY_WEBHOOK_SECRET_FILE: /run/secrets/razorpay_webhook_secret
+    RAZORPAY_PREVIOUS_WEBHOOK_SECRET_FILE: /run/secrets/razorpay_previous_webhook_secret
+  secrets:
+    - postgres_password
+    - otp_pepper
+    - mfa_key
+    - export_key
+    - registration_key
+    - ticket_key
+    - resend_key
+    - razorpay_key_id
+    - razorpay_key_secret
+    - razorpay_webhook_secret
+    - razorpay_previous_webhook_secret
+services:
+  mailpit:
+    image: axllent/mailpit:v1.33.0@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILPIT_WEB_PORT:-8025}:8025"
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+    environment:
+      MP_MAX_MESSAGES: "100"
+      MP_MAX_AGE: 24h
+    healthcheck:
+      test: [CMD, /mailpit, readyz]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    mem_limit: 128m
+  tests:
+    profiles: [verification]
+    image: bookmyticket-tests:local
+    build:
+      context: .
+      target: verify
+    user: node
+    init: true
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m,mode=1777"]
+    command: [node, scripts/container-tests.mjs]
+    environment:
+      MAILPIT_TEST_URL: http://mailpit:8025
+      MAILPIT_TEST_SMTP_HOST: mailpit
+      MAILPIT_TEST_SMTP_PORT: "1025"
+    secrets: [postgres_password]
+    depends_on:
+      database:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    mem_limit: 512m
+  database:
+    image: postgres:18.6@sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81
+    environment:
+      POSTGRES_DB: bookmyticket
+      POSTGRES_USER: bookmyticket
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    volumes: ["database:/var/lib/postgresql"]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U bookmyticket -d bookmyticket"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    restart: unless-stopped
+    stop_grace_period: 30s
+    mem_limit: 1g
+  migrate:
+    <<: *application
+    restart: "no"
+    command: [node, --import, tsx, scripts/migrate.ts]
+    depends_on:
+      database:
+        condition: service_healthy
+    mem_limit: 256m
+  app:
+    <<: *application
+    ports: ["127.0.0.1:${APP_PORT:-3100}:3000"]
+    depends_on:
+      mailpit:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    mem_limit: 512m
+  worker:
+    <<: *application
+    command: [node, --import, tsx, src/worker.ts]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, node, scripts/worker-health.mjs]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    mem_limit: 256m
+volumes:
+  database:
+secrets:
+  postgres_password:
+    file: .local/compose/secrets/postgres_password
+  otp_pepper:
+    file: .local/compose/secrets/otp_pepper
+  mfa_key:
+    file: .local/compose/secrets/mfa_key
+  export_key:
+    file: .local/compose/secrets/export_key
+  registration_key:
+    file: .local/compose/secrets/registration_key
+  ticket_key:
+    file: .local/compose/secrets/ticket_key
+  resend_key:
+    file: .local/compose/secrets/resend_key
+  razorpay_key_id:
+    file: .local/compose/secrets/razorpay_key_id
+  razorpay_key_secret:
+    file: .local/compose/secrets/razorpay_key_secret
+  razorpay_webhook_secret:
+    file: .local/compose/secrets/razorpay_webhook_secret
+  razorpay_previous_webhook_secret:
+    file: .local/compose/secrets/razorpay_previous_webhook_secret

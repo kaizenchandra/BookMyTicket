@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-11-07T01:24:17.425Z",
+  "origin": "http://127.0.0.1:3101",
+  "level": "Read-only deployed HTTP; authenticated full journeys verified separately in isolated PostgreSQL tests; no browser acceptance",
+  "checks": [
+    {
+      "title": "[DEMO] Neon Monsoon",
+      "city": "Bengaluru",
+      "kind": "cinema",
+      "listingId": "661901ad-0e34-48ee-9bdc-671e354dd16e",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "85292020-ed39-42c2-8b4f-8d999812ca6c"
+    },
+    {
+      "title": "[DEMO] The Last Metro",
+      "city": "Mumbai",
+      "kind": "cinema",
+      "listingId": "3f0b7592-1c9a-4b12-9171-6ac34b85975f",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "d7905c9c-0067-4c76-9eeb-a1ccc7a79f23"
+    },
+    {
+      "title": "[DEMO] A Map of Stars",
+      "city": "Bengaluru",
+      "kind": "cinema",
+      "listingId": "f87bd742-c40d-4904-9d37-3fe47e52cc0d",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "0ee56815-91ae-4a6e-bafe-a9ec5d7d046e"
+    },
+    {
+      "title": "[DEMO] Midnight Marina",
+      "city": "Chennai",
+      "kind": "cinema",
+      "listingId": "3b19e18a-bb66-4a77-a871-8a690ca4b506",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "d8702ff1-2c85-4134-b9d9-230f3e7140b1"
+    },
+    {
+      "title": "[DEMO] Bengaluru Falcons vs Mumbai Mariners",
+      "city": "Bengaluru",
+      "kind": "sports",
+      "listingId": "a9108493-441a-4ca2-9d16-b16c03f6870a",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "596d0067-22c4-4b5d-a162-dea703d7d3df"
+    },
+    {
+      "title": "[DEMO] Mumbai Comets vs Delhi Strikers",
+      "city": "Mumbai",
+      "kind": "sports",
+      "listingId": "b43f9fff-7351-42ed-a52a-77082c97471b",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "d01b69bd-f467-46c0-b6a6-d646777e36ce"
+    },
+    {
+      "title": "[DEMO] Chennai Waves vs Hyderabad Arrows",
+      "city": "Chennai",
+      "kind": "sports",
+      "listingId": "914a0a13-7649-4390-b2f0-b9ef86fc8216",
+      "posterAvailable": true,
+      "sessionCount": 2,
+      "freeSessionId": "11ca39c4-1c5e-46ee-b2c6-95d698e3b837"
+    }
+  ]
+}

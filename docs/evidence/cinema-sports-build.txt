@@ -1,0 +1,14 @@
+
+> bookmyticket@0.14.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 37 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.71 kB │ gzip:  0.40 kB
+dist/assets/index-BXYFinu6.css   10.10 kB │ gzip:  2.93 kB
+dist/assets/index-CJ1Fefyr.js   338.72 kB │ gzip: 99.79 kB
+
+✓ built in 85ms

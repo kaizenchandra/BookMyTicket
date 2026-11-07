@@ -1,0 +1,17 @@
+✔ owner wallet renders independently decodable stable QR credentials without issuing new tickets (95.892583ms)
+✔ pending bookings expose no credential or download and incomplete issuance is explicit (11.39925ms)
+✔ per-ticket revoked, transferred and redeemed states suppress QR display (11.406959ms)
+✔ cancelled and expired occurrences never expose QR credentials; current times flag schedule changes (12.111625ms)
+✔ calendar is independently parseable, UTC-correct, folded by bytes and free of ticket credentials (15.77275ms)
+✔ printable documents escape supplied text and include only embedded QR images (21.707208ms)
+(node:26788) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ authenticated HTTP ticket, document and calendar routes deny cross-account retrieval (90.683167ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 514.715167

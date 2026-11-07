@@ -1,0 +1,7 @@
+# ADR 010 — Explicit local Mailpit delivery
+
+The user requested a Docker email-capture service and working signup/login verification. Previously, composition always selected Resend, so missing external credentials caused OTP_UNAVAILABLE even in local Docker development. Composition now selects an explicit `OTP_DELIVERY` adapter. Resend remains the default outside the local Compose setup; unknown modes fail closed. Mailpit is allowed only in explicitly development/test environments and never falls back to an external recipient provider.
+
+Mailpit uses a real SMTP adapter behind the existing OtpDelivery port; signup/session use cases and PostgreSQL OTP invariants remain unchanged. It uses bounded timeouts, disabled protocol/body logging and no filesystem/URL content sources. Only successful code verification creates or retrieves an account and issues a session. Frontend configuration checks include the pepper, expose a loopback-only inbox URL, and explain local capture. Resend cooldown, code expiry and contact correction are visible; backend controls remain authoritative.
+
+Compose supplies a version/digest-pinned Mailpit container, loopback-only host bindings, health dependency, temporary bounded inbox and no relay. CI/test containers send SMTP into that service, verify through actual HTTP and isolate account fixtures in bookmyticket_test. This is local delivery evidence, not internet email delivery, production verification or a payment Test Mode exception. No existing credentials or .env contents were exposed or overwritten.
