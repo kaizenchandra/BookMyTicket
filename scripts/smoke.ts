@@ -3,6 +3,16 @@ import { writeFile } from "node:fs/promises";
 const baseUrl = process.env.SMOKE_ORIGIN ?? "http://127.0.0.1:3000";
 const checks = [];
 {
+  const path = "/api/v1/admin/help";
+  const response = await fetch(baseUrl + path, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: baseUrl },
+    body: "{}",
+  });
+  assert.equal(response.status, 401);
+  checks.push({ path, method: "POST", status: response.status });
+}
+{
   const path =
     "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff/00000000-0000-4000-8000-000000000002";
   const response = await fetch(baseUrl + path, {
@@ -85,6 +95,7 @@ for (const path of [
   "/api/v1/occurrences/series",
   "/api/v1/occurrences/series/preview",
   "/api/v1/organizations",
+  "/api/v1/notifications/unread",
   "/api/v1/organizations/00000000-0000-4000-8000-000000000001/invitations/00000000-0000-4000-8000-000000000002/revoke",
   "/api/v1/organizations/00000000-0000-4000-8000-000000000001/submit",
   "/api/v1/organizations/00000000-0000-4000-8000-000000000001/listings",
@@ -190,6 +201,12 @@ for (const [path, expected] of [
   ["/api/v1/catalog?sort=title&language=Hindi", 200],
   ["/api/v1/catalog/suggestions?q=movie", 200],
   ["/api/v1/cities", 200],
+  ["/api/v1/help?q=payment&topic=payment", 200],
+  ["/help?topic=booking", 200],
+  ["/admin/help", 200],
+  ["/api/v1/admin/help", 401],
+  ["/api/v1/admin/help?status=unpublished&q=booking", 401],
+  ["/api/v1/admin/help/find-booking/history", 401],
   ["/api/v1/config", 200],
   ["/api/v1/auth/mfa", 401],
   ["/api/v1/auth/sessions", 401],
@@ -214,6 +231,7 @@ for (const [path, expected] of [
   ["/explore", 200],
   ["/profile", 200],
   ["/api/v1/profile/attendees", 401],
+  ["/api/v1/profile/attendees/consent-history", 401],
   ["/api/v1/profile/communications/history", 401],
   ["/admin/pricing", 200],
   ["/operations", 200],
@@ -231,6 +249,9 @@ for (const [path, expected] of [
   ["/movies", 200],
   ["/sports", 200],
   ["/api/v1/notifications", 401],
+  ["/api/v1/notifications?fromDate=2026-01-02&toDate=2026-01-02", 401],
+  ["/api/v1/notifications?status=read&category=booking", 401],
+  ["/api/v1/notifications?category=support&unread=true", 401],
   ["/api/v1/operations/notification-deliveries", 401],
   ["/notifications", 200],
   ["/partner", 200],

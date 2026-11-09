@@ -1,3 +1,4 @@
+import { consentPolicies } from "../domain/consent-policies.ts";
 import {
   createCipheriv,
   createDecipheriv,
@@ -12,6 +13,21 @@ import type {
   SavedAttendeesStore,
 } from "../application/saved-attendees.ts";
 export class PostgresSavedAttendees implements SavedAttendeesStore {
+  async history(owner: string, beforeVersion?: number) {
+    const rows = (
+      await pool.query(
+        `SELECT purpose,policy_version AS "policyVersion",granted,policy_text AS "policyText",preference_version AS "preferenceVersion",created_at AS "recordedAt"
+       FROM profiles.attendee_consent_history WHERE account_id=$1 AND ($2::integer IS NULL OR preference_version<$2)
+       ORDER BY preference_version DESC LIMIT 21`,
+        [owner, beforeVersion ?? null],
+      )
+    ).rows;
+    const items = rows.slice(0, 20);
+    return {
+      items,
+      nextCursor: rows.length > 20 ? items.at(-1).preferenceVersion : null,
+    };
+  }
   private key() {
     const secret = process.env.REGISTRATION_ENCRYPTION_KEY;
     if (!secret || !/^[a-f0-9]{64}$/i.test(secret))
@@ -113,8 +129,8 @@ export class PostgresSavedAttendees implements SavedAttendeesStore {
         [owner, ciphertext, version],
       );
       await tx.query(
-        "INSERT INTO profiles.attendee_consent_history(account_id,preference_version,purpose,policy_version,granted) VALUES($1,$2,'saved_attendees',1,$3)",
-        [owner, version, input.consent],
+        "INSERT INTO profiles.attendee_consent_history(account_id,preference_version,purpose,policy_version,granted,policy_text) VALUES($1,$2,'saved_attendees',1,$3,$4)",
+        [owner, version, input.consent, consentPolicies.saved_attendees.text],
       );
       return {
         version,

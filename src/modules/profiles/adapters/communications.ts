@@ -1,3 +1,4 @@
+import { consentPolicies } from "../domain/consent-policies.ts";
 import { pool, transaction } from "../../../shared/database.ts";
 import { AppError } from "../../../shared/errors.ts";
 import type {
@@ -10,7 +11,7 @@ export class PostgresCommunications implements CommunicationStore {
   async history(owner: string, beforeVersion?: number) {
     const rows = (
       await pool.query(
-        `SELECT purpose,policy_version AS "policyVersion",granted,preference_version AS "preferenceVersion",recorded_at AS "recordedAt"
+        `SELECT purpose,policy_version AS "policyVersion",granted,policy_text AS "policyText",preference_version AS "preferenceVersion",recorded_at AS "recordedAt"
        FROM profiles.marketing_consent_history WHERE account_id=$1 AND ($2::integer IS NULL OR preference_version<$2)
        ORDER BY preference_version DESC LIMIT 21`,
         [owner, beforeVersion ?? null],
@@ -81,8 +82,13 @@ export class PostgresCommunications implements CommunicationStore {
       ).rows[0];
       if (current.marketingEmail !== input.marketingEmail)
         await tx.query(
-          "INSERT INTO profiles.marketing_consent_history(account_id,purpose,policy_version,granted,preference_version) VALUES($1,'marketing_email',1,$2,$3)",
-          [owner, input.marketingEmail, saved.version],
+          "INSERT INTO profiles.marketing_consent_history(account_id,purpose,policy_version,granted,preference_version,policy_text) VALUES($1,'marketing_email',1,$2,$3,$4)",
+          [
+            owner,
+            input.marketingEmail,
+            saved.version,
+            consentPolicies.marketing_email.text,
+          ],
         );
       return {
         ...saved,

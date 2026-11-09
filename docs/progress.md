@@ -661,3 +661,90 @@ Next cohesive work: versioned attendee registration schemas and event/sports reg
 - Verified 196 native and Docker tests, zero failures/skips; build/typecheck; 198-module architecture checks; 119-path contracts; and 95 deployed HTTP smoke checks. Migration completed and local v0.73.0 app, worker, database and Mailpit are healthy. No seed, new grants or external communications were required.
 - Tests create 23 real alternating changes with retries, traverse 20+3 pages, check language-only omission, exact versions, owner isolation, allowed projections, invalid queries, authentication and immutability. Evidence prefix: docs/evidence/consent-history-.
 - Historical policy text, approved retention/deletion handling, browser/session/navigation/accessibility, external delivery and broader requirements remain open. See ADR 076 and runbooks/marketing-consent-history.md.
+
+## Version 0.74.0 — saved attendee consent history
+- Added GET /profile/attendees/consent-history with authenticated-account scope, bounded version pagination and consent metadata only. History queries neither read nor decrypt attendee details and work after withdrawal or when the encryption key is unavailable. Migration 066 makes retained attendee consent rows immutable.
+- Added the history panel beside saved attendee controls and shared navigation with the marketing panel while preserving purpose-specific copy. Opened histories refresh after saved-version changes; session changes clear data and stale responses are suppressed. Default no-consent states are not reconstructed as events.
+- Verified 198 native and Docker tests, zero failures/skips; build/typecheck; 198-module architecture checks; 120-path contracts; and 96 deployed HTTP smoke checks. Migration completed and local v0.74.0 app, worker, database and Mailpit are healthy. No seed, new grants or external communications were required.
+- Tests perform 24 real alternating saves/withdrawals with retries, verify 20+4 pagination, deleted ciphertext, key-independent access, private-field omission, owner isolation, malformed queries and immutability. Initial-render tests distinguish both consent purposes and explicit loading. Evidence prefix: docs/evidence/attendee-consent-history-.
+- Historical policy text, approved retention/deletion handling, browser/session/navigation/accessibility and broader requirements remain open. See ADR 077 and runbooks/attendee-consent-history.md.
+
+## Version 0.75.0 — retained consent wording
+- Migration 067 adds nullable bounded policy-text snapshots to marketing and attendee consent records. New saves persist canonical version-1 form wording atomically; historical rows remain null. Shared domain wording keeps first-party forms and saved snapshots aligned without copying attendee/contact data.
+- Both history APIs expose policyText and the shared frontend displays escaped retained text in an expandable control or explicit unavailable text for legacy records. Existing immutability protects snapshots from rewriting. Recorded wording is not proof of client display or external message delivery.
+- Verified 199 native and Docker tests, zero failures/skips; build/typecheck; 199-module architecture checks; 120-path contracts; and 96 deployed HTTP smoke checks. Migration completed and local v0.75.0 app, worker, database and Mailpit are healthy. No seed, grants or external messages were needed.
+- Tests verify exact new snapshots, legacy nulls, rejected snapshot rewrites, safe text rendering and missing-text behavior alongside existing consent privacy/pagination checks. Evidence prefix: docs/evidence/consent-wording-.
+- Legacy wording, approved retention/deletion handling, future policy-version rollout, browser/accessibility and broader requirements remain open. See ADR 078 and runbooks/retained-consent-wording.md.
+
+## Version 0.76.0 — notification category filters
+- Added optional booking/payment/support filtering using explicit domain template mappings before cursor pagination. Unread filtering combines with category, while the unread total remains inbox-wide. Owner-scoped exact cursor checks and read-state operations remain unchanged.
+- Added the category selector, filtered empty-state copy and account-change filter resets. Category changes return to newest results; older-page navigation preserves filters. OpenAPI documents the optional category enum.
+- Verified 200 native and Docker tests, zero failures/skips; build/typecheck; 199-module architecture checks; 120-path contracts; and 97 deployed HTTP smoke checks. Local v0.76.0 app, worker, database and Mailpit are healthy. No migration, seed, grants or external messages were needed.
+- Tests cover all six templates, booking pagination, category/unread combinations, global unread counts, support deep links, malformed filters, authentication and cross-account cursor/data isolation. Evidence prefix: docs/evidence/notification-categories-.
+- External delivery, browser/category/navigation/accessibility, load acceptance and broader requirements remain open. See ADR 079 and runbooks/notification-categories.md.
+
+## Version 0.77.0 — notification read-status views
+- Added status=all/unread/read filtering combined with categories before cursor pagination. Legacy unread=true/false remains supported; supplying both status and unread is rejected. Inbox-wide unread counts and owner/cursor protections remain unchanged.
+- Replaced the unread checkbox with a read-status selector. Status changes reset pagination while preserving category; account changes reset the view. Marking an item unread removes it from Read after refresh, with explicit filtered empty-state copy.
+- Verified 201 native and Docker tests, zero failures/skips; build/typecheck; 199-module architecture checks; 120-path contracts; and 98 deployed HTTP smoke checks. Local v0.77.0 app, worker, database and Mailpit are healthy. No migration, seed, grants or external messages were needed.
+- Tests cover 20+3 read pagination, categories, read timestamps, legacy equivalence, view transitions, unread totals, account isolation and invalid/ambiguous filters. Evidence prefix: docs/evidence/notification-status-.
+- External delivery, browser/read-state/navigation/accessibility, load acceptance and broader requirements remain open. See ADR 080 and runbooks/notification-read-filters.md.
+
+## Version 0.78.0 — bulk unread notifications
+- Added POST /notifications/unread with strict one-to-twenty distinct-ID validation and atomic owner-scoped updates. Shared deterministic row locking checks the whole selection before changing any state. Missing/foreign records cause no partial updates; unseen records remain untouched.
+- Added Mark displayed read notifications as unread beside the existing bulk-read control. Only eligible displayed IDs are sent; loading/error/busy/empty selections disable the action. Success refreshes current filters and unread totals.
+- Verified 202 native and Docker tests, zero failures/skips; build/typecheck; 199-module architecture checks; 121-path contracts; and 99 deployed HTTP smoke checks. Local v0.78.0 app, worker, database and Mailpit are healthy. No migration, seed, grants or external messages were needed.
+- Tests cover mixed-owner/missing rollback, duplicate/empty/oversized selections, concurrent reversed requests, repeated setters, untouched records, unread totals and authentication. Evidence prefix: docs/evidence/notification-bulk-unread-.
+- External delivery, browser/multi-action/filter/accessibility, load acceptance and broader requirements remain open. See ADR 081 and runbooks/bulk-unread-notifications.md.
+
+## Version 0.79.0 — notification date ranges
+- Added optional fromDate/toDate filters using inclusive India calendar days over event time. Either bound can be omitted. Invalid and reversed dates are rejected; category/status predicates apply before pagination and unread totals remain inbox-wide.
+- Added frontend date inputs with Apply/Clear controls, cursor reset and India-time event display. Account changes reset the range; older-page navigation preserves it.
+- Verified 203 native and Docker tests, zero failures/skips; build/typecheck; 199-module architecture checks; 121-path contracts; and 100 deployed HTTP smoke checks. Local v0.79.0 app, worker, database and Mailpit are healthy. No migration, seed, grants or external messages were needed.
+- Tests cover midnight boundaries, one-sided ranges, filtered pagination, valid leap dates, malformed/reversed dates, authentication and account isolation. Evidence prefix: docs/evidence/notification-dates-.
+- External delivery, browser/date/filter/accessibility, load acceptance and broader requirements remain open. See ADR 082 and runbooks/notification-date-ranges.md.
+
+## Version 0.80.0 — Favorites request recovery and contracts
+- Guarded save/remove/status/list results across account/resource/page changes, return visits and unmount. Bound pending sign-in Save to its original listing/venue; prevented stale page/status presentation. Failed list loads clear pagination and show Retry favorites separately from empty results.
+- Added shared strict favorites query and response contracts, typed frontend page data and generated API documentation. Existing owner isolation, publication checks and setters remain authoritative.
+- Verified 205 native and Docker tests with zero failures/skips, build/typecheck, architecture checks across 200 module files, 121 API paths and 100 local HTTP smoke checks. Local v0.80.0 app, worker, database and Mailpit are healthy. No migration, seed, grants or external messages were needed.
+- Added delayed-promise scope tests and HTTP contract/authentication/validation checks; existing pagination and unpublished-summary tests now validate real responses against the contract. Evidence prefix: docs/evidence/favorites-recovery-.
+- Browser event ordering/sign-in/account switching/navigation/accessibility, load acceptance, artist/team favorites and broader requirements remain open. See ADR 083 and runbooks/favorites-recovery.md.
+
+## Version 0.81.0 — searchable help
+- Added the Catalog Help application port, code-published versioned content adapter and domain keyword/topic search. Public GET /api/v1/help validates strict bounded queries and returns six possible public articles without reading personal data.
+- Replaced static Help with labeled search/topic controls, URL-preserved filters, result counts, safe text, empty/error/retry states and contextual links. Booking history and payment details link to matching help topics. Existing support guidance remains visible.
+- Verified 208 native and Docker tests, zero failures/skips; build/typecheck; architecture checks across 204 module files; 122 API paths; and 102 deployed HTTP smoke checks. Local v0.81.0 app, worker, database and Mailpit are healthy. No migration, seed, grants or external messages were needed.
+- Tests cover case-insensitive all-term matching, topic intersections, actual response contracts, invalid/repeated/extra queries, anonymous access, known internal links and safe rendering. Evidence prefix: docs/evidence/help-search-.
+- Administrative FAQ publication/editing, localization, browser/navigation/accessibility/load acceptance and broader requirements remain open. See ADR 084 and runbooks/help-search.md.
+
+## Version 0.82.0 — Help content administration
+- Migration 068 installs six FAQ articles and immutable save receipts. Public Help now reads published PostgreSQL content; the prior TypeScript adapter is a bootstrap/test fixture only.
+- Added GET /admin/help and PUT /admin/help/:id with route MFA/moderation checks, transaction-level active permission rechecks, version locking, actor/fingerprint-scoped retries and atomic audit. Historical retries return recorded versions without changing later publication state.
+- Added /admin/help with current article/version, editable question/answer/topic, publication checkbox, required reason, safe preview and original-request retry/discard controls. Destinations are fixed; existing articles only.
+- Verified 210 native and Docker tests, zero failures/skips; build/typecheck; architecture checks across 205 module files; 124 API paths; and 104 local HTTP smoke checks. Migration 068 applied successfully and local v0.82.0 app, worker, database and Mailpit are healthy. No application grants or external messages were created.
+- Tests cover permission/MFA rejection, publication visibility, six concurrent identical saves, payload/actor conflicts, replay after unpublish, immutable receipts, audit rollback, revoked permission and editor rendering. Evidence prefix: docs/evidence/help-admin-.
+- Article creation/deletion, editable destinations, separate drafts/approval, history browsing, approved retention, localization, browser/accessibility/load acceptance and broader content requirements remain open. See ADR 085 and runbooks/help-administration.md.
+
+## Version 0.83.0 — FAQ revision history
+- Added GET /admin/help/:id/history with current staff MFA/moderation checks, transactional permission rechecks, bounded version pagination and audited reads. Responses explicitly project prior content, actor, reason, time and versions; fingerprints and unrelated snapshot fields remain private.
+- Added an explicit-load history panel inside the editor with collapsed prior content, India-time timestamps, newest/older navigation, empty/error/retry states and draft preservation. Historical content is clearly distinguished from the current answer.
+- Verified 212 native and Docker tests with zero failures/skips, build/typecheck, 205-module architecture checks, 125 API paths and 105 local HTTP smoke checks. Local v0.83.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
+- Tests cover 22 edits over two pages while a new edit arrives, exact snapshots/attribution, missing/empty history, strict boundaries, MFA/access/revocation and audit failure. The first-run rendering assertion matched explanatory copy instead of the loading indicator; it was corrected and both full suites rerun successfully. First-run and final evidence use docs/evidence/help-history-.
+- Browser/editor/accessibility, comparison/restore, approved retention, load and broader content requirements remain open. See ADR 086 and runbooks/help-revision-history.md.
+
+## Version 0.84.0 — FAQ draft creation
+- Added POST /admin/help with strict slug/content/destination/reason validation and current staff MFA/moderation checks. Creation always starts unpublished at version one. Domain-controlled destinations resolve to existing internal routes.
+- Migration 069 adds immutable creation receipts. Article uniqueness and row locking serialize concurrent requests; original actor/fingerprint retries return the original result without changing later edits/publication. Receipt, article and audit commit atomically with active permission checks.
+- Added separate draft creation form with preview, explicit unpublished wording, original-request retry and discard/reload recovery. After creation staff select the draft and publish through the versioned editor.
+- Verified 214 native and Docker tests, no failures/skips; build/typecheck; 205-module architecture checks; 125 API paths; and 106 HTTP smoke checks. Migration 069 applied and local v0.84.0 app, worker, database and Mailpit are healthy. No application grants or external messages were created.
+- Tests cover six concurrent requests, validation, MFA/access, actor/payload/seeded-ID conflicts, public invisibility, later publish/unpublish, replay safety, immutable receipts, audit rollback and revocation. Evidence prefix: docs/evidence/help-creation-.
+- Deletion, editable destinations, creation-history display, separate approval, retention, pagination/load, browser/editor/accessibility and broader requirements remain open. See ADR 087 and runbooks/help-draft-creation.md.
+
+## Version 0.85.0 — FAQ administration filtering and pagination
+- Replaced unbounded article listing with twenty-item pages and ID cursors. Literal case-insensitive ID/question search and publication filtering run before pagination; the same C-collation ordering governs boundaries and sorting.
+- Added frontend search/status controls, first/next navigation and explicit page counts/empty states. Filters reset pagination; editing/creation hides list navigation to preserve drafts. New articles can be located by ID after creation.
+- Retained current MFA/moderation, transaction-level permission and audited-page checks. Audit metadata omits raw search text. The response now includes nextCursor; clients must follow it for the entire collection.
+- Verified 215 native and Docker tests with no failures/skips, build/typecheck, 205-module architecture checks, 125 API paths and 107 deployed HTTP smoke checks. Local v0.85.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
+- Tests cover 27 articles, filtered/unfiltered pages, new earlier IDs, publication changes between pages, case-insensitive/literal-percent queries, strict inputs, audit failure and revoked access. Evidence prefix: docs/evidence/help-list-.
+- Public-search pagination, indexing/load, browser/editor/accessibility and broader content requirements remain open. See ADR 088 and runbooks/help-administration-list.md.

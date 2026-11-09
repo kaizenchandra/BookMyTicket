@@ -7,6 +7,16 @@ export const notificationTypes = [
   "booking.pending_cancelled",
   "payment.recovery_required",
 ];
+export type NotificationCategory = "booking" | "payment" | "support";
+export const notificationCategories: Record<NotificationCategory, string[]> = {
+  booking: [
+    "booking.confirmed",
+    "booking.free_cancelled",
+    "booking.pending_cancelled",
+  ],
+  payment: ["payment.recovery_required"],
+  support: ["support.case_assigned", "support.staff_replied"],
+};
 export function notificationTemplate(type: string) {
   switch (type) {
     case "support.case_assigned":

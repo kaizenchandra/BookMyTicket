@@ -1,3 +1,4 @@
+import { consentPolicies } from "../src/modules/profiles/domain/consent-policies.ts";
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID, randomBytes } from "node:crypto";
@@ -273,5 +274,150 @@ test("Saved attendees require consent, encrypt private data, isolate accounts an
     await app.close();
     if (oldKey === undefined) delete process.env.REGISTRATION_ENCRYPTION_KEY;
     else process.env.REGISTRATION_ENCRYPTION_KEY = oldKey;
+  }
+});
+
+test("Saved attendee consent history survives withdrawal without exposing private details", async () => {
+  const oldKey = process.env.REGISTRATION_ENCRYPTION_KEY;
+  process.env.REGISTRATION_ENCRYPTION_KEY = randomBytes(32).toString("hex");
+  const app = await buildApp(),
+    owner = await account(),
+    other = await account();
+  const url = "/api/v1/profile/attendees/consent-history",
+    item = {
+      id: randomUUID(),
+      name: "Private history attendee",
+      email: "history-private@fixture.invalid",
+      phone: "+919876543210",
+    };
+  try {
+    assert.equal((await app.inject({ url })).statusCode, 401);
+    assert.deepEqual(
+      (await app.inject({ url, headers: owner.headers })).json(),
+      { items: [], nextCursor: null },
+    );
+    for (let i = 0; i < 24; i++) {
+      const input = {
+        expectedVersion: i,
+        consentVersion: 1,
+        consent: i % 2 === 0,
+        items: i % 2 === 0 ? [item] : [],
+      };
+      const save = () =>
+        app.inject({
+          method: "PUT",
+          url: "/api/v1/profile/attendees",
+          headers: owner.headers,
+          payload: input,
+        });
+      const r = await save();
+      assert.equal(r.statusCode, 200, r.body);
+      assert.equal((await save()).statusCode, 200);
+    }
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT ciphertext FROM profiles.saved_attendees WHERE account_id=$1",
+          [owner.id],
+        )
+      ).rows[0].ciphertext,
+      null,
+    );
+    // History uses only consent metadata and must not depend on decryption availability.
+    delete process.env.REGISTRATION_ENCRYPTION_KEY;
+    const { attendeeConsentHistoryPage } =
+      await import("../src/modules/profiles/adapters/saved-attendees-schema.ts");
+    const first = attendeeConsentHistoryPage.parse(
+      (await app.inject({ url, headers: owner.headers })).json(),
+    );
+    assert.equal(first.items.length, 20);
+    assert.equal(first.nextCursor, 5);
+    const second = attendeeConsentHistoryPage.parse(
+      (
+        await app.inject({
+          url: url + "?beforeVersion=5",
+          headers: owner.headers,
+        })
+      ).json(),
+    );
+    assert.equal(second.items.length, 4);
+    assert.equal(second.nextCursor, null);
+    const items = [...first.items, ...second.items];
+    assert.deepEqual(
+      items.map((i) => i.preferenceVersion),
+      Array.from({ length: 24 }, (_, i) => 24 - i),
+    );
+    items.forEach((i) => {
+      assert.equal(i.granted, i.preferenceVersion % 2 === 1);
+      assert.equal(i.purpose, "saved_attendees");
+      assert.equal(i.policyText, consentPolicies.saved_attendees.text);
+      assert.equal(i.policyVersion, 1);
+    });
+    for (const value of [owner.id, ...Object.values(item)])
+      assert(!JSON.stringify(items).includes(value));
+    assert.deepEqual(
+      (
+        await app.inject({
+          url: url + "?beforeVersion=5",
+          headers: other.headers,
+        })
+      ).json(),
+      { items: [], nextCursor: null },
+    );
+    await pool.query(
+      "INSERT INTO profiles.attendee_consent_history(account_id,preference_version,purpose,policy_version,granted) VALUES($1,1,'saved_attendees',1,true)",
+      [other.id],
+    );
+    assert.equal(
+      (await app.inject({ url, headers: other.headers })).json().items[0]
+        .policyText,
+      null,
+    );
+    await assert.rejects(
+      pool.query(
+        "UPDATE profiles.attendee_consent_history SET policy_text='Rewritten' WHERE account_id=$1",
+        [owner.id],
+      ),
+      /immutable/,
+    );
+    for (const suffix of [
+      "?beforeVersion=0",
+      "?beforeVersion=1.5",
+      "?beforeVersion=01",
+      "?beforeVersion=2147483648",
+      "?accountId=" + owner.id,
+    ])
+      assert.equal(
+        (await app.inject({ url: url + suffix, headers: owner.headers }))
+          .statusCode,
+        422,
+      );
+    await assert.rejects(
+      pool.query(
+        "UPDATE profiles.attendee_consent_history SET granted=false WHERE account_id=$1",
+        [owner.id],
+      ),
+      /immutable/,
+    );
+    await assert.rejects(
+      pool.query(
+        "DELETE FROM profiles.attendee_consent_history WHERE account_id=$1",
+        [owner.id],
+      ),
+      /immutable/,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT count(*)::int n FROM profiles.attendee_consent_history WHERE account_id=$1",
+          [owner.id],
+        )
+      ).rows[0].n,
+      24,
+    );
+  } finally {
+    if (oldKey === undefined) delete process.env.REGISTRATION_ENCRYPTION_KEY;
+    else process.env.REGISTRATION_ENCRYPTION_KEY = oldKey;
+    await app.close();
   }
 });

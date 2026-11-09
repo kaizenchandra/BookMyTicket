@@ -1246,22 +1246,27 @@
     "journey": "Inspect and revoke other sessions",
     "frontendRoute": "/profile",
     "backendModule": "identity",
-    "apiUseCase": "Sessions.list/revoke; auth/sessions endpoints",
+    "apiUseCase": "Sessions.list/revoke; auth/sessions endpoints; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts",
     "dataOwnership": "identity.sessions",
     "permissions": "Authenticated active account; own sessions only",
     "transactionRules": "Account advisory lock shared with MFA; current session preserved; audit committed with deletion",
     "acceptanceTests": [
-      "tests/sessions.test.ts"
+      "tests/sessions.test.ts",
+      "tests/request-scope.test.ts: delayed account/resource response invalidation",
+      "tests/favorites.test.ts: Favorite contracts preserve authentication, empty state and strict query validation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_subset_verified_browser_and_provider_unverified",
     "evidence": [
       "docs/evidence/integration-tests.txt",
       "docs/evidence/container-tests.txt",
-      "docs/evidence/local-smoke.json"
+      "docs/evidence/local-smoke.json",
+      "docs/evidence/favorites-recovery-full-suite.txt",
+      "docs/architecture/adr-083-favorites-request-recovery.md"
     ],
     "dependencies": [
-      "Browser verification; device metadata and broader account lifecycle remain outstanding"
+      "Browser verification; device metadata and broader account lifecycle remain outstanding",
+      "Favorites recovery/contracts implemented; artist/team support and browser/sign-in/navigation/accessibility/load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -1348,22 +1353,33 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping; encrypted owner-only GET/PUT /api/v1/profile/attendees, explicit version-1 consent/history/withdrawal and manual checkout field reuse",
+    "apiUseCase": "pending mapping; encrypted owner-only GET/PUT /api/v1/profile/attendees, explicit version-1 consent/history/withdrawal and manual checkout field reuse; owner-scoped saved-attendee consent metadata history with immutable rows, version pagination and purpose-specific customer panel excluding attendee details; immutable consent wording snapshots for new marketing/attendee records, shared versioned form wording and explicit legacy-unavailable history display",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
     "acceptanceTests": [
       "tests/profile.test.ts: Saved attendees require consent, encrypt private data, isolate accounts and withdraw without retaining details",
-      "tests/saved-attendees-ui.test.ts: explicit reuse excludes declarations"
+      "tests/saved-attendees-ui.test.ts: explicit reuse excludes declarations",
+      "tests/profile.test.ts: Saved attendee consent history survives withdrawal without exposing private details",
+      "tests/saved-attendees-ui.test.ts: Consent history panels distinguish attendee storage from marketing permission",
+      "tests/profile.test.ts: retained attendee consent wording and legacy-null snapshots",
+      "tests/communication-preferences.test.ts: retained marketing wording and legacy-null snapshots",
+      "tests/saved-attendees-ui.test.ts: Consent wording renders retained text safely and identifies missing historical text"
     ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
     "evidence": [
       "docs/evidence/saved-attendees-full-suite.txt",
-      "docs/architecture/adr-047-saved-attendees.md"
+      "docs/architecture/adr-047-saved-attendees.md",
+      "docs/evidence/attendee-consent-history-full-suite.txt",
+      "docs/architecture/adr-077-attendee-consent-history.md",
+      "docs/evidence/consent-wording-full-suite.txt",
+      "docs/architecture/adr-078-retained-consent-wording.md"
     ],
     "dependencies": [
-      "Saved attendee shortcuts implemented; browser/checkout/accessibility, production consent policy, retention/export/deletion integration and key rotation remain open"
+      "Saved attendee shortcuts implemented; browser/checkout/accessibility, production consent policy, retention/export/deletion integration and key rotation remain open",
+      "Saved attendee consent history implemented; historical policy text, retention/deletion and browser/session/accessibility acceptance remain open",
+      "New consent wording retention implemented; legacy text, retention/deletion, future policy rollout and browser/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -1448,13 +1464,16 @@
     "journey": "Save language and optional marketing email consent; withdraw consent",
     "frontendRoute": "/profile",
     "backendModule": "profiles",
-    "apiUseCase": "GET/PUT /api/v1/profile/communications; owner-scoped paginated marketing consent history with purpose/policy/time/withdrawal projection, immutable records and explicit-load customer history panel",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications; owner-scoped paginated marketing consent history with purpose/policy/time/withdrawal projection, immutable records and explicit-load customer history panel; immutable consent wording snapshots for new marketing/attendee records, shared versioned form wording and explicit legacy-unavailable history display",
     "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
     "permissions": "Authenticated account only; no submitted owner identity",
     "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
     "acceptanceTests": [
       "tests/communication-preferences.test.ts",
-      "tests/communication-preferences.test.ts: Customer consent history paginates real changes and excludes other accounts"
+      "tests/communication-preferences.test.ts: Customer consent history paginates real changes and excludes other accounts",
+      "tests/profile.test.ts: retained attendee consent wording and legacy-null snapshots",
+      "tests/communication-preferences.test.ts: retained marketing wording and legacy-null snapshots",
+      "tests/saved-attendees-ui.test.ts: Consent wording renders retained text safely and identifies missing historical text"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "database_http_verified_not_browser",
@@ -1462,11 +1481,14 @@
       "docs/evidence/communication-full-suite.txt",
       "docs/architecture/adr-018-communication-preferences.md",
       "docs/evidence/consent-history-full-suite.txt",
-      "docs/architecture/adr-076-marketing-consent-history.md"
+      "docs/architecture/adr-076-marketing-consent-history.md",
+      "docs/evidence/consent-wording-full-suite.txt",
+      "docs/architecture/adr-078-retained-consent-wording.md"
     ],
     "dependencies": [
       "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows",
-      "Customer consent history implemented; historical policy text, approved retention/deletion, external delivery and browser/session/accessibility acceptance remain open"
+      "Customer consent history implemented; historical policy text, approved retention/deletion, external delivery and browser/session/accessibility acceptance remain open",
+      "New consent wording retention implemented; legacy text, retention/deletion, future policy rollout and browser/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -5318,13 +5340,15 @@
     "journey": "Save and remove listing favorites",
     "frontendRoute": "/favorites, /listing/:id",
     "backendModule": "profiles",
-    "apiUseCase": "Favorites.save/remove/list/status; account-owned venue favorites GET/PUT/DELETE /api/v1/venue-favorites with public-summary contract, /favorites/venues pagination and save from public venue page",
+    "apiUseCase": "Favorites.save/remove/list/status; account-owned venue favorites GET/PUT/DELETE /api/v1/venue-favorites with public-summary contract, /favorites/venues pagination and save from public venue page; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts",
     "dataOwnership": "profiles.favorites; catalog owns public listing details",
     "permissions": "Authenticated owner only",
     "transactionRules": "Unique account/listing; idempotent writes; published-only summaries; stable cursor",
     "acceptanceTests": [
       "tests/favorites.test.ts",
-      "tests/venues.test.ts: Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues"
+      "tests/venues.test.ts: Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues",
+      "tests/request-scope.test.ts: delayed account/resource response invalidation",
+      "tests/favorites.test.ts: Favorite contracts preserve authentication, empty state and strict query validation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_subset_verified_browser_and_provider_unverified",
@@ -5333,11 +5357,14 @@
       "docs/evidence/container-tests.txt",
       "docs/evidence/local-smoke.json",
       "docs/evidence/venue-favorites-full-suite.txt",
-      "docs/architecture/adr-045-venue-favorites.md"
+      "docs/architecture/adr-045-venue-favorites.md",
+      "docs/evidence/favorites-recovery-full-suite.txt",
+      "docs/architecture/adr-083-favorites-request-recovery.md"
     ],
     "dependencies": [
       "Browser verification; artist/team/venue types remain outstanding",
-      "Venue favorites implemented; artist/team favorites, alert subscriptions, sign-in continuation/browser/accessibility and load acceptance remain open"
+      "Venue favorites implemented; artist/team favorites, alert subscriptions, sign-in continuation/browser/accessibility and load acceptance remain open",
+      "Favorites recovery/contracts implemented; artist/team support and browser/sign-in/navigation/accessibility/load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -5349,13 +5376,15 @@
     "journey": "Save and remove listing favorites",
     "frontendRoute": "/favorites, /listing/:id",
     "backendModule": "profiles",
-    "apiUseCase": "Favorites.save/remove/list/status; account-owned venue favorites GET/PUT/DELETE /api/v1/venue-favorites with public-summary contract, /favorites/venues pagination and save from public venue page",
+    "apiUseCase": "Favorites.save/remove/list/status; account-owned venue favorites GET/PUT/DELETE /api/v1/venue-favorites with public-summary contract, /favorites/venues pagination and save from public venue page; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts",
     "dataOwnership": "profiles.favorites; catalog owns public listing details",
     "permissions": "Authenticated owner only",
     "transactionRules": "Unique account/listing; idempotent writes; published-only summaries; stable cursor",
     "acceptanceTests": [
       "tests/favorites.test.ts",
-      "tests/venues.test.ts: Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues"
+      "tests/venues.test.ts: Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues",
+      "tests/request-scope.test.ts: delayed account/resource response invalidation",
+      "tests/favorites.test.ts: Favorite contracts preserve authentication, empty state and strict query validation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_subset_verified_browser_and_provider_unverified",
@@ -5364,11 +5393,14 @@
       "docs/evidence/container-tests.txt",
       "docs/evidence/local-smoke.json",
       "docs/evidence/venue-favorites-full-suite.txt",
-      "docs/architecture/adr-045-venue-favorites.md"
+      "docs/architecture/adr-045-venue-favorites.md",
+      "docs/evidence/favorites-recovery-full-suite.txt",
+      "docs/architecture/adr-083-favorites-request-recovery.md"
     ],
     "dependencies": [
       "Browser verification; artist/team/venue types remain outstanding",
-      "Venue favorites implemented; artist/team favorites, alert subscriptions, sign-in continuation/browser/accessibility and load acceptance remain open"
+      "Venue favorites implemented; artist/team favorites, alert subscriptions, sign-in continuation/browser/accessibility and load acceptance remain open",
+      "Favorites recovery/contracts implemented; artist/team support and browser/sign-in/navigation/accessibility/load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -5399,13 +5431,17 @@
     "journey": "Receive persisted booking updates; read inbox; inspect and replay failed inbox delivery",
     "frontendRoute": "/notifications; /operations",
     "backendModule": "notifications; reporting",
-    "apiUseCase": "Notifications.once/list/read; durable consumer; failures/replay; owner-wide unread counts, bounded atomic POST /api/v1/notifications/read and DELETE /api/v1/notifications/:id/read with customer read/unread controls",
+    "apiUseCase": "Notifications.once/list/read; durable consumer; failures/replay; owner-wide unread counts, bounded atomic POST /api/v1/notifications/read and DELETE /api/v1/notifications/:id/read with customer read/unread controls; domain-defined notification categories combined with unread cursor pagination and frontend category selection preserving owner isolation; all/unread/read notification status views combined with category pagination and backward-compatible legacy unread filtering; atomic bounded owner-scoped bulk mark-unread with deterministic locks and frontend displayed-read selection; inclusive India event-date ranges combined with category/read-state pagination and frontend apply/clear controls",
     "dataOwnership": "notifications messages/read state; reporting source events and consumer deliveries",
     "permissions": "Owner-only inbox; support grant and fresh MFA for delivery recovery",
     "transactionRules": "Row-locked database consumer; message and acknowledgment atomic; unique event deduplication; five-attempt backoff; audited replay",
     "acceptanceTests": [
       "tests/notifications.test.ts",
-      "tests/notifications.test.ts: Inbox bulk read is atomic, bounded and owner scoped while new arrivals remain unread"
+      "tests/notifications.test.ts: Inbox bulk read is atomic, bounded and owner scoped while new arrivals remain unread",
+      "tests/notifications.test.ts: Notification categories preserve unread pagination and account isolation",
+      "tests/notifications.test.ts: Notification read-only views combine with categories and retain legacy unread compatibility",
+      "tests/notifications.test.ts: Bulk mark-unread validates ownership atomically and changes only selected notifications",
+      "tests/notifications.test.ts: Notification date ranges use inclusive India event dates with filtered pagination"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_verified_not_browser",
@@ -5413,11 +5449,23 @@
       "docs/evidence/notification-full-suite.txt",
       "docs/architecture/adr-013-in-app-notifications.md",
       "docs/evidence/inbox-actions-full-suite.txt",
-      "docs/architecture/adr-049-inbox-actions.md"
+      "docs/architecture/adr-049-inbox-actions.md",
+      "docs/evidence/notification-categories-full-suite.txt",
+      "docs/architecture/adr-079-notification-categories.md",
+      "docs/evidence/notification-status-full-suite.txt",
+      "docs/architecture/adr-080-notification-read-filters.md",
+      "docs/evidence/notification-bulk-unread-full-suite.txt",
+      "docs/architecture/adr-081-bulk-unread-notifications.md",
+      "docs/evidence/notification-dates-full-suite.txt",
+      "docs/architecture/adr-082-notification-date-ranges.md"
     ],
     "dependencies": [
       "Browser acceptance; localized templates; email/SMS/push; reminders; retention/account deletion; full event families; production observability",
-      "Inbox read-state actions implemented; browser/accessibility/load acceptance, live badges, retention and external channels remain open"
+      "Inbox read-state actions implemented; browser/accessibility/load acceptance, live badges, retention and external channels remain open",
+      "Notification categories implemented; external delivery, load and browser/navigation/accessibility acceptance remain open",
+      "Read-status views implemented; external delivery, load and browser/accessibility acceptance remain open",
+      "Bulk mark-unread implemented; external delivery, load and browser/multi-action/accessibility acceptance remain open",
+      "Notification date filtering implemented; external delivery, load and browser/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -5524,15 +5572,26 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
-    "acceptanceTests": [],
+    "acceptanceTests": [
+      "tests/help-search.test.ts: domain search, public HTTP validation/contracts and safe contextual result rendering",
+      "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview"
+    ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/help-search-full-suite.txt",
+      "docs/architecture/adr-084-searchable-help.md",
+      "docs/evidence/help-admin-full-suite.txt",
+      "docs/architecture/adr-085-help-administration.md"
+    ],
+    "dependencies": [
+      "Public FAQ search implemented; administrative content lifecycle, localization, browser/accessibility and load acceptance remain open",
+      "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7337,22 +7396,38 @@
     "journey": "Review commercial terms and accept an order",
     "frontendRoute": "/checkout/:id, /bookings/:id, /admin/pricing",
     "backendModule": "pricing",
-    "apiUseCase": "Approve/assign policy, quote, accept immutable order",
+    "apiUseCase": "Approve/assign policy, quote, accept immutable order; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation",
     "dataOwnership": "pricing",
     "permissions": "Customer owner; staff pricing grant + fresh MFA",
     "transactionRules": "Occurrence/reservation/assignment locks; immutable policy/quote/order snapshots",
     "acceptanceTests": [
       "tests/pricing-domain.test.ts",
-      "tests/pricing-integration.test.ts"
+      "tests/pricing-integration.test.ts",
+      "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview",
+      "tests/help-admin.test.ts: paginated real revisions, attribution, access rechecks, audit failure and safe explicit-load history rendering",
+      "tests/help-admin.test.ts: FAQ creation permission, concurrent retries, collision, publication, immutable receipts, rollback and draft form",
+      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "browser_verification_blocked",
     "evidence": [
       "docs/evidence/integration-tests.txt",
-      "docs/architecture/adr-002-quotes.md"
+      "docs/architecture/adr-002-quotes.md",
+      "docs/evidence/help-admin-full-suite.txt",
+      "docs/architecture/adr-085-help-administration.md",
+      "docs/evidence/help-history-full-suite.txt",
+      "docs/architecture/adr-086-help-revision-history.md",
+      "docs/evidence/help-creation-full-suite.txt",
+      "docs/architecture/adr-087-help-draft-creation.md",
+      "docs/evidence/help-list-full-suite.txt",
+      "docs/architecture/adr-088-help-administration-pagination.md"
     ],
     "dependencies": [
-      "Browser verification; approved production policy values; payment initiation remains pending"
+      "Browser verification; approved production policy values; payment initiation remains pending",
+      "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open",
+      "FAQ history inspection implemented; article creation, comparison/restore, approved retention, browser/accessibility and load acceptance remain open",
+      "FAQ creation implemented; deletion, destination editing, approval, creation-history UI, retention, pagination/load and browser/accessibility acceptance remain open",
+      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10042,13 +10117,15 @@
     "journey": "Save and remove listing favorites",
     "frontendRoute": "/favorites, /listing/:id",
     "backendModule": "profiles",
-    "apiUseCase": "Favorites.save/remove/list/status; account-owned venue favorites GET/PUT/DELETE /api/v1/venue-favorites with public-summary contract, /favorites/venues pagination and save from public venue page",
+    "apiUseCase": "Favorites.save/remove/list/status; account-owned venue favorites GET/PUT/DELETE /api/v1/venue-favorites with public-summary contract, /favorites/venues pagination and save from public venue page; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts",
     "dataOwnership": "profiles.favorites; catalog owns public listing details",
     "permissions": "Authenticated owner only",
     "transactionRules": "Unique account/listing; idempotent writes; published-only summaries; stable cursor",
     "acceptanceTests": [
       "tests/favorites.test.ts",
-      "tests/venues.test.ts: Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues"
+      "tests/venues.test.ts: Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues",
+      "tests/request-scope.test.ts: delayed account/resource response invalidation",
+      "tests/favorites.test.ts: Favorite contracts preserve authentication, empty state and strict query validation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_subset_verified_browser_and_provider_unverified",
@@ -10057,11 +10134,14 @@
       "docs/evidence/container-tests.txt",
       "docs/evidence/local-smoke.json",
       "docs/evidence/venue-favorites-full-suite.txt",
-      "docs/architecture/adr-045-venue-favorites.md"
+      "docs/architecture/adr-045-venue-favorites.md",
+      "docs/evidence/favorites-recovery-full-suite.txt",
+      "docs/architecture/adr-083-favorites-request-recovery.md"
     ],
     "dependencies": [
       "Browser verification; artist/team/venue types remain outstanding",
-      "Venue favorites implemented; artist/team favorites, alert subscriptions, sign-in continuation/browser/accessibility and load acceptance remain open"
+      "Venue favorites implemented; artist/team favorites, alert subscriptions, sign-in continuation/browser/accessibility and load acceptance remain open",
+      "Favorites recovery/contracts implemented; artist/team support and browser/sign-in/navigation/accessibility/load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10073,22 +10153,33 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping; encrypted owner-only GET/PUT /api/v1/profile/attendees, explicit version-1 consent/history/withdrawal and manual checkout field reuse",
+    "apiUseCase": "pending mapping; encrypted owner-only GET/PUT /api/v1/profile/attendees, explicit version-1 consent/history/withdrawal and manual checkout field reuse; owner-scoped saved-attendee consent metadata history with immutable rows, version pagination and purpose-specific customer panel excluding attendee details; immutable consent wording snapshots for new marketing/attendee records, shared versioned form wording and explicit legacy-unavailable history display",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
     "acceptanceTests": [
       "tests/profile.test.ts: Saved attendees require consent, encrypt private data, isolate accounts and withdraw without retaining details",
-      "tests/saved-attendees-ui.test.ts: explicit reuse excludes declarations"
+      "tests/saved-attendees-ui.test.ts: explicit reuse excludes declarations",
+      "tests/profile.test.ts: Saved attendee consent history survives withdrawal without exposing private details",
+      "tests/saved-attendees-ui.test.ts: Consent history panels distinguish attendee storage from marketing permission",
+      "tests/profile.test.ts: retained attendee consent wording and legacy-null snapshots",
+      "tests/communication-preferences.test.ts: retained marketing wording and legacy-null snapshots",
+      "tests/saved-attendees-ui.test.ts: Consent wording renders retained text safely and identifies missing historical text"
     ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
     "evidence": [
       "docs/evidence/saved-attendees-full-suite.txt",
-      "docs/architecture/adr-047-saved-attendees.md"
+      "docs/architecture/adr-047-saved-attendees.md",
+      "docs/evidence/attendee-consent-history-full-suite.txt",
+      "docs/architecture/adr-077-attendee-consent-history.md",
+      "docs/evidence/consent-wording-full-suite.txt",
+      "docs/architecture/adr-078-retained-consent-wording.md"
     ],
     "dependencies": [
-      "Saved attendee shortcuts implemented; browser/checkout/accessibility, production consent policy, retention/export/deletion integration and key rotation remain open"
+      "Saved attendee shortcuts implemented; browser/checkout/accessibility, production consent policy, retention/export/deletion integration and key rotation remain open",
+      "Saved attendee consent history implemented; historical policy text, retention/deletion and browser/session/accessibility acceptance remain open",
+      "New consent wording retention implemented; legacy text, retention/deletion, future policy rollout and browser/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10100,7 +10191,7 @@
     "journey": "Save language and optional marketing email consent; withdraw consent",
     "frontendRoute": "/profile",
     "backendModule": "profiles",
-    "apiUseCase": "GET/PUT /api/v1/profile/communications; encrypted owner-only GET/PUT /api/v1/profile/attendees, explicit version-1 consent/history/withdrawal and manual checkout field reuse; owner-scoped paginated marketing consent history with purpose/policy/time/withdrawal projection, immutable records and explicit-load customer history panel",
+    "apiUseCase": "GET/PUT /api/v1/profile/communications; encrypted owner-only GET/PUT /api/v1/profile/attendees, explicit version-1 consent/history/withdrawal and manual checkout field reuse; owner-scoped paginated marketing consent history with purpose/policy/time/withdrawal projection, immutable records and explicit-load customer history panel; owner-scoped saved-attendee consent metadata history with immutable rows, version pagination and purpose-specific customer panel excluding attendee details; immutable consent wording snapshots for new marketing/attendee records, shared versioned form wording and explicit legacy-unavailable history display",
     "dataOwnership": "profiles.communication_preferences; profiles.marketing_consent_history",
     "permissions": "Authenticated account only; no submitted owner identity",
     "transactionRules": "Row lock; version conflict; identical immediate retry; atomic consent history",
@@ -10108,7 +10199,12 @@
       "tests/communication-preferences.test.ts",
       "tests/profile.test.ts: Saved attendees require consent, encrypt private data, isolate accounts and withdraw without retaining details",
       "tests/saved-attendees-ui.test.ts: explicit reuse excludes declarations",
-      "tests/communication-preferences.test.ts: Customer consent history paginates real changes and excludes other accounts"
+      "tests/communication-preferences.test.ts: Customer consent history paginates real changes and excludes other accounts",
+      "tests/profile.test.ts: Saved attendee consent history survives withdrawal without exposing private details",
+      "tests/saved-attendees-ui.test.ts: Consent history panels distinguish attendee storage from marketing permission",
+      "tests/profile.test.ts: retained attendee consent wording and legacy-null snapshots",
+      "tests/communication-preferences.test.ts: retained marketing wording and legacy-null snapshots",
+      "tests/saved-attendees-ui.test.ts: Consent wording renders retained text safely and identifies missing historical text"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "database_http_verified_not_browser",
@@ -10118,12 +10214,18 @@
       "docs/evidence/saved-attendees-full-suite.txt",
       "docs/architecture/adr-047-saved-attendees.md",
       "docs/evidence/consent-history-full-suite.txt",
-      "docs/architecture/adr-076-marketing-consent-history.md"
+      "docs/architecture/adr-076-marketing-consent-history.md",
+      "docs/evidence/attendee-consent-history-full-suite.txt",
+      "docs/architecture/adr-077-attendee-consent-history.md",
+      "docs/evidence/consent-wording-full-suite.txt",
+      "docs/architecture/adr-078-retained-consent-wording.md"
     ],
     "dependencies": [
       "Browser/a11y acceptance; localized templates; campaign delivery; broader consent purposes and privacy workflows",
       "Saved attendee shortcuts implemented; browser/checkout/accessibility, production consent policy, retention/export/deletion integration and key rotation remain open",
-      "Customer consent history implemented; historical policy text, approved retention/deletion, external delivery and browser/session/accessibility acceptance remain open"
+      "Customer consent history implemented; historical policy text, approved retention/deletion, external delivery and browser/session/accessibility acceptance remain open",
+      "Saved attendee consent history implemented; historical policy text, retention/deletion and browser/session/accessibility acceptance remain open",
+      "New consent wording retention implemented; legacy text, retention/deletion, future policy rollout and browser/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -10222,21 +10324,26 @@
     "journey": "Select attendee fields, request an encrypted export, track status and download before expiry",
     "frontendRoute": "/partner/venues",
     "backendModule": "reporting; identity; providers; inventory; events; bookings",
-    "apiUseCase": "AttendeeExports.request/list/download/once",
+    "apiUseCase": "AttendeeExports.request/list/download/once; owner-scoped saved-attendee consent metadata history with immutable rows, version pagination and purpose-specific customer panel excluding attendee details",
     "dataOwnership": "reporting export jobs/artifacts; bookings registrations; events form versions",
     "permissions": "Requester only; active account; approved organization owner; recent MFA on request/download; fresh worker/download authorization",
     "transactionRules": "Actor-scoped idempotency; SKIP LOCKED job transaction; shared authorization locks; bounded retries; encrypted artifact; database-time expiry",
     "acceptanceTests": [
-      "tests/exports.test.ts"
+      "tests/exports.test.ts",
+      "tests/profile.test.ts: Saved attendee consent history survives withdrawal without exposing private details",
+      "tests/saved-attendees-ui.test.ts: Consent history panels distinguish attendee storage from marketing permission"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_verified_browser_unverified",
     "evidence": [
       "docs/evidence/export-full-suite.txt",
-      "docs/architecture/adr-007-attendee-exports.md"
+      "docs/architecture/adr-007-attendee-exports.md",
+      "docs/evidence/attendee-consent-history-full-suite.txt",
+      "docs/architecture/adr-077-attendee-consent-history.md"
     ],
     "dependencies": [
-      "Browser acceptance; large export streaming; configurable production retention; sensitivity classes; administrator replay; managed key rotation"
+      "Browser acceptance; large export streaming; configurable production retention; sensitivity classes; administrator replay; managed key rotation",
+      "Saved attendee consent history implemented; historical policy text, retention/deletion and browser/session/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -11192,15 +11299,38 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
-    "acceptanceTests": [],
+    "acceptanceTests": [
+      "tests/help-search.test.ts: domain search, public HTTP validation/contracts and safe contextual result rendering",
+      "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview",
+      "tests/help-admin.test.ts: paginated real revisions, attribution, access rechecks, audit failure and safe explicit-load history rendering",
+      "tests/help-admin.test.ts: FAQ creation permission, concurrent retries, collision, publication, immutable receipts, rollback and draft form",
+      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors"
+    ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/help-search-full-suite.txt",
+      "docs/architecture/adr-084-searchable-help.md",
+      "docs/evidence/help-admin-full-suite.txt",
+      "docs/architecture/adr-085-help-administration.md",
+      "docs/evidence/help-history-full-suite.txt",
+      "docs/architecture/adr-086-help-revision-history.md",
+      "docs/evidence/help-creation-full-suite.txt",
+      "docs/architecture/adr-087-help-draft-creation.md",
+      "docs/evidence/help-list-full-suite.txt",
+      "docs/architecture/adr-088-help-administration-pagination.md"
+    ],
+    "dependencies": [
+      "Public FAQ search implemented; administrative content lifecycle, localization, browser/accessibility and load acceptance remain open",
+      "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open",
+      "FAQ history inspection implemented; article creation, comparison/restore, approved retention, browser/accessibility and load acceptance remain open",
+      "FAQ creation implemented; deletion, destination editing, approval, creation-history UI, retention, pagination/load and browser/accessibility acceptance remain open",
+      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -16612,7 +16742,7 @@
     "journey": "Receive persisted booking updates; read inbox; inspect and replay failed inbox delivery",
     "frontendRoute": "/notifications; /operations",
     "backendModule": "notifications; reporting",
-    "apiUseCase": "Notifications.once/list/read; durable consumer; failures/replay; support.staff_replied outbox and customer inbox; owner-scoped exact case selection; atomic support.case_assigned outbox and recipient inbox with protected case link; exact PostgreSQL microsecond boundaries for owner-scoped notification UUID cursors; owner-wide unread counts, bounded atomic POST /api/v1/notifications/read and DELETE /api/v1/notifications/:id/read with customer read/unread controls",
+    "apiUseCase": "Notifications.once/list/read; durable consumer; failures/replay; support.staff_replied outbox and customer inbox; owner-scoped exact case selection; atomic support.case_assigned outbox and recipient inbox with protected case link; exact PostgreSQL microsecond boundaries for owner-scoped notification UUID cursors; owner-wide unread counts, bounded atomic POST /api/v1/notifications/read and DELETE /api/v1/notifications/:id/read with customer read/unread controls; domain-defined notification categories combined with unread cursor pagination and frontend category selection preserving owner isolation; all/unread/read notification status views combined with category pagination and backward-compatible legacy unread filtering; atomic bounded owner-scoped bulk mark-unread with deterministic locks and frontend displayed-read selection; inclusive India event-date ranges combined with category/read-state pagination and frontend apply/clear controls",
     "dataOwnership": "notifications messages/read state; reporting source events and consumer deliveries",
     "permissions": "Owner-only inbox; support grant and fresh MFA for delivery recovery",
     "transactionRules": "Row-locked database consumer; message and acknowledgment atomic; unique event deduplication; five-attempt backoff; audited replay",
@@ -16621,7 +16751,11 @@
       "tests/support-operations.test.ts: Customer-visible staff replies",
       "tests/support-assignment.test.ts: Supervisor assignment notices",
       "tests/notifications.test.ts: Notification paging preserves microsecond boundaries",
-      "tests/notifications.test.ts: Inbox bulk read is atomic, bounded and owner scoped while new arrivals remain unread"
+      "tests/notifications.test.ts: Inbox bulk read is atomic, bounded and owner scoped while new arrivals remain unread",
+      "tests/notifications.test.ts: Notification categories preserve unread pagination and account isolation",
+      "tests/notifications.test.ts: Notification read-only views combine with categories and retain legacy unread compatibility",
+      "tests/notifications.test.ts: Bulk mark-unread validates ownership atomically and changes only selected notifications",
+      "tests/notifications.test.ts: Notification date ranges use inclusive India event dates with filtered pagination"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "local_database_http_verified_not_browser",
@@ -16636,14 +16770,26 @@
       "docs/evidence/inbox-precision-full-suite.txt",
       "docs/architecture/adr-039-inbox-cursor-precision.md",
       "docs/evidence/inbox-actions-full-suite.txt",
-      "docs/architecture/adr-049-inbox-actions.md"
+      "docs/architecture/adr-049-inbox-actions.md",
+      "docs/evidence/notification-categories-full-suite.txt",
+      "docs/architecture/adr-079-notification-categories.md",
+      "docs/evidence/notification-status-full-suite.txt",
+      "docs/architecture/adr-080-notification-read-filters.md",
+      "docs/evidence/notification-bulk-unread-full-suite.txt",
+      "docs/architecture/adr-081-bulk-unread-notifications.md",
+      "docs/evidence/notification-dates-full-suite.txt",
+      "docs/architecture/adr-082-notification-date-ranges.md"
     ],
     "dependencies": [
       "Browser acceptance; localized templates; email/SMS/push; reminders; retention/account deletion; full event families; production observability",
       "Support notification browser acceptance; external reply delivery and assignment notice browser acceptance remains open",
       "Assignment notice browser acceptance; external delivery and self-claim/reminder policy remain open",
       "Inbox browser/error-state/accessibility acceptance; approved retention policy",
-      "Inbox read-state actions implemented; browser/accessibility/load acceptance, live badges, retention and external channels remain open"
+      "Inbox read-state actions implemented; browser/accessibility/load acceptance, live badges, retention and external channels remain open",
+      "Notification categories implemented; external delivery, load and browser/navigation/accessibility acceptance remain open",
+      "Read-status views implemented; external delivery, load and browser/accessibility acceptance remain open",
+      "Bulk mark-unread implemented; external delivery, load and browser/multi-action/accessibility acceptance remain open",
+      "Notification date filtering implemented; external delivery, load and browser/accessibility acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -18167,7 +18313,7 @@
     "journey": "Filter case queues and navigate older cases",
     "frontendRoute": "/operations",
     "backendModule": "support",
-    "apiUseCase": "SupportOperations.queue; owner-scoped customer case keyset pagination and exact conversation navigation; bounded customer-visible conversation pages with owner/case-scoped cursors; audited bounded staff detail message pages with actor/case-scoped cursors; exact PostgreSQL microsecond boundaries for owner-scoped notification UUID cursors; GET /admin/providers stable creation-time/UUID pagination and kind filters with URL-based admin navigation; GET /admin/listings paginated review queue with listing-type filters, dedicated /admin/listings UI and inline versioned review decisions; owner invitation history with exact timestamp/UUID cursor pagination, current MFA/ownership checks and First/Previous/Next frontend controls; authenticated-contact recipient invitation pages with exact cursors, pending/unexpired filtering and frontend First/Previous/Next navigation; independent staff member UUID cursor pagination with bounded lists, current owner/MFA checks and separate frontend member/invitation navigation; owner invitation effective-status filters before pagination with authoritative expiry classification and frontend status selection preserving member position; owner member-role filters applied before pagination with independent invitation filtering and frontend member-role selection",
+    "apiUseCase": "SupportOperations.queue; owner-scoped customer case keyset pagination and exact conversation navigation; bounded customer-visible conversation pages with owner/case-scoped cursors; audited bounded staff detail message pages with actor/case-scoped cursors; exact PostgreSQL microsecond boundaries for owner-scoped notification UUID cursors; GET /admin/providers stable creation-time/UUID pagination and kind filters with URL-based admin navigation; GET /admin/listings paginated review queue with listing-type filters, dedicated /admin/listings UI and inline versioned review decisions; owner invitation history with exact timestamp/UUID cursor pagination, current MFA/ownership checks and First/Previous/Next frontend controls; authenticated-contact recipient invitation pages with exact cursors, pending/unexpired filtering and frontend First/Previous/Next navigation; independent staff member UUID cursor pagination with bounded lists, current owner/MFA checks and separate frontend member/invitation navigation; owner invitation effective-status filters before pagination with authoritative expiry classification and frontend status selection preserving member position; owner member-role filters applied before pagination with independent invitation filtering and frontend member-role selection; domain-defined notification categories combined with unread cursor pagination and frontend category selection preserving owner isolation; all/unread/read notification status views combined with category pagination and backward-compatible legacy unread filtering; inclusive India event-date ranges combined with category/read-state pagination and frontend apply/clear controls; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation",
     "dataOwnership": "support.cases",
     "permissions": "Current platform support permission and fresh MFA for every page",
     "transactionRules": "Read-only parameterized query; exact microsecond timestamp/UUID keyset; actor/filter-scoped cursor; live filter membership",
@@ -18183,7 +18329,17 @@
       "tests/provider-staff.test.ts: Recipient invitation pages reach older invitations without exposing other contacts or unavailable records",
       "tests/provider-staff.test.ts: Member pages preserve independent invitation cursors and authorized role actions",
       "tests/provider-staff.test.ts: Owner invitation filters paginate effective status without filtering members or leaking recipients",
-      "tests/provider-staff.test.ts: Member role filters paginate independently and reflect authorized role changes"
+      "tests/provider-staff.test.ts: Member role filters paginate independently and reflect authorized role changes",
+      "tests/notifications.test.ts: Notification categories preserve unread pagination and account isolation",
+      "tests/notifications.test.ts: Notification read-only views combine with categories and retain legacy unread compatibility",
+      "tests/notifications.test.ts: Notification date ranges use inclusive India event dates with filtered pagination",
+      "tests/request-scope.test.ts: delayed account/resource response invalidation",
+      "tests/favorites.test.ts: Favorite contracts preserve authentication, empty state and strict query validation",
+      "tests/help-search.test.ts: domain search, public HTTP validation/contracts and safe contextual result rendering",
+      "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview",
+      "tests/help-admin.test.ts: paginated real revisions, attribution, access rechecks, audit failure and safe explicit-load history rendering",
+      "tests/help-admin.test.ts: FAQ creation permission, concurrent retries, collision, publication, immutable receipts, rollback and draft form",
+      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
@@ -18212,7 +18368,25 @@
       "docs/evidence/invitation-filters-full-suite.txt",
       "docs/architecture/adr-074-invitation-status-filters.md",
       "docs/evidence/member-filters-full-suite.txt",
-      "docs/architecture/adr-075-member-role-filters.md"
+      "docs/architecture/adr-075-member-role-filters.md",
+      "docs/evidence/notification-categories-full-suite.txt",
+      "docs/architecture/adr-079-notification-categories.md",
+      "docs/evidence/notification-status-full-suite.txt",
+      "docs/architecture/adr-080-notification-read-filters.md",
+      "docs/evidence/notification-dates-full-suite.txt",
+      "docs/architecture/adr-082-notification-date-ranges.md",
+      "docs/evidence/favorites-recovery-full-suite.txt",
+      "docs/architecture/adr-083-favorites-request-recovery.md",
+      "docs/evidence/help-search-full-suite.txt",
+      "docs/architecture/adr-084-searchable-help.md",
+      "docs/evidence/help-admin-full-suite.txt",
+      "docs/architecture/adr-085-help-administration.md",
+      "docs/evidence/help-history-full-suite.txt",
+      "docs/architecture/adr-086-help-revision-history.md",
+      "docs/evidence/help-creation-full-suite.txt",
+      "docs/architecture/adr-087-help-draft-creation.md",
+      "docs/evidence/help-list-full-suite.txt",
+      "docs/architecture/adr-088-help-administration-pagination.md"
     ],
     "dependencies": [
       "Browser/accessibility acceptance; browser history restoration; broader API pagination coverage",
@@ -18226,7 +18400,16 @@
       "Recipient invitation pagination implemented; member pagination, resend delivery, load and browser/accessibility acceptance remain open",
       "Member pagination implemented; invitation delivery/resend, load and browser/accessibility acceptance remain open",
       "Invitation status filtering implemented; delivery/resend, load and browser/filter/accessibility acceptance remain open",
-      "Member role filtering implemented; delivery/resend, load and browser/filter/accessibility acceptance remain open"
+      "Member role filtering implemented; delivery/resend, load and browser/filter/accessibility acceptance remain open",
+      "Notification categories implemented; external delivery, load and browser/navigation/accessibility acceptance remain open",
+      "Read-status views implemented; external delivery, load and browser/accessibility acceptance remain open",
+      "Notification date filtering implemented; external delivery, load and browser/accessibility acceptance remain open",
+      "Favorites recovery/contracts implemented; artist/team support and browser/sign-in/navigation/accessibility/load acceptance remain open",
+      "Public FAQ search implemented; administrative content lifecycle, localization, browser/accessibility and load acceptance remain open",
+      "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open",
+      "FAQ history inspection implemented; article creation, comparison/restore, approved retention, browser/accessibility and load acceptance remain open",
+      "FAQ creation implemented; deletion, destination editing, approval, creation-history UI, retention, pagination/load and browser/accessibility acceptance remain open",
+      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },

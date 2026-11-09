@@ -10,7 +10,11 @@ export function NotificationInbox({
   const [items, setItems] = useState<any[]>([]),
     [cursor, setCursor] = useState<string | null>(null),
     [next, setNext] = useState<string | null>(null),
-    [unread, setUnread] = useState(false),
+    [status, setStatus] = useState("all"),
+    [category, setCategory] = useState(""),
+    [fromDate, setFromDate] = useState(""),
+    [toDate, setToDate] = useState(""),
+    [dates, setDates] = useState({ fromDate: "", toDate: "" }),
     [revision, setRevision] = useState(0),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
@@ -19,6 +23,16 @@ export function NotificationInbox({
     [message, setMessage] = useState("");
   const actor = useRef(accountId);
   actor.current = accountId;
+  useEffect(() => {
+    setCategory("");
+    setFromDate("");
+    setToDate("");
+    setDates({ fromDate: "", toDate: "" });
+    setStatus("all");
+    setCursor(null);
+    setBusy(null);
+    setMessage("");
+  }, [accountId]);
   useEffect(() => {
     let active = true;
     setItems([]);
@@ -31,7 +45,10 @@ export function NotificationInbox({
       return;
     }
     const q = new URLSearchParams({
-      unread: String(unread),
+      status,
+      ...(dates.fromDate ? { fromDate: dates.fromDate } : {}),
+      ...(dates.toDate ? { toDate: dates.toDate } : {}),
+      ...(category ? { category } : {}),
       ...(cursor ? { after: cursor } : {}),
     });
     api(`/notifications?${q}`)
@@ -51,7 +68,7 @@ export function NotificationInbox({
     return () => {
       active = false;
     };
-  }, [accountId, cursor, unread, revision]);
+  }, [accountId, cursor, status, category, dates, revision]);
   async function mark(id: string, read: boolean) {
     const expected = accountId;
     setBusy(id);
@@ -74,20 +91,26 @@ export function NotificationInbox({
       if (actor.current === expected) setBusy(null);
     }
   }
-  async function markDisplayed() {
-    const ids = items.filter((n) => !n.read_at).map((n) => n.id),
+  async function markDisplayed(read: boolean) {
+    const ids = items
+        .filter((n) => (read ? !n.read_at : !!n.read_at))
+        .map((n) => n.id),
       expected = accountId;
     if (!ids.length) return;
-    setBusy("page");
+    setBusy(read ? "page-read" : "page-unread");
     setError("");
     setMessage("");
     try {
-      await api("/notifications/read", {
+      await api(read ? "/notifications/read" : "/notifications/unread", {
         method: "POST",
         body: JSON.stringify({ ids }),
       });
       if (actor.current === expected) {
-        setMessage("Displayed unread notifications marked read.");
+        setMessage(
+          read
+            ? "Displayed unread notifications marked read."
+            : "Displayed read notifications marked unread.",
+        );
         setRevision((r) => r + 1);
       }
     } catch (e) {
@@ -115,17 +138,89 @@ export function NotificationInbox({
         Updates describe events when they occurred. Open the linked record for
         its current status.
       </p>
-      <label>
-        <input
-          type="checkbox"
-          checked={unread}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (fromDate && toDate && fromDate > toDate) {
+            setError("From date must not follow to date.");
+            return;
+          }
+          setDates({ fromDate, toDate });
+          setCursor(null);
+        }}
+      >
+        <p>
+          Event dates use India time (Asia/Kolkata), including both selected
+          days. Delivery may occur later.
+        </p>
+        <label>
+          From date
+          <input
+            type="date"
+            value={fromDate}
+            disabled={loading || busy !== null}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </label>
+        <label>
+          To date
+          <input
+            type="date"
+            value={toDate}
+            disabled={loading || busy !== null}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+        </label>
+        <button disabled={loading || busy !== null}>Apply dates</button>
+        <button
+          type="button"
           disabled={loading || busy !== null}
-          onChange={(e) => {
-            setUnread(e.target.checked);
+          onClick={() => {
+            setFromDate("");
+            setToDate("");
+            setDates({ fromDate: "", toDate: "" });
             setCursor(null);
           }}
-        />{" "}
-        Unread only
+        >
+          Clear dates
+        </button>
+      </form>
+      {(dates.fromDate || dates.toDate) && (
+        <p>
+          Applied event dates (India time): {dates.fromDate || "Any start"} to{" "}
+          {dates.toDate || "Any end"}.
+        </p>
+      )}
+      <label>
+        Notification category
+        <select
+          value={category}
+          disabled={loading || busy !== null}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setCursor(null);
+          }}
+        >
+          <option value="">All updates</option>
+          <option value="booking">Bookings</option>
+          <option value="payment">Payments</option>
+          <option value="support">Support</option>
+        </select>
+      </label>
+      <label>
+        Read status
+        <select
+          value={status}
+          disabled={loading || busy !== null}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setCursor(null);
+          }}
+        >
+          <option value="all">All notifications</option>
+          <option value="unread">Unread</option>
+          <option value="read">Read</option>
+        </select>
       </label>
       <button
         disabled={loading || busy !== null}
@@ -140,11 +235,21 @@ export function NotificationInbox({
         disabled={
           loading || busy !== null || !!error || !items.some((n) => !n.read_at)
         }
-        onClick={() => void markDisplayed()}
+        onClick={() => void markDisplayed(true)}
       >
-        {busy === "page"
+        {busy === "page-read"
           ? "Saving…"
           : "Mark displayed unread notifications as read"}
+      </button>
+      <button
+        disabled={
+          loading || busy !== null || !!error || !items.some((n) => !!n.read_at)
+        }
+        onClick={() => void markDisplayed(false)}
+      >
+        {busy === "page-unread"
+          ? "Saving…"
+          : "Mark displayed read notifications as unread"}
       </button>
       {error && (
         <p className="notice" role="alert">
@@ -154,14 +259,21 @@ export function NotificationInbox({
       {loading ? (
         <p role="status">Loading notifications…</p>
       ) : error && items.length === 0 ? null : items.length === 0 ? (
-        <p>No {unread ? "unread " : ""}notifications on this page.</p>
+        <p>
+          No {status === "all" ? "" : `${status} `}notifications match these
+          filters on this page.
+        </p>
       ) : (
         items.map((n) => (
           <article className="organization" key={n.id}>
             <p>{n.read_at ? "Read" : "Unread"}</p>
             <h2>{n.title}</h2>
             <p>{n.body}</p>
-            <time>{new Date(n.occurred_at).toLocaleString("en-IN")}</time>
+            <time dateTime={n.occurred_at}>
+              {new Date(n.occurred_at).toLocaleString("en-IN", {
+                timeZone: "Asia/Kolkata",
+              })}
+            </time>
             <p>
               <a href={n.href}>
                 {n.href.startsWith("/cases?")

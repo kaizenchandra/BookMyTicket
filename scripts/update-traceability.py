@@ -472,6 +472,78 @@ for row in rows:
   row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/communication-preferences.test.ts: Customer consent history paginates real changes and excludes other accounts']))
   row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/consent-history-full-suite.txt','docs/architecture/adr-076-marketing-consent-history.md']))
   row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Customer consent history implemented; historical policy text, approved retention/deletion, external delivery and browser/session/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:PRO-04','BE:CUS-05','BE:CUS-06','BE:CUS-11']:
+  row['apiUseCase'] += '; owner-scoped saved-attendee consent metadata history with immutable rows, version pagination and purpose-specific customer panel excluding attendee details'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/profile.test.ts: Saved attendee consent history survives withdrawal without exposing private details','tests/saved-attendees-ui.test.ts: Consent history panels distinguish attendee storage from marketing permission']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/attendee-consent-history-full-suite.txt','docs/architecture/adr-077-attendee-consent-history.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Saved attendee consent history implemented; historical policy text, retention/deletion and browser/session/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:PRO-04','FE:PRO-08','BE:CUS-05','BE:CUS-06']:
+  row['apiUseCase'] += '; immutable consent wording snapshots for new marketing/attendee records, shared versioned form wording and explicit legacy-unavailable history display'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/profile.test.ts: retained attendee consent wording and legacy-null snapshots','tests/communication-preferences.test.ts: retained marketing wording and legacy-null snapshots','tests/saved-attendees-ui.test.ts: Consent wording renders retained text safely and identifies missing historical text']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/consent-wording-full-suite.txt','docs/architecture/adr-078-retained-consent-wording.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['New consent wording retention implemented; legacy text, retention/deletion, future policy rollout and browser/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ENG-04','BE:NTF-11','BE:API-05']:
+  row['apiUseCase'] += '; domain-defined notification categories combined with unread cursor pagination and frontend category selection preserving owner isolation'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/notifications.test.ts: Notification categories preserve unread pagination and account isolation']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/notification-categories-full-suite.txt','docs/architecture/adr-079-notification-categories.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Notification categories implemented; external delivery, load and browser/navigation/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ENG-04','BE:NTF-11','BE:API-05']:
+  row['apiUseCase'] += '; all/unread/read notification status views combined with category pagination and backward-compatible legacy unread filtering'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/notifications.test.ts: Notification read-only views combine with categories and retain legacy unread compatibility']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/notification-status-full-suite.txt','docs/architecture/adr-080-notification-read-filters.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Read-status views implemented; external delivery, load and browser/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ENG-04','BE:NTF-11']:
+  row['apiUseCase'] += '; atomic bounded owner-scoped bulk mark-unread with deterministic locks and frontend displayed-read selection'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/notifications.test.ts: Bulk mark-unread validates ownership atomically and changes only selected notifications']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/notification-bulk-unread-full-suite.txt','docs/architecture/adr-081-bulk-unread-notifications.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Bulk mark-unread implemented; external delivery, load and browser/multi-action/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ENG-04','BE:NTF-11','BE:API-05']:
+  row['apiUseCase'] += '; inclusive India event-date ranges combined with category/read-state pagination and frontend apply/clear controls'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/notifications.test.ts: Notification date ranges use inclusive India event dates with filtered pagination']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/notification-dates-full-suite.txt','docs/architecture/adr-082-notification-date-ranges.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Notification date filtering implemented; external delivery, load and browser/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:AUTH-12','FE:ENG-01','FE:ENG-02','BE:CUS-04','BE:API-05']:
+  row['apiUseCase'] += '; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/request-scope.test.ts: delayed account/resource response invalidation','tests/favorites.test.ts: Favorite contracts preserve authentication, empty state and strict query validation']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/favorites-recovery-full-suite.txt','docs/architecture/adr-083-favorites-request-recovery.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Favorites recovery/contracts implemented; artist/team support and browser/sign-in/navigation/accessibility/load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:SUP-C-01','BE:CAT-10','BE:API-05']:
+  row['apiUseCase'] += '; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-search.test.ts: domain search, public HTTP validation/contracts and safe contextual result rendering']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/help-search-full-suite.txt','docs/architecture/adr-084-searchable-help.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Public FAQ search implemented; administrative content lifecycle, localization, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ADM-UI-08','FE:SUP-C-01','BE:CAT-10','BE:API-05']:
+  row['apiUseCase'] += '; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/help-admin-full-suite.txt','docs/architecture/adr-085-help-administration.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ADM-UI-08','BE:CAT-10','BE:API-05']:
+  row['apiUseCase'] += '; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-admin.test.ts: paginated real revisions, attribution, access rechecks, audit failure and safe explicit-load history rendering']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/help-history-full-suite.txt','docs/architecture/adr-086-help-revision-history.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['FAQ history inspection implemented; article creation, comparison/restore, approved retention, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ADM-UI-08','BE:CAT-10','BE:API-05']:
+  row['apiUseCase'] += '; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-admin.test.ts: FAQ creation permission, concurrent retries, collision, publication, immutable receipts, rollback and draft form']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/help-creation-full-suite.txt','docs/architecture/adr-087-help-draft-creation.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['FAQ creation implemented; deletion, destination editing, approval, creation-history UI, retention, pagination/load and browser/accessibility acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:ADM-UI-08','BE:CAT-10','BE:API-05']:
+  row['apiUseCase'] += '; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/help-list-full-suite.txt','docs/architecture/adr-088-help-administration-pagination.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open']))
 Path('docs/requirements/traceability.json').write_text(json.dumps(rows,indent=2)+'\n')
 Path('docs/requirements/traceability.md').write_text(f'''# Traceability register
 

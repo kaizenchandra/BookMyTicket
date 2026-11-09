@@ -13,12 +13,16 @@ export type SavedAttendeesInput = {
 };
 export interface SavedAttendeesStore {
   get(owner: string): Promise<unknown>;
+  history(owner: string, beforeVersion?: number): Promise<unknown>;
   save(owner: string, input: SavedAttendeesInput): Promise<unknown>;
 }
 export class SavedAttendees {
   constructor(private store: SavedAttendeesStore) {}
   get(owner: string) {
     return this.store.get(owner);
+  }
+  history(owner: string, beforeVersion?: number) {
+    return this.store.history(owner, beforeVersion);
   }
   save(owner: string, input: SavedAttendeesInput) {
     if (input.consent !== input.items.length > 0)

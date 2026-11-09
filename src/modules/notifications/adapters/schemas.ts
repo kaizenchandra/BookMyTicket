@@ -1,10 +1,23 @@
 import { z } from "zod";
+const notificationDate = z.iso
+  .date()
+  .refine((v) => !v.startsWith("0000"), "Use a year from 0001 onward.");
 export const notificationFilters = z
   .object({
     after: z.uuid().optional(),
+    fromDate: notificationDate.optional(),
+    toDate: notificationDate.optional(),
     unread: z.enum(["true", "false"]).optional(),
+    status: z.enum(["all", "unread", "read"]).optional(),
+    category: z.enum(["booking", "payment", "support"]).optional(),
   })
-  .strict();
+  .strict()
+  .refine((v) => v.status === undefined || v.unread === undefined, {
+    message: "Use status or the legacy unread filter, not both.",
+  })
+  .refine((v) => !v.fromDate || !v.toDate || v.fromDate <= v.toDate, {
+    message: "From date must not follow to date.",
+  });
 export const notificationPage = z
   .object({
     unreadCount: z.number().int().nonnegative(),
@@ -40,4 +53,8 @@ export const notificationReadManyResponse = z
   .strict();
 export const notificationReadResponse = z
   .object({ id: z.uuid(), read_at: z.iso.datetime().nullable() })
+  .strict();
+
+export const notificationUnreadManyResponse = z
+  .object({ ids: z.array(z.uuid()).min(1).max(20), read: z.literal(false) })
   .strict();

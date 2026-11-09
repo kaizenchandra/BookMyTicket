@@ -1,3 +1,4 @@
+import { consentPolicies } from "../src/modules/profiles/domain/consent-policies.ts";
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID, randomBytes } from "node:crypto";
@@ -221,6 +222,7 @@ test("Customer consent history paginates real changes and excludes other account
       assert.equal(i.granted, i.preferenceVersion % 2 === 1);
       assert.equal(i.policyVersion, 1);
       assert.equal(i.purpose, "marketing_email");
+      assert.equal(i.policyText, consentPolicies.marketing_email.text);
     });
     assert(!JSON.stringify(first).includes(owner.id));
     assert.deepEqual(
@@ -256,6 +258,19 @@ test("Customer consent history paginates real changes and excludes other account
     await assert.rejects(
       pool.query(
         "DELETE FROM profiles.marketing_consent_history WHERE account_id=$1",
+        [owner.id],
+      ),
+      /immutable/,
+    );
+    await pool.query(
+      "INSERT INTO profiles.marketing_consent_history(account_id,purpose,policy_version,granted,preference_version) VALUES($1,'marketing_email',1,true,1)",
+      [other.id],
+    );
+    const legacy = (await app.inject({ url, headers: other.headers })).json();
+    assert.equal(legacy.items[0].policyText, null);
+    await assert.rejects(
+      pool.query(
+        "UPDATE profiles.marketing_consent_history SET policy_text='Rewritten' WHERE account_id=$1",
         [owner.id],
       ),
       /immutable/,

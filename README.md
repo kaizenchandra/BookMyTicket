@@ -3,7 +3,7 @@
 India/INR ticket-booking platform under active implementation. **Not a completed or production-ready platform.** No live payment, external email delivery, supplier, payout or cloud deployment has been verified. Local Mailpit SMTP signup/login is verified.
 
 
-Current local demo (**v0.73.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
+Current local demo (**v0.85.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
 
 The user-requested sample catalog contains **4 fictional movies, 4 events, 3 sports fixtures and 22 sessions**, clearly labeled DEMO. Choose a **Free session** to test actual reservation → confirmation → QR ticket → cancellation. Priced demo sessions cannot collect real payments. [Demo setup, operator sign-in and limits](docs/runbooks/cinema-sports-demo.md).
 
@@ -153,3 +153,27 @@ Version 0.71.0 adds owner invitation-status filters with correct server-time exp
 Version 0.72.0 adds member-role filters with independent invitation navigation and existing protected-owner controls. [Usage](docs/runbooks/member-role-filters.md).
 
 Version 0.73.0 adds private customer marketing-consent history with grants, withdrawals, policy versions and pagination beside communication preferences. [Usage](docs/runbooks/marketing-consent-history.md).
+
+Version 0.74.0 adds private saved-attendee consent history that remains available after withdrawal without exposing attendee details. [Usage](docs/runbooks/attendee-consent-history.md).
+
+Version 0.75.0 retains consent wording with new marketing and saved-attendee history entries and explicitly labels missing legacy wording. [Usage](docs/runbooks/retained-consent-wording.md).
+
+Version 0.76.0 adds booking, payment and support notification filters combined with unread views and pagination. [Usage](docs/runbooks/notification-categories.md).
+
+Version 0.77.0 adds All/Unread/Read notification views combined with categories and pagination, preserving legacy unread API queries. [Usage](docs/runbooks/notification-read-filters.md).
+
+Version 0.78.0 adds atomic Mark displayed read notifications as unread, limited to the current page. [Usage](docs/runbooks/bulk-unread-notifications.md).
+
+Version 0.79.0 adds inclusive India event-date filters to the notification inbox and API, combined with category, read status and pagination. [Usage](docs/runbooks/notification-date-ranges.md).
+
+Version 0.80.0 guards Favorites against stale account/resource responses, binds sign-in save intent to its original resource, and adds explicit retrieval/state contracts and retry states. [Usage and limits](docs/runbooks/favorites-recovery.md).
+
+Version 0.81.0 adds [searchable Help](http://127.0.0.1:3101/help), public FAQ keyword/topic search and contextual booking/payment help links. Six versioned articles are maintained through code review; administrative editing remains open. [Usage](docs/runbooks/help-search.md).
+
+Version 0.82.0 adds [Help administration](http://127.0.0.1:3101/admin/help) for authorized moderation staff: preview, edit and publish/unpublish existing FAQ answers with version checks, durable retries and audit records. Public Help reads PostgreSQL content. [Usage](docs/runbooks/help-administration.md).
+
+Version 0.83.0 adds protected FAQ revision history with prior content, staff attribution, reasons and stable pagination. Loading history keeps the current editor draft. [Usage](docs/runbooks/help-revision-history.md).
+
+Version 0.84.0 adds unpublished FAQ draft creation with controlled internal destinations, unique article IDs, retained retry requests and immutable creation receipts. Review and publish drafts through the existing editor. [Usage](docs/runbooks/help-draft-creation.md).
+
+Version 0.85.0 adds FAQ administration search, publication filters and twenty-item cursor pages. API clients must follow nextCursor for the full collection. [Usage](docs/runbooks/help-administration-list.md).

@@ -1,3 +1,5 @@
+import { HelpAdministration } from "./features/help-editor.tsx";
+import { HelpCenter } from "./features/help.tsx";
 import { OrganizationCreationForm } from "./features/organization-creation.tsx";
 import { ListingReviewHistoryPage } from "./features/listing-review-history.tsx";
 import { ListingReviewQueue } from "./features/listing-review-queue.tsx";
@@ -351,6 +353,8 @@ function App() {
           <BookingHistory key={me?.id ?? "anonymous"} />
         ) : route === "/scanner" ? (
           <Scanner key={me?.id ?? "anonymous"} />
+        ) : route === "/admin/help" ? (
+          <HelpAdministration key={me?.id ?? "anonymous"} />
         ) : route === "/admin/audit" ? (
           <AuditHistory key={me?.id ?? "anonymous"} />
         ) : route === "/admin/pricing" ? (
@@ -370,32 +374,7 @@ function App() {
         ) : route === "/cases" ? (
           <Cases key={me?.id ?? "anonymous"} />
         ) : route === "/help" ? (
-          <section className="reading">
-            <p className="eyebrow">HELP & ACCESSIBILITY</p>
-            <h1>How can we help?</h1>
-            <h2>Payment uncertainty</h2>
-            <p>
-              A payment callback is not a booking confirmation. If a payment is
-              pending, retrieve its status before making another payment.
-            </p>
-            <h2>Booking availability</h2>
-            <p>
-              Seats are held only after the server confirms a reservation. The
-              countdown uses server time; refreshing does not extend it.
-            </p>
-            <h2>Accessibility</h2>
-            <p>
-              Use keyboard navigation and the seat list to select places. Light
-              and Dark themes are available from the header.
-            </p>
-            <a className="primary" href="/cases">
-              Contact support
-            </a>
-            <p>
-              Do not include OTPs or payment secrets in support messages. No
-              response estimate is configured.
-            </p>
-          </section>
+          <HelpCenter />
         ) : (
           <Empty title="This page is not available">
             Return to <a href="/explore">discovery</a> to browse published
@@ -429,6 +408,7 @@ function App() {
           <a href="/notifications">Notifications</a>
           <a href="/admin">Administration</a>
           <a href="/operations">Support & finance</a>
+          <a href="/admin/help">Help content administration</a>
           <a href="/scanner">Admission</a>
         </div>
         <small>Development build · Live sales are not enabled</small>

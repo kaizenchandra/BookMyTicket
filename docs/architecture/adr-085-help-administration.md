@@ -1,0 +1,13 @@
+# ADR 085: Versioned Help content administration
+
+This increment advances FE:ADM-UI-08, FE:SUP-C-01, BE:CAT-10 and BE:API-05. It supersedes ADR 084's code-only runtime publication model. The six initial answers are installed by migration 068 into Catalog-owned PostgreSQL tables. The old content adapter remains a bootstrap/test fixture; editing it does not change deployed answers.
+
+Public Help now reads only published database articles through the existing HelpContent port. Authorized staff can list existing articles and edit question, answer, topic and publication state through HelpEditor. IDs and action destinations remain fixed. Creating/deleting articles, editable links, scheduling, separate drafts/approval, history browsing and broader banner/collection/policy management remain open.
+
+GET /api/v1/admin/help and PUT /api/v1/admin/help/:id require authenticated current MFA plus platform moderate permission. The adapter rechecks active account and permission through Identity's contract inside each transaction, including retries. List reads are audited. Saves lock one article, validate expected version, update it, insert an immutable receipt containing the previous snapshot and reason, and write audit metadata in one transaction. Any receipt/audit failure rolls back the update.
+
+Each article/input-version pair is a durable business key. A fingerprint covers normalized editable fields and reason. Only the original actor with an identical fingerprint can replay a successful save. Replay returns its original output version without rewriting current content, so it cannot resurrect an article unpublished later. Changed payloads/actors and stale versions conflict. Receipts are immutable; approved retention is still required. No external network calls occur inside the transaction.
+
+The /admin/help editor provides text preview and explicit publication state, displays current version, requires a reason and retains the original request after failure. New edits are disabled until retry or explicit draft discard/reload. Successful save reloads current content rather than treating a historical receipt as the latest article. Account changes remount the workspace; delayed unmounted actions are ignored.
+
+Database/API tests cover concurrent identical saves, actor/payload conflicts, public publish/unpublish visibility, replay after unpublish, permission/MFA checks, revoked permission on direct adapter retry, immutable receipts and audit rollback. Server-rendered UI tests cover preview, publication wording, reason and escaped content. Browser/editor/retry/accessibility/load acceptance remains open. Public search currently scans the small published collection in memory; growth requires pagination/search indexing and load validation.

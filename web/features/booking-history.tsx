@@ -47,6 +47,9 @@ export function BookingHistory() {
     <section className="reading">
       <p className="eyebrow">YOUR EXPERIENCES</p>
       <h1>My bookings</h1>
+      <p>
+        <a href="/help?topic=booking">Help with bookings and tickets</a>
+      </p>
       <form
         onSubmit={(e) => {
           e.preventDefault();

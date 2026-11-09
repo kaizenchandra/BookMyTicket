@@ -1,3 +1,4 @@
+import { consentPolicies } from "../../src/modules/profiles/domain/consent-policies.ts";
 import { MarketingConsentHistory } from "./marketing-consent-history.tsx";
 import { useEffect, useState } from "react";
 import { api } from "../api.ts";
@@ -96,8 +97,7 @@ export function CommunicationPreferences() {
             disabled={!saved || busy}
             onChange={(event) => setMarketing(event.target.checked)}
           />{" "}
-          I agree to receive optional offers and recommendations by email. I can
-          withdraw this permission here at any time.
+          {consentPolicies.marketing_email.text}
         </label>
         <p>
           Marketing email consent, version 1. Saving permission does not

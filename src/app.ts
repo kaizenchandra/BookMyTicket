@@ -1,3 +1,7 @@
+import { Help, HelpEditor } from "./modules/catalog/application/help.ts";
+import { PostgresHelp } from "./modules/catalog/adapters/help-postgres.ts";
+import { helpFilters, helpId, helpEdit, helpHistoryFilters, helpCreation, helpAdminFilters } from "./modules/catalog/adapters/help-schema.ts";
+import { favoriteFilters } from "./modules/profiles/adapters/favorites-schema.ts";
 import { PostgresActiveAccount } from "./modules/identity/adapters/active.ts";
 import { OrganizationCreation } from "./modules/providers/application/creation.ts";
 import { PostgresOrganizationCreation } from "./modules/providers/adapters/creation.ts";
@@ -324,6 +328,33 @@ export async function buildApp() {
     paymentsAvailable: collection.available(),
     releaseStatus: "implementation_in_progress",
   }));
+  const helpStore = new PostgresHelp(new PostgresStaffAuthorization(), new PostgresAudit());
+  const help = new Help(helpStore), helpEditor = new HelpEditor(helpStore);
+  app.post("/api/v1/admin/help", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return helpEditor.create(actor.id, helpCreation.parse(req.body));
+  });
+  app.get("/api/v1/admin/help", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return helpEditor.list(actor.id, helpAdminFilters.parse(req.query));
+  });
+  app.get("/api/v1/admin/help/:id/history", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    const filters = helpHistoryFilters.parse(req.query);
+    return helpEditor.history(actor.id, helpId.parse((req.params as {id:string}).id), filters.beforeVersion === undefined ? undefined : Number(filters.beforeVersion));
+  });
+  app.put("/api/v1/admin/help/:id", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return helpEditor.save(actor.id, helpId.parse((req.params as {id:string}).id), helpEdit.parse(req.body));
+  });
+  app.get("/api/v1/help", async (req) => {
+    const filters = helpFilters.parse(req.query);
+    return help.search(filters.q, filters.topic);
+  });
   app.get("/api/v1/catalog", async (req) =>
     discovery.search(catalogFilters.parse(req.query)),
   );
@@ -423,10 +454,7 @@ export async function buildApp() {
   const favorites = new Favorites(new PostgresFavorites(), catalog);
   app.get("/api/v1/favorites", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
-    const query = z
-      .object({ after: uuid.optional() })
-      .strict()
-      .parse(req.query);
+    const query = favoriteFilters.parse(req.query);
     return favorites.list(actor.id, query.after);
   });
   app.get("/api/v1/favorites/:id", async (req) =>
@@ -470,6 +498,14 @@ export async function buildApp() {
     ),
   );
   const savedAttendees = new SavedAttendees(new PostgresSavedAttendees());
+  app.get("/api/v1/profile/attendees/consent-history", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    const filters = consentHistoryFilters.parse(req.query);
+    return savedAttendees.history(
+      actor.id,
+      filters.beforeVersion ? Number(filters.beforeVersion) : undefined,
+    );
+  });
   app.get("/api/v1/profile/attendees", async (req) =>
     savedAttendees.get((await identity.authenticate(req.cookies.session)).id),
   );
@@ -1336,7 +1372,21 @@ export async function buildApp() {
   app.get("/api/v1/notifications", async (req) => {
     const actor = await identity.authenticate(req.cookies.session),
       q = notificationFilters.parse(req.query);
-    return notifications.list(actor.id, q.after, q.unread === "true");
+    return notifications.list(
+      actor.id,
+      q.after,
+      q.status === "unread" || q.unread === "true",
+      q.category,
+      q.status === "read",
+      { fromDate: q.fromDate, toDate: q.toDate },
+    );
+  });
+  app.post("/api/v1/notifications/unread", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    return notifications.unreadMany(
+      actor.id,
+      notificationReadMany.parse(req.body).ids,
+    );
   });
   app.post("/api/v1/notifications/read", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);

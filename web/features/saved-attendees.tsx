@@ -1,3 +1,5 @@
+import { consentPolicies } from "../../src/modules/profiles/domain/consent-policies.ts";
+import { ConsentHistory } from "./consent-history.tsx";
 import { useEffect, useState } from "react";
 import { api, ApiError } from "../api.ts";
 import type { SavedAttendee } from "../../src/modules/profiles/application/saved-attendees.ts";
@@ -157,8 +159,7 @@ export function SavedAttendeesEditor() {
                 checked={consent}
                 onChange={(e) => setConsent(e.target.checked)}
               />
-              I consent to storing these details in my account for reuse in
-              future booking forms (policy version 1).
+              {consentPolicies.saved_attendees.text}
             </label>
           )}
           <button
@@ -193,6 +194,13 @@ export function SavedAttendeesEditor() {
           {saved ? "Discard draft and reload list" : "Retry loading attendees"}
         </button>
       )}
+      <ConsentHistory
+        revision={saved?.version ?? 0}
+        endpoint="/profile/attendees/consent-history"
+        title="Saved attendee consent history"
+        purpose="Saved attendee storage"
+        description="Consent recorded when saving attendee shortcuts or withdrawing permission. History contains no attendee names or contact details. Withdrawal deletes saved shortcuts; existing booking records remain unchanged."
+      />
     </section>
   );
 }

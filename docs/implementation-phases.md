@@ -182,3 +182,39 @@ Implemented owner member-role filtering before pagination and frontend selection
 
 ### Customer consent history progress (0.73.0)
 Implemented owner-scoped marketing consent history, immutable records, version pagination and an explicit-load customer panel distinguishing consent from communication delivery. Historical policy text, retention/deletion handling, browser/session/accessibility, external delivery and broader phases remain open. See progress.md and runbooks/marketing-consent-history.md.
+
+### Saved attendee consent history progress (0.74.0)
+Implemented owner-scoped immutable consent metadata history, version pagination and a customer panel excluding all attendee details, including after withdrawal. Historical policy text, retention/deletion handling, browser/session/accessibility and broader phases remain open. See progress.md and runbooks/attendee-consent-history.md.
+
+### Consent wording retention progress (0.75.0)
+Implemented immutable wording snapshots for new consent entries, shared versioned form text and explicit legacy-unavailable display. Legacy reconstruction, retention/deletion handling, future-version rollout, browser/accessibility and broader phases remain open. See progress.md and runbooks/retained-consent-wording.md.
+
+### Notification category progress (0.76.0)
+Implemented domain-defined category filtering combined with unread cursor pagination, owner isolation and frontend selection. External delivery, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/notification-categories.md.
+
+### Notification read-status progress (0.77.0)
+Implemented all/unread/read views with category pagination and legacy unread compatibility. External delivery, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/notification-read-filters.md.
+
+### Bulk unread notification progress (0.78.0)
+Implemented atomic bounded owner-scoped mark-unread and frontend displayed-page selection. External delivery, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/bulk-unread-notifications.md.
+
+### Notification date-range progress (0.79.0)
+Implemented inclusive India event-date ranges, combined server-side filtering and frontend apply/clear controls. External delivery, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/notification-date-ranges.md.
+
+### Favorites recovery progress (0.80.0)
+Implemented account/resource request invalidation, resource-bound sign-in save intent, list retry states and exact retrieval/state API contracts. Artist/team favorites, browser/sign-in/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/favorites-recovery.md.
+
+### Searchable help progress (0.81.0)
+Implemented public FAQ keyword/topic search, six versioned code-managed answers, searchable Help UI and contextual booking/payment links. Administrative FAQ editing/publication, localization, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/help-search.md.
+
+### Help administration progress (0.82.0)
+Implemented protected editing/publication of existing FAQ articles, preview, conflict/retry recovery, immutable receipts, audit and PostgreSQL public retrieval. New article creation, history browsing, draft/approval workflows, retention, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/help-administration.md.
+
+### FAQ history progress (0.83.0)
+Implemented audited staff revision-history retrieval, prior-content projection, version pagination and an explicit-load panel preserving editor drafts. Creation, comparison/restore, retention, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/help-revision-history.md.
+
+### FAQ creation progress (0.84.0)
+Implemented protected unpublished draft creation, internal destinations, unique article IDs, immutable retry receipts, audit and preview/recovery UI. Deletion, destination editing, creation-history display, approval, retention, pagination/load, browser/accessibility acceptance and broader phases remain open. See progress.md and runbooks/help-draft-creation.md.
+
+### FAQ list progress (0.85.0)
+Implemented bounded administration pages, ID/question search, publication filters and frontend list navigation that preserves active drafts. Public-search pagination, indexing/load, browser/accessibility acceptance and broader phases remain open. See progress.md and runbooks/help-administration-list.md.

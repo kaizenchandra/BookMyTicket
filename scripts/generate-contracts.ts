@@ -1,3 +1,5 @@
+import { helpFilters, helpResponse, helpEdit, helpEditorPage, helpSaved, helpHistoryFilters, helpHistoryPage, helpCreation, helpAdminFilters } from "../src/modules/catalog/adapters/help-schema.ts";
+import { favoriteFilters, favoritePage, favoriteState } from "../src/modules/profiles/adapters/favorites-schema.ts";
 import {
   organizationCreationInput,
   organizationCreationKey,
@@ -37,6 +39,7 @@ import {
 import {
   savedAttendeesInput,
   savedAttendeesResponse,
+  attendeeConsentHistoryPage,
 } from "../src/modules/profiles/adapters/saved-attendees-schema.ts";
 import {
   profileInput,
@@ -54,6 +57,7 @@ import {
   notificationFilters,
   notificationReadMany,
   notificationReadManyResponse,
+  notificationUnreadManyResponse,
   notificationReadResponse,
   notificationPage,
 } from "../src/modules/notifications/adapters/schemas.ts";
@@ -198,6 +202,7 @@ const requests: Record<string, unknown> = {
     z.object({ reason: z.string().trim().min(5).max(2000) }).strict(),
   ),
   "post /api/v1/notifications/read": z.toJSONSchema(notificationReadMany),
+  "post /api/v1/notifications/unread": z.toJSONSchema(notificationReadMany),
   "post /api/v1/notifications/{id}/read": z.toJSONSchema(z.object({}).strict()),
   "post /api/v1/organizations/{id}/invitations":
     z.toJSONSchema(invitationInput),
@@ -531,6 +536,19 @@ for (const [, method, raw] of source.matchAll(
       z.toJSONSchema(reviewQueueFilters).properties ?? {},
     ).map(([name, schema]) => ({ name, in: "query", required: false, schema }));
   }
+  if (
+    path === "/api/v1/profile/attendees/consent-history" &&
+    method === "get"
+  ) {
+    operation.responses["200"].content = {
+      "application/json": {
+        schema: z.toJSONSchema(attendeeConsentHistoryPage),
+      },
+    };
+    operation.parameters = Object.entries(
+      z.toJSONSchema(consentHistoryFilters).properties ?? {},
+    ).map(([name, schema]) => ({ name, in: "query", required: false, schema }));
+  }
   if (path === "/api/v1/profile/communications/history" && method === "get") {
     operation.responses["200"].content = {
       "application/json": { schema: z.toJSONSchema(consentHistoryPage) },
@@ -543,6 +561,43 @@ for (const [, method, raw] of source.matchAll(
     operation.responses["200"].content = {
       "application/json": { schema: z.toJSONSchema(profileResponse) },
     };
+  if (path === "/api/v1/admin/help/{id}/history" && method === "get") {
+    operation.responses["200"].content = {"application/json": {schema: z.toJSONSchema(helpHistoryPage)}};
+    operation.parameters = [...(operation.parameters ?? []), ...Object.entries(z.toJSONSchema(helpHistoryFilters).properties ?? {}).map(([name,schema])=>({name,in:"query",required:false,schema}))];
+  }
+  if (path === "/api/v1/admin/help" && method === "post") {
+    operation.requestBody = {required:true, content:{"application/json":{schema:z.toJSONSchema(helpCreation)}}};
+    operation.responses["200"].content = {"application/json":{schema:z.toJSONSchema(helpSaved)}};
+  }
+  if (path === "/api/v1/admin/help" && method === "get") {
+    operation.responses["200"].content = {"application/json": {schema: z.toJSONSchema(helpEditorPage)}};
+    operation.parameters = Object.entries(z.toJSONSchema(helpAdminFilters, {io:"input"}).properties ?? {}).map(([name,schema])=>({name,in:"query",required:false,schema}));
+  }
+  if (path === "/api/v1/admin/help/{id}" && method === "put") {
+    operation.requestBody = {required: true, content: {"application/json": {schema: z.toJSONSchema(helpEdit)}}};
+    operation.responses["200"].content = {"application/json": {schema: z.toJSONSchema(helpSaved)}};
+  }
+  if (path === "/api/v1/help" && method === "get") {
+    operation.responses["200"].content = {
+      "application/json": { schema: z.toJSONSchema(helpResponse) },
+    };
+    operation.parameters = Object.entries(
+      z.toJSONSchema(helpFilters, { io: "input" }).properties ?? {},
+    ).map(([name, schema]) => ({ name, in: "query", required: false, schema }));
+  }
+  if (path === "/api/v1/favorites" && method === "get") {
+    operation.responses["200"].content = {
+      "application/json": { schema: z.toJSONSchema(favoritePage) },
+    };
+    operation.parameters = Object.entries(
+      z.toJSONSchema(favoriteFilters).properties ?? {},
+    ).map(([name, schema]) => ({ name, in: "query", required: false, schema }));
+  }
+  if (path === "/api/v1/favorites/{id}" && ["get", "put", "delete"].includes(method)) {
+    operation.responses["200"].content = {
+      "application/json": { schema: z.toJSONSchema(favoriteState) },
+    };
+  }
   if (path === "/api/v1/venue-favorites" && method === "get") {
     operation.responses["200"].content = {
       "application/json": { schema: z.toJSONSchema(venueFavoritePage) },
@@ -567,6 +622,12 @@ for (const [, method, raw] of source.matchAll(
       })),
     ];
   }
+  if (path === "/api/v1/notifications/unread" && method === "post")
+    operation.responses["200"].content = {
+      "application/json": {
+        schema: z.toJSONSchema(notificationUnreadManyResponse),
+      },
+    };
   if (path === "/api/v1/notifications/read" && method === "post")
     operation.responses["200"].content = {
       "application/json": {

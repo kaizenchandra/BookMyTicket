@@ -1,0 +1,11 @@
+# ADR 087: Retry-safe FAQ draft creation
+
+FE:ADM-UI-08 and BE:CAT-10 are advanced by creating FAQ drafts through the Catalog HelpEditor application port. POST /api/v1/admin/help requires current staff MFA and platform moderation permission; active permission is rechecked in the database transaction, including replays.
+
+A caller chooses a unique lowercase article slug and supplies question, answer, topic, one supported action destination and a reason. Domain-owned destinations map to existing bookings, discovery, profile and support routes. Arbitrary links, supplied publication state and additional fields are rejected. Creation always produces unpublished version one; review and publication use the existing versioned editor.
+
+The article ID is the durable business uniqueness key. Insert-on-conflict plus article row locking serializes simultaneous creation attempts. An immutable creation receipt binds that ID to the original actor and normalized payload fingerprint, retains the initial snapshot/reason, and commits atomically with the article and audit. Matching retries return the original version-one receipt without modifying current content. Changed payloads, other actors and IDs occupied by seeded articles conflict. There is no key expiry or implicit duplicate creation. Permission revocation prevents replay.
+
+The UI separates creation from article selection, previews content/destination, explains unpublished status and retains the original request after uncertain failure. Pending attempts disable edits and offer exact retry or explicit discard. Success reloads current articles, so a historical creation result is not mistaken for current publication state. Account transitions remount the workspace.
+
+Migration 069 adds immutable creation receipts. Edit-history inspection still shows edits, not creation events; creation provenance is retained in receipts/audit. Tests cover validation, MFA/access controls, six concurrent requests, conflicts, initial privacy, later publication/unpublication, replay safety, immutable receipts, audit rollback and revoked permissions. Article deletion, editing destinations, creation-history UI, separate approval, retention, pagination/load and browser/accessibility acceptance remain open.

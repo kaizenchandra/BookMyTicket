@@ -1,3 +1,5 @@
+import { RequestScope } from "../request-scope.ts";
+import type { FavoritePage } from "../../src/modules/profiles/adapters/favorites-schema.ts";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api.ts";
 export function SaveListing({
@@ -11,31 +13,38 @@ export function SaveListing({
   accountId?: string;
   signIn: () => void;
 }) {
-  const [saved, setSaved] = useState<boolean | null>(null),
+  const [savedValue, setSaved] = useState<boolean | null>(null),
+    [statusScope, setStatusScope] = useState(""),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
-    [pending, setPending] = useState(false),
+    [pending, setPending] = useState<string | null>(null),
     [revision, setRevision] = useState(0);
-  const actor = useRef(accountId);
-  actor.current = accountId;
+  const scope = useRef(new RequestScope()).current;
+  const resource = JSON.stringify([collection, id]);
+  const scopeKey = JSON.stringify([accountId, collection, id]);
+  scope.update(scopeKey);
+  const saved = statusScope === scopeKey ? savedValue : null;
+  useEffect(() => () => scope.invalidate(), [scope]);
   useEffect(() => {
-    let current = true;
+    const current = scope.capture();
+    setBusy(false);
     setSaved(null);
     setMessage("");
     if (accountId)
       api<{ saved: boolean }>(`/${collection}/${id}`)
         .then((r) => {
-          if (current) setSaved(r.saved);
+          if (current()) {
+            setSaved(r.saved);
+            setStatusScope(scopeKey);
+          }
         })
         .catch((e) => {
-          if (current) setMessage(e.message);
+          if (current()) setMessage(e.message);
         });
-    return () => {
-      current = false;
-    };
+    return () => scope.invalidate();
   }, [id, accountId, collection, revision]);
   async function change(save: boolean) {
-    const expected = accountId;
+    const current = scope.capture();
     setBusy(true);
     setMessage("");
     try {
@@ -43,22 +52,23 @@ export function SaveListing({
         method: save ? "PUT" : "DELETE",
         ...(save ? { body: "{}" } : {}),
       });
-      if (actor.current === expected) {
+      if (current()) {
         setSaved(save);
         setMessage(save ? "Saved to Favorites." : "Removed from Favorites.");
       }
     } catch (e) {
-      if (actor.current === expected) setMessage((e as Error).message);
+      if (current()) setMessage((e as Error).message);
     } finally {
-      setBusy(false);
+      if (current()) setBusy(false);
     }
   }
   useEffect(() => {
-    if (pending && accountId && saved !== null && !busy) {
-      setPending(false);
+    if (pending && pending !== resource) setPending(null);
+    if (pending === resource && accountId && saved !== null && !busy) {
+      setPending(null);
       if (!saved) void change(true);
     }
-  }, [pending, accountId, saved, busy]);
+  }, [pending, resource, accountId, saved, busy]);
   return (
     <div>
       <button
@@ -66,7 +76,7 @@ export function SaveListing({
         disabled={busy || (!!accountId && saved === null)}
         onClick={() => {
           if (!accountId) {
-            setPending(true);
+            setPending(resource);
             signIn();
           } else void change(!saved);
         }}
@@ -86,16 +96,7 @@ export function SaveListing({
     </div>
   );
 }
-type Favorite = {
-  listingId: string;
-  listing: null | {
-    id: string;
-    title: string;
-    kind: string;
-    city: string;
-    poster_url: string | null;
-  };
-};
+type Favorite = FavoritePage["items"][number];
 export function FavoritesPage({
   accountId,
   signIn,
@@ -107,36 +108,47 @@ export function FavoritesPage({
     [next, setNext] = useState<string | null>(null),
     [loading, setLoading] = useState(true),
     [message, setMessage] = useState(""),
+    [error, setError] = useState(""),
+    [loadedScope, setLoadedScope] = useState(""),
     [busy, setBusy] = useState<string | null>(null),
     [revision, setRevision] = useState(0);
   const cursor = new URLSearchParams(location.search).get("after");
+  const scope = useRef(new RequestScope()).current;
+  const scopeKey = JSON.stringify([accountId, cursor, revision]);
+  scope.update(scopeKey);
+  const awaitingPage = loading || loadedScope !== scopeKey;
+  useEffect(() => () => scope.invalidate(), [scope]);
   useEffect(() => {
-    let current = true;
+    const current = scope.capture();
     setItems([]);
+    setNext(null);
+    setBusy(null);
+    setError("");
     setMessage("");
     setLoading(true);
     if (!accountId) {
       setLoading(false);
       return;
     }
-    api<{ items: Favorite[]; nextCursor: string | null }>(
+    api<FavoritePage>(
       `/favorites${cursor ? "?after=" + encodeURIComponent(cursor) : ""}`,
     )
       .then((r) => {
-        if (current) {
+        if (current()) {
           setItems(r.items);
           setNext(r.nextCursor);
         }
       })
       .catch((e) => {
-        if (current) setMessage(e.message);
+        if (current()) setError(e.message);
       })
       .finally(() => {
-        if (current) setLoading(false);
+        if (current()) {
+          setLoading(false);
+          setLoadedScope(scopeKey);
+        }
       });
-    return () => {
-      current = false;
-    };
+    return () => scope.invalidate();
   }, [accountId, cursor, revision]);
   if (!accountId)
     return (
@@ -150,15 +162,18 @@ export function FavoritesPage({
       </section>
     );
   async function remove(id: string) {
+    const current = scope.capture();
     setBusy(id);
+    setMessage("");
     try {
       await api(`/favorites/${id}`, { method: "DELETE" });
+      if (!current()) return;
       setItems((old) => old.filter((f) => f.listingId !== id));
       setMessage("Removed from Favorites.");
     } catch (e) {
-      setMessage((e as Error).message);
+      if (current()) setMessage((e as Error).message);
     } finally {
-      setBusy(null);
+      if (current()) setBusy(null);
     }
   }
   return (
@@ -168,14 +183,15 @@ export function FavoritesPage({
       <p>
         <a href="/favorites/venues">Saved venues</a>
       </p>
-      {message && (
+      {loadedScope === scopeKey && message && (
         <p className="notice" role="status">
           {message}
         </p>
       )}
-      {loading ? (
+      {loadedScope === scopeKey && error && <p role="alert">{error}</p>}
+      {awaitingPage ? (
         <p role="status">Loading favorites…</p>
-      ) : !items.length ? (
+      ) : error ? null : !items.length ? (
         <p>
           No saved listings on this page. Browse Movies, Events or Sports to
           save one.
@@ -211,7 +227,7 @@ export function FavoritesPage({
       )}
       <nav aria-label="Favorite pages">
         {cursor && <a href="/favorites">First page</a>}{" "}
-        {next && (
+        {!awaitingPage && !error && next && (
           <a href={`/favorites?after=${encodeURIComponent(next)}`}>Next page</a>
         )}
       </nav>
@@ -219,7 +235,7 @@ export function FavoritesPage({
         disabled={loading || busy !== null}
         onClick={() => setRevision((r) => r + 1)}
       >
-        Refresh favorites
+        {error ? "Retry favorites" : "Refresh favorites"}
       </button>
     </section>
   );

@@ -1,3 +1,7 @@
+import {
+  notificationCategories,
+  type NotificationCategory,
+} from "../domain/template.ts";
 import { randomUUID } from "node:crypto";
 import {
   pool,
@@ -6,7 +10,10 @@ import {
 } from "../../../shared/database.ts";
 import { AppError } from "../../../shared/errors.ts";
 import type { DurableRecord } from "../../reporting/contracts/index.ts";
-import type { NotificationStore } from "../application/inbox.ts";
+import type {
+  NotificationDateRange,
+  NotificationStore,
+} from "../application/inbox.ts";
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export class PostgresNotifications implements NotificationStore {
   async deliver(
@@ -50,7 +57,14 @@ export class PostgresNotifications implements NotificationStore {
       ],
     );
   }
-  async list(owner: string, after?: string, unread = false) {
+  async list(
+    owner: string,
+    after?: string,
+    unread = false,
+    category?: NotificationCategory,
+    readOnly = false,
+    dates: NotificationDateRange = {},
+  ) {
     let cursor: { created_at: string; id: string } | undefined;
     if (after) {
       cursor = (
@@ -68,8 +82,17 @@ export class PostgresNotifications implements NotificationStore {
         );
     }
     const result = await pool.query(
-      "SELECT id,title,body,href,occurred_at,created_at,read_at FROM notifications.messages WHERE owner_id=$1 AND (NOT $2::boolean OR read_at IS NULL) AND ($3::timestamptz IS NULL OR (created_at,id)<($3,$4::uuid)) ORDER BY created_at DESC,id DESC LIMIT 21",
-      [owner, unread, cursor?.created_at ?? null, cursor?.id ?? null],
+      "SELECT id,title,body,href,occurred_at,created_at,read_at FROM notifications.messages WHERE owner_id=$1 AND (NOT $2::boolean OR read_at IS NULL) AND (NOT $6::boolean OR read_at IS NOT NULL) AND ($5::text[] IS NULL OR template=ANY($5)) AND ($7::date IS NULL OR occurred_at >= ($7::date::timestamp AT TIME ZONE 'Asia/Kolkata')) AND ($8::date IS NULL OR occurred_at < (($8::date + 1)::timestamp AT TIME ZONE 'Asia/Kolkata')) AND ($3::timestamptz IS NULL OR (created_at,id)<($3,$4::uuid)) ORDER BY created_at DESC,id DESC LIMIT 21",
+      [
+        owner,
+        unread,
+        cursor?.created_at ?? null,
+        cursor?.id ?? null,
+        category ? notificationCategories[category] : null,
+        readOnly,
+        dates.fromDate ?? null,
+        dates.toDate ?? null,
+      ],
     );
     const count = await pool.query(
       "SELECT count(*)::int AS count FROM notifications.messages WHERE owner_id=$1 AND read_at IS NULL",
@@ -91,7 +114,13 @@ export class PostgresNotifications implements NotificationStore {
       throw new AppError("NOT_FOUND", "Notification not found.", 404);
     return result.rows[0];
   }
-  async readMany(owner: string, ids: string[]) {
+  readMany(owner: string, ids: string[]) {
+    return this.setReadMany(owner, ids, true);
+  }
+  unreadMany(owner: string, ids: string[]) {
+    return this.setReadMany(owner, ids, false);
+  }
+  private async setReadMany(owner: string, ids: string[], read: boolean) {
     return transaction(async (tx) => {
       const rows = await tx.query(
         "SELECT id FROM notifications.messages WHERE owner_id=$1 AND id=ANY($2::uuid[]) ORDER BY id FOR UPDATE",
@@ -104,10 +133,12 @@ export class PostgresNotifications implements NotificationStore {
           404,
         );
       await tx.query(
-        "UPDATE notifications.messages SET read_at=coalesce(read_at,statement_timestamp()) WHERE owner_id=$1 AND id=ANY($2::uuid[])",
+        read
+          ? "UPDATE notifications.messages SET read_at=coalesce(read_at,statement_timestamp()) WHERE owner_id=$1 AND id=ANY($2::uuid[])"
+          : "UPDATE notifications.messages SET read_at=NULL WHERE owner_id=$1 AND id=ANY($2::uuid[])",
         [owner, ids],
       );
-      return { ids: rows.rows.map((r) => r.id), read: true };
+      return { ids: rows.rows.map((r) => r.id), read };
     });
   }
   async read(owner: string, id: string) {

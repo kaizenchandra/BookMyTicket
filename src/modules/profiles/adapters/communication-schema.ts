@@ -36,6 +36,7 @@ export const consentHistoryPage = z
           .object({
             purpose: z.literal("marketing_email"),
             policyVersion: z.literal(1),
+            policyText: z.string().min(1).max(3000).nullable(),
             granted: z.boolean(),
             preferenceVersion: z.number().int().positive(),
             recordedAt: z.iso.datetime(),

@@ -23,3 +23,23 @@ export const savedAttendeesResponse = z
     items: z.array(savedAttendee).max(10),
   })
   .strict();
+
+export const attendeeConsentHistoryPage = z
+  .object({
+    items: z
+      .array(
+        z
+          .object({
+            purpose: z.literal("saved_attendees"),
+            policyVersion: z.literal(1),
+            policyText: z.string().min(1).max(3000).nullable(),
+            granted: z.boolean(),
+            preferenceVersion: z.number().int().positive(),
+            recordedAt: z.iso.datetime(),
+          })
+          .strict(),
+      )
+      .max(20),
+    nextCursor: z.number().int().positive().nullable(),
+  })
+  .strict();

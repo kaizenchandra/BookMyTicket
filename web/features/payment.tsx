@@ -235,6 +235,9 @@ export function PaymentPanel({
   return (
     <section className="quote-panel" aria-labelledby="payment-heading">
       <h2 id="payment-heading">Payment</h2>
+      <p>
+        <a href="/help?topic=payment">Help with payments and refunds</a>
+      </p>
       {!status ? (
         <p role="status">Retrieving payment status…</p>
       ) : (

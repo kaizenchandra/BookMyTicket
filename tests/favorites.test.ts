@@ -1,3 +1,7 @@
+import {
+  favoritePage,
+  favoriteState,
+} from "../src/modules/profiles/adapters/favorites-schema.ts";
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID, randomBytes } from "node:crypto";
@@ -123,6 +127,7 @@ test("Unpublished favorites never expose private content and remain removable", 
       url: "/api/v1/favorites",
       headers: f.headers,
     });
+    favoritePage.parse(page.json());
     assert.equal(page.json().items[0].listing, null);
     assert(!page.body.includes("PRIVATE REVISION"));
     assert.equal(
@@ -163,6 +168,7 @@ test("Favorites use bounded stable cursor pagination and reject invalid inputs",
         headers: f.headers,
       })
     ).json();
+    favoritePage.parse(first);
     assert.equal(first.items.length, 24);
     assert(first.nextCursor);
     const second = (
@@ -172,6 +178,7 @@ test("Favorites use bounded stable cursor pagination and reject invalid inputs",
         headers: f.headers,
       })
     ).json();
+    favoritePage.parse(second);
     assert.equal(second.items.length, 3);
     assert.equal(second.nextCursor, null);
     assert.equal(
@@ -199,6 +206,59 @@ test("Favorites use bounded stable cursor pagination and reject invalid inputs",
       ).statusCode,
       422,
     );
+  } finally {
+    await app.close();
+  }
+});
+
+test("Favorite contracts preserve authentication, empty state and strict query validation", async () => {
+  const f = await fixture(),
+    app = await buildApp();
+  try {
+    assert.equal(
+      (await app.inject({ url: "/api/v1/favorites" })).statusCode,
+      401,
+    );
+    const empty = await app.inject({
+      url: "/api/v1/favorites",
+      headers: f.headers,
+    });
+    assert.deepEqual(favoritePage.parse(empty.json()), {
+      items: [],
+      nextCursor: null,
+    });
+    const url = `/api/v1/favorites/${f.ids[0]}`;
+    for (const [method, saved] of [
+      ["GET", false],
+      ["PUT", true],
+      ["GET", true],
+      ["DELETE", false],
+    ] as const) {
+      const response = await app.inject({
+        method,
+        url,
+        headers: f.headers,
+        ...(method === "PUT" ? { payload: {} } : {}),
+      });
+      assert.equal(response.statusCode, 200);
+      assert.deepEqual(favoriteState.parse(response.json()), { saved });
+    }
+    for (const query of [
+      "after=",
+      "after=invalid",
+      "ownerId=" + f.other,
+      "limit=1000",
+      "after=" + f.ids[0] + "&after=" + f.ids[0],
+    ])
+      assert.equal(
+        (
+          await app.inject({
+            url: "/api/v1/favorites?" + query,
+            headers: f.headers,
+          })
+        ).statusCode,
+        422,
+      );
   } finally {
     await app.close();
   }
