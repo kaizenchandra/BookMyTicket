@@ -30,8 +30,12 @@ export class PostgresCategoryDrafts implements CategoryDrafts {
     await tx.query("SELECT pg_advisory_xact_lock(hashtextextended($1,22))", [
       `${actor}:${org}:${key}`,
     ]);
+    // The complete category input is already hashed by its owner. Exclude new
+    // retained projection fields from the legacy envelope to preserve retries.
+    const { retainedMetadata, ...legacyInput } = input;
+    const fingerprintInput = input.requestFingerprint ? legacyInput : input;
     const fingerprint = createHash("sha256")
-      .update(JSON.stringify({ kind, input, id, version }))
+      .update(JSON.stringify({ kind, input: fingerprintInput, id, version }))
       .digest("hex");
     const previous = (
       await tx.query(
@@ -83,7 +87,7 @@ export class PostgresCategoryDrafts implements CategoryDrafts {
           input.city,
           input.description,
           input.posterUrl ?? null,
-          input.metadata,
+          { ...input.metadata, ...retainedMetadata },
         ],
       );
     } else
@@ -97,7 +101,7 @@ export class PostgresCategoryDrafts implements CategoryDrafts {
           input.city,
           input.description,
           input.posterUrl ?? null,
-          input.metadata,
+          { ...input.metadata, ...retainedMetadata },
         ],
       );
     await tx.query(

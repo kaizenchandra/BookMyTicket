@@ -12,11 +12,12 @@ export class PostgresCatalog implements CatalogPort {
       startsAt: string;
       timeZone: string;
       venueName: string;
+      venueId: string;
       state: string;
     },
   ) {
     await tx.query(
-      "INSERT INTO catalog.session_projection(occurrence_id,listing_id,starts_at,time_zone,venue_name,state) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(occurrence_id) DO UPDATE SET starts_at=$3,time_zone=$4,venue_name=$5,state=$6",
+      "INSERT INTO catalog.session_projection(occurrence_id,listing_id,starts_at,time_zone,venue_name,state,venue_id) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(occurrence_id) DO UPDATE SET starts_at=$3,time_zone=$4,venue_name=$5,state=$6,venue_id=$7",
       [
         input.id,
         input.listingId,
@@ -24,6 +25,7 @@ export class PostgresCatalog implements CatalogPort {
         input.timeZone,
         input.venueName,
         input.state,
+        input.venueId,
       ],
     );
   }
@@ -105,12 +107,10 @@ export class PostgresCatalog implements CatalogPort {
       projected.rows.map(({ listing_id, ...session }) => [listing_id, session]),
     );
     return {
-      items: rows.rows
-        .slice(0, 24)
-        .map(({ title_key, time_key, ...item }) => ({
-          ...item,
-          nextSession: sessions.get(item.id) ?? null,
-        })),
+      items: rows.rows.slice(0, 24).map(({ title_key, time_key, ...item }) => ({
+        ...item,
+        nextSession: sessions.get(item.id) ?? null,
+      })),
       total: count.rows[0].total,
       facets,
       nextCursor:
@@ -167,6 +167,17 @@ export class PostgresCatalog implements CatalogPort {
         "Listing does not belong to this approved scope.",
         403,
       );
+  }
+  async bookingTitle(id: string, tx: Transaction) {
+    const row = (
+      await tx.query(
+        "SELECT title FROM catalog.listings WHERE id=$1 AND state='published' FOR SHARE",
+        [id],
+      )
+    ).rows[0];
+    if (!row)
+      throw new AppError("NOT_FOUND", "This listing is not available.", 404);
+    return row.title as string;
   }
   async requirePublished(id: string, tx?: Transaction) {
     const result = await (tx ?? pool).query(

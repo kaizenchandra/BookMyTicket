@@ -4,7 +4,9 @@ export function SaveListing({
   id,
   accountId,
   signIn,
+  collection = "favorites",
 }: {
+  collection?: "favorites" | "venue-favorites";
   id: string;
   accountId?: string;
   signIn: () => void;
@@ -12,7 +14,8 @@ export function SaveListing({
   const [saved, setSaved] = useState<boolean | null>(null),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
-    [pending, setPending] = useState(false);
+    [pending, setPending] = useState(false),
+    [revision, setRevision] = useState(0);
   const actor = useRef(accountId);
   actor.current = accountId;
   useEffect(() => {
@@ -20,7 +23,7 @@ export function SaveListing({
     setSaved(null);
     setMessage("");
     if (accountId)
-      api<{ saved: boolean }>(`/favorites/${id}`)
+      api<{ saved: boolean }>(`/${collection}/${id}`)
         .then((r) => {
           if (current) setSaved(r.saved);
         })
@@ -30,13 +33,13 @@ export function SaveListing({
     return () => {
       current = false;
     };
-  }, [id, accountId]);
+  }, [id, accountId, collection, revision]);
   async function change(save: boolean) {
     const expected = accountId;
     setBusy(true);
     setMessage("");
     try {
-      await api(`/favorites/${id}`, {
+      await api(`/${collection}/${id}`, {
         method: save ? "PUT" : "DELETE",
         ...(save ? { body: "{}" } : {}),
       });
@@ -75,6 +78,11 @@ export function SaveListing({
             : "Save to Favorites"}
       </button>
       {message && <p role="status">{message}</p>}
+      {accountId && saved === null && message && (
+        <button onClick={() => setRevision((r) => r + 1)}>
+          Retry favorite status
+        </button>
+      )}
     </div>
   );
 }
@@ -134,6 +142,9 @@ export function FavoritesPage({
     return (
       <section className="reading">
         <h1>Favorites</h1>
+        <p>
+          <a href="/favorites/venues">Saved venues</a>
+        </p>
         <p>Sign in to access your saved movies, events and sports.</p>
         <button onClick={signIn}>Sign in</button>
       </section>
@@ -154,6 +165,9 @@ export function FavoritesPage({
     <section>
       <p className="eyebrow">YOUR COLLECTION</p>
       <h1>Favorites</h1>
+      <p>
+        <a href="/favorites/venues">Saved venues</a>
+      </p>
       {message && (
         <p className="notice" role="status">
           {message}

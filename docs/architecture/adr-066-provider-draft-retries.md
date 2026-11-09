@@ -1,0 +1,11 @@
+# ADR 066: Durable organization name edits
+
+FE:PRV-03/06 and BE:PRV-02 require resumable onboarding corrections. PUT /api/v1/organizations/:id/draft retains its existing normalized name and bounded expectedVersion request. The organization/input version identifies one edit operation, with original actor and normalized name bound to its result.
+
+Migration 059 adds immutable providers.draft_edits. The Providers adapter locks the organization and current owner membership before consulting prior edits. An identical original-actor request returns its original result; changed name or another owner returns DRAFT_CONFLICT. New edits continue to require editable state and matching version. Organization update and durable input/result record commit in one transaction, so a failed record insert rolls back the name and version. No external calls occur in this transaction.
+
+Recovery is checked before current-state validation and never writes organization state. It cannot overwrite later edits, submission or approval. Current ownership remains required for all retries. Authentication is enforced at the HTTP adapter. Records have no automatic expiry. Existing pre-migration edits cannot be reconstructed, and the prior next-version/name-only shortcut is removed.
+
+The provider form captures the original name/version on save, retains it after errors and offers Retry original organization draft save or Dismiss draft recovery. New saves and submissions are blocked while edit recovery is pending, but users can retain different unsaved text. On success the form reads current organizations rather than applying a historical result, updates its current baseline and preserves different text. A failed refresh retains recovery for another safe attempt. Session changes clear recovery; stale save responses after session change/unmount are ignored. Recovery remains memory-only.
+
+Tests cover six concurrent normalized requests, one durable result, injected-insert rollback, invalid names/versions, actor/payload conflicts, later edits and approval, ownership downgrade/removal and immutability. Browser recovery/form/accessibility, reload persistence, retention approval and private onboarding-detail save recovery remain open.

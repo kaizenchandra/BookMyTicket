@@ -18,7 +18,9 @@
         "booking.confirmed",
         "payment.recovery_required",
         "booking.pending_cancelled",
-        "booking.free_cancelled"
+        "booking.free_cancelled",
+        "support.staff_replied",
+        "support.case_assigned"
       ]
     },
     "aggregate_id": {
@@ -44,6 +46,14 @@
         },
         "paymentId": {
           "type": "string"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "caseVersion": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }
@@ -63,6 +73,46 @@
             "required": [
               "version",
               "ownerId"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "support.staff_replied"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "version",
+              "ownerId",
+              "messageId"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "support.case_assigned"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": [
+              "version",
+              "ownerId",
+              "caseVersion"
             ]
           }
         }

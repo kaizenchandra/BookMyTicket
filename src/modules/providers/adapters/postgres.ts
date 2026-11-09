@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { requireCompleteOnboarding } from "../domain/onboarding.ts";
+import { requireEditableOrganization } from "../domain/draft.ts";
 import {
   pool,
   transaction,
@@ -14,20 +15,6 @@ export class PostgresProviders implements OrganizationAccess {
         [actorId],
       )
     ).rows;
-  }
-  async create(actorId: string, name: string, kind: string) {
-    return transaction(async (tx) => {
-      const id = randomUUID();
-      await tx.query(
-        "INSERT INTO providers.organizations(id,owner_id,name,kind) VALUES($1,$2,$3,$4)",
-        [id, actorId, name, kind],
-      );
-      await tx.query(
-        "INSERT INTO providers.memberships VALUES($1,$2,'owner')",
-        [id, actorId],
-      );
-      return { id, name, kind, state: "draft", version: 1 };
-    });
   }
   async requireExport(actorId: string, id: string, tx: Transaction) {
     if (
@@ -72,19 +59,110 @@ export class PostgresProviders implements OrganizationAccess {
         403,
       );
   }
-  async submit(actorId: string, id: string, version: number) {
-    return transaction(async (tx) => {
-      // Membership is rechecked inside the mutation, not inferred from frontend organization selection.
-      const r = await tx.query(
-        "UPDATE providers.organizations o SET state='submitted',version=version+1 WHERE id=$1 AND version=$2 AND state IN ('draft','changes_requested') AND EXISTS(SELECT 1 FROM providers.memberships m WHERE m.organization_id=o.id AND m.account_id=$3 AND m.role='owner') RETURNING *",
-        [id, version, actorId],
+  private async lockOwner(tx: Transaction, actor: string, id: string) {
+    const row = (
+      await tx.query(
+        "SELECT * FROM providers.organizations WHERE id=$1 FOR UPDATE",
+        [id],
+      )
+    ).rows[0];
+    const member = (
+      await tx.query(
+        "SELECT role FROM providers.memberships WHERE organization_id=$1 AND account_id=$2 FOR SHARE",
+        [id, actor],
+      )
+    ).rows[0];
+    if (!row || member?.role !== "owner")
+      throw new AppError(
+        "FORBIDDEN",
+        "Only organization owners can change onboarding drafts.",
+        403,
       );
-      if (!r.rowCount)
+    return row;
+  }
+  async edit(actor: string, id: string, name: string, version: number) {
+    return transaction(async (tx) => {
+      const row = await this.lockOwner(tx, actor, id);
+      const prior = (
+        await tx.query(
+          "SELECT actor_id,name,result FROM providers.draft_edits WHERE organization_id=$1 AND input_version=$2",
+          [id, version],
+        )
+      ).rows[0];
+      if (prior) {
+        if (prior.actor_id !== actor || prior.name !== name)
+          throw new AppError(
+            "DRAFT_CONFLICT",
+            "This draft version already has a different recorded edit.",
+            409,
+          );
+        return prior.result;
+      }
+      requireEditableOrganization(row.state);
+      if (row.version !== version) {
         throw new AppError(
-          "CONFLICT",
-          "Access, version, or onboarding state has changed.",
+          "VERSION_CONFLICT",
+          "Organization changed. Reload and review the latest draft.",
+          409,
         );
-      return r.rows[0];
+      }
+      const result = (
+        await tx.query(
+          "UPDATE providers.organizations SET name=$2,version=version+1 WHERE id=$1 RETURNING *",
+          [id, name],
+        )
+      ).rows[0];
+      await tx.query(
+        "INSERT INTO providers.draft_edits(organization_id,input_version,version,actor_id,name,result) VALUES($1,$2,$3,$4,$5,$6)",
+        [id, version, result.version, actor, name, result],
+      );
+      return result;
+    });
+  }
+  async submit(actor: string, id: string, version: number) {
+    return transaction(async (tx) => {
+      const row = await this.lockOwner(tx, actor, id);
+      const prior = (
+        await tx.query(
+          "SELECT actor_id,result FROM providers.submissions WHERE organization_id=$1 AND input_version=$2",
+          [id, version],
+        )
+      ).rows[0];
+      if (prior) {
+        if (prior.actor_id !== actor)
+          throw new AppError(
+            "SUBMISSION_CONFLICT",
+            "This version was submitted by another owner.",
+            409,
+          );
+        return prior.result;
+      }
+      requireEditableOrganization(row.state);
+      if (row.version !== version)
+        throw new AppError(
+          "VERSION_CONFLICT",
+          "Organization changed. Reload and review before submitting.",
+          409,
+        );
+      requireCompleteOnboarding(
+        (
+          await tx.query(
+            'SELECT legal_name AS "legalName",business_address AS "businessAddress",contact_name AS "contactName",contact_email AS "contactEmail",contact_phone AS "contactPhone" FROM providers.onboarding_details WHERE organization_id=$1',
+            [id],
+          )
+        ).rows[0],
+      );
+      const result = (
+        await tx.query(
+          "UPDATE providers.organizations SET state='submitted',version=version+1 WHERE id=$1 RETURNING *",
+          [id],
+        )
+      ).rows[0];
+      await tx.query(
+        "INSERT INTO providers.submissions(organization_id,input_version,version,actor_id,result) VALUES($1,$2,$3,$4,$5)",
+        [id, version, result.version, actor, result],
+      );
+      return result;
     });
   }
 }

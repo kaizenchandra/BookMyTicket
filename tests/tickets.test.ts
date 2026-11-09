@@ -27,7 +27,7 @@ const c = commerce(),
   reservations = new Reservations(
     new PostgresReservations(new PostgresCatalog()),
   );
-async function fixture(approvedPolicy = true) {
+async function fixture(approvedPolicy = true, venueSnapshot: unknown = null) {
   const owner = randomUUID(),
     org = randomUUID(),
     listing = randomUUID(),
@@ -45,8 +45,8 @@ async function fixture(approvedPolicy = true) {
     [listing, org],
   );
   await pool.query(
-    "INSERT INTO inventory.occurrences(id,listing_id,organization_id,venue_name,time_zone,starts_at,ends_at,sales_open,sales_close) VALUES($1,$2,$3,'Pricing fixture venue','Asia/Kolkata',now()+interval '2 days',now()+interval '2 days 1 hour',now()-interval '1 day',now()+interval '1 day')",
-    [occurrence, listing, org],
+    "INSERT INTO inventory.occurrences(id,listing_id,organization_id,venue_name,time_zone,starts_at,ends_at,sales_open,sales_close,venue_snapshot) VALUES($1,$2,$3,'Pricing fixture venue','Asia/Kolkata',now()+interval '2 days',now()+interval '2 days 1 hour',now()-interval '1 day',now()+interval '1 day',$4)",
+    [occurrence, listing, org, venueSnapshot],
   );
   await pool.query(
     "INSERT INTO inventory.resources(occurrence_id,id,kind,label,capacity,price_paise) VALUES($1,'pool','pool','TEST POOL',20,101)",
@@ -65,8 +65,8 @@ async function fixture(approvedPolicy = true) {
   return { owner, org, listing, occurrence, policyId, hold };
 }
 
-async function prepared(confirmed = true) {
-  const f = await fixture();
+async function prepared(confirmed = true, venueSnapshot: unknown = null) {
+  const f = await fixture(true, venueSnapshot);
   const quote = await c.quotes.create(f.owner, f.hold.id);
   const order = (await c.placement.accept(f.owner, randomUUID(), {
     reservationId: f.hold.id,
@@ -393,4 +393,75 @@ test("a decoded customer QR works through authorized HTTP admission and redeemed
   } finally {
     await app.close();
   }
+});
+
+test("Ticket directions use scheduled venue addresses across wallet, document and calendar without credentials", async () => {
+  const venue = randomUUID();
+  const address = '12, मुख्य Road; <script>alert("x")</script>\nNorth gate';
+  const f = await prepared(true, { venueId: venue, address, city: "Pune" });
+  await pool.query(
+    "INSERT INTO venues.venues(id,organization_id,name,address,city,time_zone,amenities,accessibility) VALUES($1,$2,'Live venue','NEW PUBLIC ADDRESS','Mumbai','Asia/Kolkata','','')",
+    [venue, f.org],
+  );
+  const wallet = await c.wallet.view(f.owner, f.order.id);
+  walletResponse.parse(wallet);
+  const occurrence = wallet.occurrences[0];
+  assert.equal(occurrence.venueAddress, address);
+  assert.equal(occurrence.venueCity, "Pune");
+  const url = new URL(occurrence.directionsUrl!);
+  assert.equal(url.origin, "https://www.google.com");
+  assert.equal(url.pathname, "/maps/dir/");
+  assert.equal(url.searchParams.get("api"), "1");
+  assert.equal(
+    url.searchParams.get("destination"),
+    `${occurrence.venueName}, ${address}, Pune`,
+  );
+  assert.deepEqual([...url.searchParams.keys()].sort(), ["api", "destination"]);
+  for (const secret of [
+    f.owner,
+    f.order.id,
+    f.occurrence,
+    ...wallet.items.map((t) => t.id),
+  ])
+    assert(!url.href.includes(secret));
+  const { ticketDocument } =
+    await import("../src/modules/bookings/adapters/ticket-document.ts");
+  const html = ticketDocument(await c.wallet.document(f.owner, f.order.id));
+  assert(html.includes("Scheduled venue address"));
+  assert(html.includes("&lt;script&gt;"));
+  assert(!html.includes("<script>"));
+  assert(html.includes('rel="noopener noreferrer"'));
+  assert(!html.includes("NEW PUBLIC ADDRESS"));
+  const { default: ICAL } = await import("ical.js");
+  const calendar = await c.wallet.calendar(f.owner, f.order.id);
+  const events = new ICAL.Component(ICAL.parse(calendar)).getAllSubcomponents(
+    "vevent",
+  );
+  assert.equal(events.length, 1);
+  assert.equal(
+    events[0].getFirstPropertyValue("location"),
+    `${occurrence.venueName}, ${address}, Pune`,
+  );
+  for (const t of await c.tickets.list(f.owner, f.order.id))
+    assert(!calendar.includes(t.token!));
+  await pool.query(
+    "UPDATE venues.venues SET address='CHANGED AGAIN' WHERE id=$1",
+    [venue],
+  );
+  assert.equal(
+    (await c.wallet.view(f.owner, f.order.id)).occurrences[0].venueAddress,
+    address,
+  );
+  await assert.rejects(
+    pool.query(
+      "UPDATE inventory.occurrences SET venue_snapshot='{}'::jsonb WHERE id=$1",
+      [f.occurrence],
+    ),
+    /snapshots cannot be silently replaced/,
+  );
+  const old = await prepared();
+  const legacy = await c.wallet.view(old.owner, old.order.id);
+  assert.equal(legacy.occurrences[0].venueAddress, null);
+  assert.equal(legacy.occurrences[0].directionsUrl, null);
+  assert(ticketDocument(legacy).includes("No street address was supplied"));
 });

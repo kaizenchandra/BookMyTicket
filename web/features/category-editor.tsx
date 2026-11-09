@@ -224,6 +224,9 @@ export function CategoryEditor({
       {rows.map((r) => (
         <article className="organization" key={r.id}>
           <strong>{r.details.title}</strong>
+          <a href={`/partner/listing-history?listingId=${r.id}`}>
+            View moderation reasons and decisions
+          </a>
           <p>
             {r.state} · version {r.version}
           </p>

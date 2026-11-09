@@ -1,0 +1,41 @@
+(node:29360) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Listing queue pages beyond 100 with stable ties, type filters and protected access (178.373541ms)
+✔ Listing review controls escape content and preserve exact navigation boundaries (6.734542ms)
+(node:29360) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Listing review decisions are atomic, immutable and retry safe across later transitions (54.663291ms)
+(node:29360) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Listing review history paginates and protects reasons, identities and snapshots (73.568292ms)
+✔ Listing history has an explicit load action and truthful historical scope (4.819167ms)
+(node:29360) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+{"level":50,"time":1794222016793,"pid":29360,"hostname":"PHOENIXAs-MacBook-Pro.local","reqId":"req-a","requestId":"req-a","msg":"Request failed"}
+✖ Listing revisions retain exact bigint cursors and protect legacy snapshots and identities (18.608625ms)
+✔ Saved revision cards escape historical text and explain missing attribution (9.829125ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 746.061584
+
+✖ failing tests:
+
+test at tests/listing-review-queue.test.ts:1:16046
+✖ Listing revisions retain exact bigint cursors and protect legacy snapshots and identities (18.608625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  503 !== 422
+  
+      at TestContext.<anonymous> (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/tests/listing-review-queue.test.ts:621:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

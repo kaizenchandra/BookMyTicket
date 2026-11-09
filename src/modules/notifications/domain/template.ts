@@ -1,5 +1,7 @@
 import { AppError } from "../../../shared/errors.ts";
 export const notificationTypes = [
+  "support.case_assigned",
+  "support.staff_replied",
   "booking.confirmed",
   "booking.free_cancelled",
   "booking.pending_cancelled",
@@ -7,6 +9,16 @@ export const notificationTypes = [
 ];
 export function notificationTemplate(type: string) {
   switch (type) {
+    case "support.case_assigned":
+      return {
+        title: "Support assignment recorded",
+        body: "A supervisor assigned a case to you. Open the support workspace to check its current assignment and status. Your current permissions and MFA are required; this notice does not grant access.",
+      };
+    case "support.staff_replied":
+      return {
+        title: "Support replied to your case",
+        body: "A customer-visible reply was recorded. Open your support case to read the conversation and check its current status.",
+      };
     case "booking.free_cancelled":
       return {
         title: "Free booking cancelled",

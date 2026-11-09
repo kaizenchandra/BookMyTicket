@@ -76,3 +76,43 @@ export const scheduleSeriesInput = z
       .strict(),
   })
   .strict();
+
+export const venueGuidanceInput = z
+  .object({
+    expectedVersion: z.number().int().positive().max(2147483646),
+    amenities: z.string().trim().max(2000),
+    accessibility: z.string().trim().max(2000),
+    transportGuidance: z.string().trim().max(2000),
+    parkingGuidance: z.string().trim().max(2000),
+    entryPolicies: z.string().trim().max(2000),
+  })
+  .strict();
+
+export const venueContactInput = z
+  .object({
+    expectedVersion: z.number().int().positive().max(2147483646),
+    phone: z.union([z.literal(""), z.string().regex(/^\+[1-9][0-9]{6,14}$/)]),
+    email: z.union([z.literal(""), z.email().max(254)]),
+    public: z.boolean(),
+  })
+  .strict()
+  .refine((value) => !value.public || Boolean(value.phone || value.email), {
+    message:
+      "Provide a phone number or email before enabling public contact details.",
+  });
+
+export const venueImageSchema = z
+  .object({
+    url: z.string().min(1).max(2048),
+    kind: z.enum(["photo", "map"]),
+    alt: z.string().trim().min(1).max(500),
+    caption: z.string().trim().max(500),
+    attribution: z.string().trim().max(500),
+  })
+  .strict();
+export const venueMediaInput = z
+  .object({
+    expectedVersion: z.number().int().positive().max(2147483646),
+    items: z.array(venueImageSchema).max(8),
+  })
+  .strict();

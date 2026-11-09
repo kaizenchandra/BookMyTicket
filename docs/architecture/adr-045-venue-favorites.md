@@ -1,0 +1,13 @@
+# ADR 045: Account-owned venue favorites
+
+BE:CUS-04 and FE:ENG-01 require supported venue favorites alongside listings. Profiles owns profiles.venue_favorites, keyed by account and venue UUID. Migration 045 leaves existing listing favorites unchanged. Venue references have no cross-module foreign key: removed/unpublished venues can remain as unavailable bookmarks until the owner removes them.
+
+Profiles consumes the Venues PublicVenueDiscovery contract. New saves require a publicly readable venue at validation time; bookmarks do not confer publication or sale authority. The visibility read and bookmark insert are not an atomic cross-module snapshot. A venue withdrawn during that interval can be saved, but every list read rechecks visibility and returns a null venue summary. Only ID, name, city and address are projected into visible summaries; contacts/media/ownership are excluded. Unavailable records retain only the owner's venue ID and saved timestamp. Unexpected discovery failures propagate rather than masquerading as withdrawal.
+
+PUT /api/v1/venue-favorites/:id and DELETE are naturally idempotent through business uniqueness and deletion. Existing saves return saved=true even after venue withdrawal, preserving the original timestamp. Authentication and active-account checks apply to every route. Body fields cannot override the actor. GET collection pages use UUID boundaries with at most 24 records and a 25th-row continuation check; cursors are ordering positions, not authorization tokens. Removed or unavailable entries do not prevent traversal. A request always filters by the current account.
+
+The current adapter resolves each page's public venues sequentially through the contract, bounded at 24. This favors reuse of existing visibility rules; a batch public-summary contract is a future optimization for measured load. The profile adapter reads only its own bookmark table.
+
+The customer venue page reuses the save control, including pending save through modal sign-in and retry after status failure. /favorites/venues supplies private paging, unavailable/removal states, retry and loading states, and navigation from listing favorites. Account-specific component keys and guarded reads prevent old list responses from populating a switched-account page. Saving a venue does not subscribe to alerts or reserve inventory.
+
+Integration tests cover concurrent retries, timestamp stability, account isolation, unavailable-new-save denial, redacted retained saves, 26-row traversal, malformed parameters, removal after withdrawal and suspended-account denial. Browser/sign-in continuation/keyboard/accessibility acceptance, artist/team favorites and subscriptions remain open.

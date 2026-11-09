@@ -1,9 +1,15 @@
+export type ListingQueueFilters = {
+  kind?: "movie" | "event" | "sports" | "";
+  afterCreatedAt?: string;
+  afterId?: string;
+};
 import type { OrganizationAccess } from "../../providers/contracts/index.ts";
 export interface CatalogManagementPort {
   create(
     actorId: string,
     organizationId: string,
     input: ListingInput,
+    key: string,
   ): Promise<unknown>;
   list(actorId: string, organizationId: string): Promise<unknown>;
   submit(actorId: string, id: string, version: number): Promise<unknown>;
@@ -12,8 +18,10 @@ export interface CatalogManagementPort {
     version: number,
     state: "published" | "changes_requested",
     reason: string,
+    reviewerId: string,
   ): Promise<unknown>;
   queue(): Promise<unknown>;
+  queuePage(filters: ListingQueueFilters): Promise<unknown>;
   update(
     actorId: string,
     id: string,
@@ -34,9 +42,14 @@ export class CatalogManagement {
     private port: CatalogManagementPort,
     private access: OrganizationAccess,
   ) {}
-  async create(actorId: string, organizationId: string, input: ListingInput) {
+  async create(
+    actorId: string,
+    organizationId: string,
+    input: ListingInput,
+    key: string,
+  ) {
     await this.access.requireMember(actorId, organizationId, true);
-    return this.port.create(actorId, organizationId, input);
+    return this.port.create(actorId, organizationId, input, key);
   }
   async list(actorId: string, organizationId: string) {
     await this.access.requireMember(actorId, organizationId);
@@ -53,8 +66,12 @@ export class CatalogManagement {
     version: number,
     state: "published" | "changes_requested",
     reason: string,
+    reviewerId: string,
   ) {
-    return this.port.review(id, version, state, reason);
+    return this.port.review(id, version, state, reason, reviewerId);
+  }
+  queuePage(filters: ListingQueueFilters) {
+    return this.port.queuePage(filters);
   }
   queue() {
     return this.port.queue();

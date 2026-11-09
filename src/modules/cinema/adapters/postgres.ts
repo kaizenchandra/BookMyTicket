@@ -37,6 +37,7 @@ export class PostgresMovies implements MoviesPort {
           city: input.city,
           description: input.description,
           posterUrl: input.posterUrl,
+          retainedMetadata: { crew: input.crew },
           metadata: {
             managedBy: "cinema",
             language: input.language,

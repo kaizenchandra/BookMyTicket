@@ -1,3 +1,4 @@
+import { PostgresSupportBookingReader } from "../src/modules/bookings/adapters/support-reader.ts";
 import { PostgresAudit } from "../src/modules/reporting/adapters/audit.ts";
 import { placeFixtureOrder } from "./pricing-fixtures.ts";
 import { PostgresAdmissionWindow } from "../src/modules/inventory/adapters/admission.ts";
@@ -179,7 +180,7 @@ test("BE:ACL-02 — organization membership enforced for reads/writes", async ()
   await p.requireMember(users[0], org, true);
   await assert.rejects(p.requireMember(users[1], org), { code: "FORBIDDEN" });
   assert.equal((await p.list(users[1])).length, 0);
-  await assert.rejects(p.submit(users[1], org, 1), { code: "CONFLICT" });
+  await assert.rejects(p.submit(users[1], org, 1), { code: "FORBIDDEN" });
 });
 test("BE:WHK-01 — exact raw bytes and constant-time HMAC validation", () => {
   const secret = randomBytes(32).toString("hex"),
@@ -503,7 +504,10 @@ test("BE:CAT-12 — unpublished catalog never exposes occurrence inventory", asy
 test("BE:SUP-03 — customer case isolation and internal-note protection", async () => {
   const { PostgresCases } =
     await import("../src/modules/support/adapters/postgres.ts");
-  const cases = new PostgresCases(new PostgresAudit());
+  const cases = new PostgresCases(
+    new PostgresAudit(),
+    new PostgresSupportBookingReader(),
+  );
   const c = (await cases.create(
     users[1],
     "TEST FIXTURE CASE",
@@ -511,14 +515,8 @@ test("BE:SUP-03 — customer case isolation and internal-note protection", async
     "An isolated integration test case",
   )) as { id: string };
   await cases.reply(users[2], c.id, "Internal fixture note", "internal", true);
-  assert.equal(
-    ((await cases.messages(users[1], c.id, false)) as any[]).length,
-    1,
-  );
-  assert.equal(
-    ((await cases.messages(users[2], c.id, true)) as any[]).length,
-    2,
-  );
+  assert.equal((await cases.messages(users[1], c.id, false)).items.length, 1);
+  assert.equal((await cases.messages(users[2], c.id, true)).items.length, 2);
   await assert.rejects(cases.messages(users[3], c.id, false), {
     code: "NOT_FOUND",
   });

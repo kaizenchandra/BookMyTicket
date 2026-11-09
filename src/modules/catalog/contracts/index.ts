@@ -1,5 +1,6 @@
 import type { Transaction } from "../../../shared/database.ts";
 export interface PublishedCatalog {
+  bookingTitle(id: string, tx: Transaction): Promise<string>;
   requirePublished(id: string, tx?: Transaction): Promise<void>;
   requireOwnedPublished(
     id: string,
@@ -21,6 +22,8 @@ export interface FavoriteCatalog {
 
 export type CategoryDraftInput = {
   requestFingerprint?: string;
+  // Derived customer-facing fields; requestFingerprint must cover their source input.
+  retainedMetadata?: Record<string, string>;
   title: string;
   city: string;
   description: string;
@@ -65,7 +68,28 @@ export interface CatalogSessions {
       startsAt: string;
       timeZone: string;
       venueName: string;
+      venueId: string;
       state: string;
     },
   ): Promise<void>;
+}
+
+export interface PublicVenueSessions {
+  read(
+    venueId: string,
+    organizationId: string,
+    after?: string,
+  ): Promise<{
+    visible: boolean;
+    items: {
+      id: string;
+      listingId: string;
+      title: string;
+      kind: string;
+      startsAt: string;
+      timeZone: string;
+      spaceName: string;
+    }[];
+    nextCursor: string | null;
+  }>;
 }

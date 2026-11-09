@@ -1,6 +1,48 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api.ts";
 import type { WalletView as Wallet } from "../../src/modules/bookings/contracts/wallet.ts";
+export function TicketDirections({
+  occurrence,
+}: {
+  occurrence: {
+    venueAddress: string | null;
+    venueCity: string | null;
+    directionsUrl: string | null;
+  };
+}) {
+  return (
+    <div>
+      {occurrence.venueAddress ? (
+        <>
+          <p>
+            Scheduled venue address: {occurrence.venueAddress}
+            {occurrence.venueCity ? `, ${occurrence.venueCity}` : ""}
+          </p>
+          {occurrence.directionsUrl && (
+            <p>
+              <a
+                href={occurrence.directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Directions on Google Maps (opens an external service)
+              </a>
+            </p>
+          )}
+          <p>
+            Use this address if maps or location access is unavailable. Check
+            current booking notices before travelling.
+          </p>
+        </>
+      ) : (
+        <p>
+          No street address was supplied for this occurrence. Check the
+          organizer’s instructions before travelling.
+        </p>
+      )}
+    </div>
+  );
+}
 export function TicketWallet({
   orderId,
   revision,
@@ -118,6 +160,7 @@ export function TicketWallet({
                             })}{" "}
                             · {o.timeZone}
                           </p>
+                          <TicketDirections occurrence={o} />
                           {o.scheduleChanged && (
                             <p role="status">
                               The schedule has changed since booking. These are

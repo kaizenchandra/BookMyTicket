@@ -128,3 +128,147 @@ test("Communication consent is opt-in, owner scoped, versioned and withdrawal is
     await app.close();
   }
 });
+
+test("Customer consent history paginates real changes and excludes other accounts", async () => {
+  const app = await buildApp();
+  async function account() {
+    const id = randomUUID(),
+      token = randomBytes(24).toString("hex");
+    await pool.query(
+      "INSERT INTO identity.accounts(id,contact) VALUES($1,$2)",
+      [id, `${id}@fixture.invalid`],
+    );
+    await pool.query(
+      "INSERT INTO identity.sessions(token_hash,account_id,expires_at) VALUES($1,$2,now()+interval '1 hour')",
+      [hashToken(token), id],
+    );
+    return { id, headers: { cookie: `session=${token}` } };
+  }
+  const owner = await account(),
+    other = await account(),
+    url = "/api/v1/profile/communications/history";
+  try {
+    assert.equal((await app.inject({ url })).statusCode, 401);
+    assert.deepEqual(
+      (await app.inject({ url, headers: owner.headers })).json(),
+      { items: [], nextCursor: null },
+    );
+    for (let i = 0; i < 23; i++) {
+      const payload = {
+        language: "en",
+        marketingEmail: i % 2 === 0,
+        version: i,
+        consentVersion: 1,
+      };
+      const r = await app.inject({
+        url: "/api/v1/profile/communications",
+        method: "PUT",
+        headers: owner.headers,
+        payload,
+      });
+      assert.equal(r.statusCode, 200, r.body);
+      assert.equal(
+        (
+          await app.inject({
+            url: "/api/v1/profile/communications",
+            method: "PUT",
+            headers: owner.headers,
+            payload,
+          })
+        ).statusCode,
+        200,
+      );
+    }
+    assert.equal(
+      (
+        await app.inject({
+          url: "/api/v1/profile/communications",
+          method: "PUT",
+          headers: owner.headers,
+          payload: {
+            language: "hi",
+            marketingEmail: true,
+            version: 23,
+            consentVersion: 1,
+          },
+        })
+      ).statusCode,
+      200,
+    );
+    const { consentHistoryPage } =
+      await import("../src/modules/profiles/adapters/communication-schema.ts");
+    const first = consentHistoryPage.parse(
+      (await app.inject({ url, headers: owner.headers })).json(),
+    );
+    assert.equal(first.items.length, 20);
+    assert.equal(first.nextCursor, 4);
+    const second = consentHistoryPage.parse(
+      (
+        await app.inject({
+          url: url + "?beforeVersion=4",
+          headers: owner.headers,
+        })
+      ).json(),
+    );
+    assert.equal(second.items.length, 3);
+    assert.equal(second.nextCursor, null);
+    const items = [...first.items, ...second.items];
+    assert.deepEqual(
+      items.map((i) => i.preferenceVersion),
+      Array.from({ length: 23 }, (_, i) => 23 - i),
+    );
+    items.forEach((i) => {
+      assert.equal(i.granted, i.preferenceVersion % 2 === 1);
+      assert.equal(i.policyVersion, 1);
+      assert.equal(i.purpose, "marketing_email");
+    });
+    assert(!JSON.stringify(first).includes(owner.id));
+    assert.deepEqual(
+      (
+        await app.inject({
+          url: url + "?beforeVersion=4",
+          headers: other.headers,
+        })
+      ).json(),
+      { items: [], nextCursor: null },
+    );
+    for (const suffix of [
+      "?beforeVersion=0",
+      "?beforeVersion=-1",
+      "?beforeVersion=1.5",
+      "?beforeVersion=01",
+      "?beforeVersion=2147483648",
+      "?beforeVersion=1e3",
+      "?accountId=" + owner.id,
+    ])
+      assert.equal(
+        (await app.inject({ url: url + suffix, headers: owner.headers }))
+          .statusCode,
+        422,
+      );
+    await assert.rejects(
+      pool.query(
+        "UPDATE profiles.marketing_consent_history SET granted=false WHERE account_id=$1",
+        [owner.id],
+      ),
+      /immutable/,
+    );
+    await assert.rejects(
+      pool.query(
+        "DELETE FROM profiles.marketing_consent_history WHERE account_id=$1",
+        [owner.id],
+      ),
+      /immutable/,
+    );
+    const current = (
+      await app.inject({
+        url: "/api/v1/profile/communications",
+        headers: owner.headers,
+      })
+    ).json();
+    assert.equal(current.version, 24);
+    assert.equal(current.marketingEmail, true);
+  } finally {
+    await app.close();
+  }
+});

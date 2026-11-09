@@ -1,3 +1,76 @@
+import { PostgresActiveAccount } from "./modules/identity/adapters/active.ts";
+import { OrganizationCreation } from "./modules/providers/application/creation.ts";
+import { PostgresOrganizationCreation } from "./modules/providers/adapters/creation.ts";
+import {
+  organizationCreationInput,
+  organizationCreationKey,
+} from "./modules/providers/adapters/creation-schema.ts";
+import { ListingRevisionHistory } from "./modules/catalog/application/revision-history.ts";
+import { PostgresListingRevisionHistory } from "./modules/catalog/adapters/revision-history.ts";
+import {
+  listingRevisionFilters,
+  listingRevisionComparisonInput,
+} from "./modules/catalog/adapters/revision-history-schema.ts";
+import { ListingReviewHistory } from "./modules/catalog/application/review-history.ts";
+import { PostgresListingReviewHistory } from "./modules/catalog/adapters/review-history.ts";
+import { listingReviewHistoryFilters } from "./modules/catalog/adapters/review-history-schema.ts";
+import {
+  listingQueueFilters,
+  listingReviewInput,
+} from "./modules/catalog/adapters/review-queue-schema.ts";
+import { reviewQueueFilters } from "./modules/providers/adapters/review-queue-schema.ts";
+import { ReviewHistory } from "./modules/providers/application/review-history.ts";
+import { PostgresReviewHistory } from "./modules/providers/adapters/review-history.ts";
+import {
+  reviewHistoryFilters,
+  providerReviewInput,
+} from "./modules/providers/adapters/review-history-schema.ts";
+import { Onboarding } from "./modules/providers/application/onboarding.ts";
+import { PostgresOnboarding } from "./modules/providers/adapters/onboarding.ts";
+import { onboardingInput } from "./modules/providers/adapters/onboarding-schema.ts";
+import { OrganizationDrafts } from "./modules/providers/application/drafts.ts";
+import {
+  organizationDraftInput,
+  organizationSubmitInput,
+} from "./modules/providers/adapters/draft-schema.ts";
+import { SavedAttendees } from "./modules/profiles/application/saved-attendees.ts";
+import { PostgresSavedAttendees } from "./modules/profiles/adapters/saved-attendees.ts";
+import { savedAttendeesInput } from "./modules/profiles/adapters/saved-attendees-schema.ts";
+import { Profile } from "./modules/profiles/application/profile.ts";
+import { profileInput } from "./modules/profiles/adapters/profile-schema.ts";
+import { VenueFavorites } from "./modules/profiles/application/venue-favorites.ts";
+import { PostgresVenueFavorites } from "./modules/profiles/adapters/venue-favorites.ts";
+import { venueFavoriteFilters } from "./modules/profiles/adapters/venue-favorites-schema.ts";
+import { PublicVenue } from "./modules/venues/application/public-venue.ts";
+import { PostgresPublicVenue } from "./modules/venues/adapters/public-venue.ts";
+import { PostgresVenueSessions } from "./modules/catalog/adapters/venue-sessions.ts";
+import { publicVenueFilters } from "./modules/venues/adapters/public-schema.ts";
+import {
+  notificationFilters,
+  notificationReadMany,
+} from "./modules/notifications/adapters/schemas.ts";
+import { messageFilters } from "./modules/support/adapters/schemas.ts";
+import { PostgresEvents } from "./modules/reporting/adapters/outbox.ts";
+import { caseListFilters } from "./modules/support/adapters/schemas.ts";
+import { SupportDirectory } from "./modules/identity/application/support-directory.ts";
+import { PostgresSupportDirectory } from "./modules/identity/adapters/support-directory.ts";
+import { supportDirectoryFilters } from "./modules/identity/adapters/support-directory-schema.ts";
+import { PostgresSupportBookingReader } from "./modules/bookings/adapters/support-reader.ts";
+import { createCaseInput } from "./modules/support/adapters/schemas.ts";
+import { CustomerEscalation } from "./modules/support/application/escalation.ts";
+import { PostgresEscalation } from "./modules/support/adapters/escalation.ts";
+import { escalationInput } from "./modules/support/adapters/schemas.ts";
+import { SupportAssignment } from "./modules/support/application/assignment.ts";
+import { PostgresAssignment } from "./modules/support/adapters/assignment.ts";
+import { PostgresStaffAuthorization } from "./modules/identity/adapters/staff-authorization.ts";
+import { assignmentInput as supportAssignmentInput } from "./modules/support/adapters/schemas.ts";
+import { BookingHistory } from "./modules/bookings/application/history.ts";
+import { PostgresHistory } from "./modules/bookings/adapters/history.ts";
+import { historyFilters } from "./modules/bookings/adapters/history-schema.ts";
+import { PostgresAudit } from "./modules/reporting/adapters/audit.ts";
+import { AuditHistory } from "./modules/reporting/application/audit-search.ts";
+import { PostgresAuditSearch } from "./modules/reporting/adapters/audit-search.ts";
+import { auditFilters } from "./modules/reporting/adapters/audit-schema.ts";
 import { onlineSettings } from "./modules/events/adapters/online-schema.ts";
 import { isAllowedOrigin } from "./shared/request-origin.ts";
 import { EventCatalog } from "./modules/events/application/catalog.ts";
@@ -5,7 +78,10 @@ import { PostgresEventCatalog } from "./modules/events/adapters/catalog.ts";
 import { eventInput } from "./modules/events/adapters/catalog-schema.ts";
 import { Communications } from "./modules/profiles/application/communications.ts";
 import { PostgresCommunications } from "./modules/profiles/adapters/communications.ts";
-import { communicationInput } from "./modules/profiles/adapters/communication-schema.ts";
+import {
+  communicationInput,
+  consentHistoryFilters,
+} from "./modules/profiles/adapters/communication-schema.ts";
 import { Movies } from "./modules/cinema/application/movies.ts";
 import { PostgresMovies } from "./modules/cinema/adapters/postgres.ts";
 import { movieInput } from "./modules/cinema/adapters/schema.ts";
@@ -24,6 +100,8 @@ import { notificationService } from "./composition.ts";
 import { ProviderStaff } from "./modules/providers/application/staff.ts";
 import { PostgresProviderStaff } from "./modules/providers/adapters/staff.ts";
 import {
+  staffInvitationFilters,
+  staffPageFilters,
   invitationInput,
   invitationVersion,
   memberInput,
@@ -42,11 +120,16 @@ import { publishForm } from "./modules/events/adapters/schemas.ts";
 import {
   listingInput,
   listingUpdate,
+  listingSubmitInput,
+  listingCreationKey,
 } from "./modules/catalog/adapters/schemas.ts";
 import { Venues } from "./modules/venues/application/venues.ts";
 import { PostgresVenues } from "./modules/venues/adapters/postgres.ts";
 import {
   venueInput,
+  venueGuidanceInput,
+  venueContactInput,
+  venueMediaInput,
   spaceInput,
   planInput,
   scheduleInput,
@@ -78,7 +161,6 @@ import { CatalogManagement } from "./modules/catalog/application/manage.ts";
 import { PostgresCatalogManagement } from "./modules/catalog/adapters/manage.ts";
 import { PostgresProviderReview } from "./modules/providers/adapters/review.ts";
 import { PostgresSchedule } from "./modules/inventory/adapters/schedule.ts";
-import { PostgresAudit } from "./modules/reporting/adapters/audit.ts";
 import { PostgresCases } from "./modules/support/adapters/postgres.ts";
 import { FinanceViews } from "./modules/finance/adapters/views.ts";
 import Fastify from "fastify";
@@ -120,13 +202,16 @@ export async function buildApp() {
   const sessions = new Sessions(new PostgresSessions(new PostgresAudit()));
   const auth = new Authentication(identity),
     providers = new PostgresProviders(),
-    profiles = new PostgresProfiles();
+    profiles = new Profile(new PostgresProfiles());
   const catalog = new PostgresCatalog(),
     discovery = new Discovery(catalog),
     inventory = new PostgresReservations(catalog),
     reservations = new Reservations(inventory);
   const managedCatalog = new CatalogManagement(
-      new PostgresCatalogManagement(providers),
+      new PostgresCatalogManagement(
+        providers,
+        new PostgresStaffAuthorization(),
+      ),
       providers,
     ),
     providerReview = new PostgresProviderReview(),
@@ -138,8 +223,10 @@ export async function buildApp() {
       catalog,
       venueStore,
     ),
-    audit = new PostgresAudit(),
-    cases = new PostgresCases(new PostgresAudit()),
+    cases = new PostgresCases(
+      new PostgresAudit(),
+      new PostgresSupportBookingReader(),
+    ),
     finance = new FinanceViews();
   const {
     bookings,
@@ -221,7 +308,7 @@ export async function buildApp() {
       requestId: req.id,
     });
   });
-  app.get("/health", async () => ({ status: "ok", version: "0.21.0" }));
+  app.get("/health", async () => ({ status: "ok", version: "0.28.0" }));
   app.get("/ready", async () => {
     await assertSchemaReady(pool, expectedMigrations);
     return { status: "ready" };
@@ -368,10 +455,28 @@ export async function buildApp() {
   app.get("/api/v1/profile/communications", async (req) =>
     communications.get((await identity.authenticate(req.cookies.session)).id),
   );
+  app.get("/api/v1/profile/communications/history", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    const filters = consentHistoryFilters.parse(req.query);
+    return communications.history(
+      actor.id,
+      filters.beforeVersion ? Number(filters.beforeVersion) : undefined,
+    );
+  });
   app.put("/api/v1/profile/communications", async (req) =>
     communications.save(
       (await identity.authenticate(req.cookies.session)).id,
       communicationInput.parse(req.body),
+    ),
+  );
+  const savedAttendees = new SavedAttendees(new PostgresSavedAttendees());
+  app.get("/api/v1/profile/attendees", async (req) =>
+    savedAttendees.get((await identity.authenticate(req.cookies.session)).id),
+  );
+  app.put("/api/v1/profile/attendees", async (req) =>
+    savedAttendees.save(
+      (await identity.authenticate(req.cookies.session)).id,
+      savedAttendeesInput.parse(req.body),
     ),
   );
   app.get("/api/v1/profile", async (req) =>
@@ -380,23 +485,19 @@ export async function buildApp() {
   app.put("/api/v1/profile", async (req) =>
     profiles.save(
       (await identity.authenticate(req.cookies.session)).id,
-      z
-        .object({
-          name: z.string().max(100),
-          theme: z.enum(["LIGHT", "DARK"]),
-          city: z.string().max(100).nullable(),
-        })
-        .strict()
-        .parse(req.body),
+      profileInput.parse(req.body),
     ),
   );
   const providerStaff = new ProviderStaff(
     identity,
     new PostgresProviderStaff(new PostgresAudit()),
   );
-  app.get("/api/v1/provider-invitations", async (req) => ({
-    items: await providerStaff.inbox(req.cookies.session),
-  }));
+  app.get("/api/v1/provider-invitations", async (req) =>
+    providerStaff.inbox(
+      req.cookies.session,
+      staffInvitationFilters.parse(req.query),
+    ),
+  );
   app.post("/api/v1/provider-invitations/:id/accept", async (req) => {
     z.object({}).strict().parse(req.body);
     return providerStaff.accept(
@@ -408,6 +509,7 @@ export async function buildApp() {
     providerStaff.list(
       req.cookies.session,
       uuid.parse((req.params as { id: string }).id),
+      staffPageFilters.parse(req.query),
     ),
   );
   app.post("/api/v1/organizations/:id/invitations", async (req) =>
@@ -437,7 +539,7 @@ export async function buildApp() {
       req.cookies.session,
       uuid.parse(p.id),
       uuid.parse(p.accountId),
-      b.version,
+      String(b.version),
       b.role,
     );
   });
@@ -550,25 +652,54 @@ export async function buildApp() {
       (await identity.authenticate(req.cookies.session)).id,
     ),
   }));
+  const organizationCreation = new OrganizationCreation(
+    new PostgresOrganizationCreation(new PostgresActiveAccount()),
+  );
   app.post("/api/v1/organizations", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
-    const input = z
-      .object({
-        name: z.string().min(2).max(150),
-        kind: z.enum(["cinema", "event", "sports"]),
-      })
-      .strict()
-      .parse(req.body);
-    return providers.create(actor.id, input.name, input.kind);
+    return organizationCreation.create(
+      actor.id,
+      organizationCreationInput.parse(req.body),
+      organizationCreationKey.parse(req.headers["idempotency-key"]),
+    );
   });
-  app.post("/api/v1/organizations/:id/submit", async (req) =>
-    providers.submit(
+  const onboarding = new Onboarding(
+    new PostgresOnboarding(new PostgresAudit()),
+  );
+  app.get("/api/v1/organizations/:id/onboarding", async (req) =>
+    onboarding.readOwner(
       (await identity.authenticate(req.cookies.session)).id,
       uuid.parse((req.params as { id: string }).id),
-      z
-        .object({ version: z.number().int().positive() })
-        .strict()
-        .parse(req.body).version,
+    ),
+  );
+  app.put("/api/v1/organizations/:id/onboarding", async (req) =>
+    onboarding.save(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      onboardingInput.parse(req.body),
+    ),
+  );
+  app.get("/api/v1/admin/providers/:id/onboarding", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return onboarding.readReview(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+    );
+  });
+  const organizationDrafts = new OrganizationDrafts(providers);
+  app.put("/api/v1/organizations/:id/draft", async (req) =>
+    organizationDrafts.edit(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      organizationDraftInput.parse(req.body),
+    ),
+  );
+  app.post("/api/v1/organizations/:id/submit", async (req) =>
+    organizationDrafts.submit(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      organizationSubmitInput.parse(req.body).version,
     ),
   );
   app.get("/api/v1/occurrences/:id/inventory", async (req) =>
@@ -610,6 +741,49 @@ export async function buildApp() {
       uuid.parse((req.params as { id: string }).id),
     ),
   );
+  const publicVenue = new PublicVenue(
+    new PostgresPublicVenue(),
+    providers,
+    new PostgresVenueSessions(),
+  );
+  const venueFavorites = new VenueFavorites(
+    new PostgresVenueFavorites(),
+    publicVenue,
+  );
+  app.get("/api/v1/venue-favorites", async (req) =>
+    venueFavorites.list(
+      (await identity.authenticate(req.cookies.session)).id,
+      venueFavoriteFilters.parse(req.query).after,
+    ),
+  );
+  app.get("/api/v1/venue-favorites/:id", async (req) =>
+    venueFavorites.status(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+    ),
+  );
+  app.put("/api/v1/venue-favorites/:id", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    z.object({})
+      .strict()
+      .parse(req.body ?? {});
+    return venueFavorites.save(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+    );
+  });
+  app.delete("/api/v1/venue-favorites/:id", async (req) =>
+    venueFavorites.remove(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+    ),
+  );
+  app.get("/api/v1/venues/:id", async (req) =>
+    publicVenue.read(
+      uuid.parse((req.params as { id: string }).id),
+      publicVenueFilters.parse(req.query).after,
+    ),
+  );
   app.get("/api/v1/catalog/:id/occurrences", async (req) => ({
     items: await schedule.forListing(
       uuid.parse((req.params as { id: string }).id),
@@ -626,6 +800,7 @@ export async function buildApp() {
       (await identity.authenticate(req.cookies.session)).id,
       uuid.parse((req.params as { id: string }).id),
       listingInput.parse(req.body),
+      listingCreationKey.parse(req.headers["idempotency-key"]),
     ),
   );
   app.put("/api/v1/listings/:id", async (req) => {
@@ -642,10 +817,7 @@ export async function buildApp() {
     managedCatalog.submit(
       (await identity.authenticate(req.cookies.session)).id,
       uuid.parse((req.params as { id: string }).id),
-      z
-        .object({ version: z.number().int().positive() })
-        .strict()
-        .parse(req.body).version,
+      listingSubmitInput.parse(req.body).version,
     ),
   );
   app.post("/api/v1/occurrences/series/preview", async (req) =>
@@ -687,6 +859,30 @@ export async function buildApp() {
       venueInput.parse(req.body),
     ),
   );
+  app.post("/api/v1/organizations/:id/venues/:venueId/guidance", async (req) =>
+    venues.guidance(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      uuid.parse((req.params as { venueId: string }).venueId),
+      venueGuidanceInput.parse(req.body),
+    ),
+  );
+  app.post("/api/v1/organizations/:id/venues/:venueId/contact", async (req) =>
+    venues.contact(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      uuid.parse((req.params as { venueId: string }).venueId),
+      venueContactInput.parse(req.body),
+    ),
+  );
+  app.post("/api/v1/organizations/:id/venues/:venueId/media", async (req) =>
+    venues.media(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      uuid.parse((req.params as { venueId: string }).venueId),
+      venueMediaInput.parse(req.body),
+    ),
+  );
   app.post("/api/v1/organizations/:id/venues/:venueId/spaces", async (req) =>
     venues.space(
       (await identity.authenticate(req.cookies.session)).id,
@@ -706,6 +902,16 @@ export async function buildApp() {
         planInput.parse(req.body),
       ),
   );
+  app.get("/api/v1/admin/providers", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return providerReview.page(reviewQueueFilters.parse(req.query));
+  });
+  app.get("/api/v1/admin/listings", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return managedCatalog.queuePage(listingQueueFilters.parse(req.query));
+  });
   app.get("/api/v1/admin/reviews", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
     await identity.require(actor, "moderate");
@@ -714,17 +920,34 @@ export async function buildApp() {
       listings: await managedCatalog.queue(),
     };
   });
+  const reviewHistory = new ReviewHistory(
+    new PostgresReviewHistory(
+      new PostgresAudit(),
+      new PostgresStaffAuthorization(),
+    ),
+  );
+  app.get("/api/v1/organizations/:id/reviews", async (req) =>
+    reviewHistory.list(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      false,
+      reviewHistoryFilters.parse(req.query).beforeVersion,
+    ),
+  );
+  app.get("/api/v1/admin/providers/:id/reviews", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return reviewHistory.list(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+      true,
+      reviewHistoryFilters.parse(req.query).beforeVersion,
+    );
+  });
   app.post("/api/v1/admin/providers/:id/review", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
     await identity.require(actor, "moderate");
-    const b = z
-      .object({
-        version: z.number().int().positive(),
-        state: z.enum(["approved", "changes_requested", "rejected"]),
-        reason: z.string().min(5).max(2000),
-      })
-      .strict()
-      .parse(req.body);
+    const b = providerReviewInput.parse(req.body);
     return providerReview.review(
       uuid.parse((req.params as { id: string }).id),
       b.version,
@@ -733,30 +956,98 @@ export async function buildApp() {
       actor.id,
     );
   });
+  const listingRevisions = new ListingRevisionHistory(
+    new PostgresListingRevisionHistory(
+      new PostgresAudit(),
+      new PostgresStaffAuthorization(),
+      providers,
+    ),
+  );
+  app.get("/api/v1/listings/:id/revisions", async (req) =>
+    listingRevisions.list(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      false,
+      listingRevisionFilters.parse(req.query).beforeId,
+    ),
+  );
+  app.get("/api/v1/admin/listings/:id/revisions", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return listingRevisions.list(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+      true,
+      listingRevisionFilters.parse(req.query).beforeId,
+    );
+  });
+  app.get("/api/v1/listings/:id/revisions/compare", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session),
+      input = listingRevisionComparisonInput.parse(req.query);
+    return listingRevisions.compare(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+      false,
+      input.fromId,
+      input.toId,
+    );
+  });
+  app.get("/api/v1/admin/listings/:id/revisions/compare", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    const input = listingRevisionComparisonInput.parse(req.query);
+    return listingRevisions.compare(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+      true,
+      input.fromId,
+      input.toId,
+    );
+  });
+  const listingHistory = new ListingReviewHistory(
+    new PostgresListingReviewHistory(
+      new PostgresAudit(),
+      new PostgresStaffAuthorization(),
+      providers,
+    ),
+  );
+  app.get("/api/v1/listings/:id/reviews", async (req) =>
+    listingHistory.list(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+      false,
+      listingReviewHistoryFilters.parse(req.query).beforeVersion,
+    ),
+  );
+  app.get("/api/v1/admin/listings/:id/reviews", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "moderate");
+    return listingHistory.list(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+      true,
+      listingReviewHistoryFilters.parse(req.query).beforeVersion,
+    );
+  });
   app.post("/api/v1/admin/listings/:id/review", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
     await identity.require(actor, "moderate");
-    const b = z
-      .object({
-        version: z.number().int().positive(),
-        state: z.enum(["published", "changes_requested"]),
-        reason: z.string().min(5).max(2000),
-      })
-      .strict()
-      .parse(req.body);
+    const b = listingReviewInput.parse(req.body);
     return managedCatalog.review(
       uuid.parse((req.params as { id: string }).id),
       b.version,
       b.state,
       b.reason,
+      actor.id,
     );
   });
   app.get("/api/v1/admin/audit", async (req) => {
-    await identity.require(
-      await identity.authenticate(req.cookies.session),
-      "audit",
+    const actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor, "audit");
+    return new AuditHistory(new PostgresAuditSearch()).search(
+      actor.id,
+      auditFilters.parse(req.query),
     );
-    return { items: await audit.list() };
   });
   app.post("/api/v1/quotes", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
@@ -934,11 +1225,12 @@ export async function buildApp() {
       input.providerOrderId,
     );
   });
-  app.get("/api/v1/bookings", async (req) => ({
-    items: await bookings.list(
+  app.get("/api/v1/bookings", async (req) =>
+    new BookingHistory(new PostgresHistory()).search(
       (await identity.authenticate(req.cookies.session)).id,
+      historyFilters.parse(req.query),
     ),
-  }));
+  );
   app.get("/api/v1/bookings/:id", async (req) =>
     bookings.get(
       (await identity.authenticate(req.cookies.session)).id,
@@ -1043,15 +1335,22 @@ export async function buildApp() {
   const notifications = notificationService();
   app.get("/api/v1/notifications", async (req) => {
     const actor = await identity.authenticate(req.cookies.session),
-      q = z
-        .object({
-          after: uuid.optional(),
-          unread: z.enum(["true", "false"]).optional(),
-        })
-        .strict()
-        .parse(req.query);
+      q = notificationFilters.parse(req.query);
     return notifications.list(actor.id, q.after, q.unread === "true");
   });
+  app.post("/api/v1/notifications/read", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    return notifications.readMany(
+      actor.id,
+      notificationReadMany.parse(req.body).ids,
+    );
+  });
+  app.delete("/api/v1/notifications/:id/read", async (req) =>
+    notifications.unread(
+      (await identity.authenticate(req.cookies.session)).id,
+      uuid.parse((req.params as { id: string }).id),
+    ),
+  );
   app.post("/api/v1/notifications/:id/read", async (req) => {
     const actor = await identity.authenticate(req.cookies.session);
     z.object({}).strict().parse(req.body);
@@ -1086,30 +1385,49 @@ export async function buildApp() {
       freeCancelInput.parse(req.body),
     );
   });
-  app.get("/api/v1/cases", async (req) => ({
-    items: await cases.list(
+  const customerEscalation = new CustomerEscalation(
+    new PostgresEscalation(new PostgresAudit()),
+  );
+  app.post("/api/v1/cases/:id/escalation", async (req) => {
+    const actor = await identity.authenticate(req.cookies.session);
+    return customerEscalation.request(
+      actor.id,
+      uuid.parse((req.params as { id: string }).id),
+      z.string().min(8).max(100).parse(req.headers["idempotency-key"]),
+      escalationInput.parse(req.body),
+    );
+  });
+  app.get("/api/v1/cases", async (req) =>
+    cases.list(
       (await identity.authenticate(req.cookies.session)).id,
+      caseListFilters.parse(req.query),
     ),
-  }));
+  );
   app.post("/api/v1/cases", async (req) => {
     const actor = await identity.authenticate(req.cookies.session),
-      b = z
-        .object({
-          subject: z.string().min(5).max(150),
-          category: z.enum(["booking", "payment", "accessibility", "other"]),
-          body: z.string().min(10).max(5000),
-        })
-        .strict()
-        .parse(req.body);
-    return cases.create(actor.id, b.subject, b.category, b.body);
+      b = createCaseInput.parse(req.body);
+    return cases.create(
+      actor.id,
+      b.subject,
+      b.category,
+      b.body,
+      b.bookingId,
+      z
+        .string()
+        .min(8)
+        .max(100)
+        .optional()
+        .parse(req.headers["idempotency-key"]),
+    );
   });
-  app.get("/api/v1/cases/:id/messages", async (req) => ({
-    items: await cases.messages(
+  app.get("/api/v1/cases/:id/messages", async (req) =>
+    cases.messages(
       (await identity.authenticate(req.cookies.session)).id,
       uuid.parse((req.params as { id: string }).id),
       false,
+      messageFilters.parse(req.query).after,
     ),
-  }));
+  );
   app.post("/api/v1/cases/:id/messages", async (req) =>
     cases.reply(
       (await identity.authenticate(req.cookies.session)).id,
@@ -1120,22 +1438,56 @@ export async function buildApp() {
         .parse(req.body).body,
       "customer",
       false,
+      z
+        .string()
+        .min(8)
+        .max(100)
+        .optional()
+        .parse(req.headers["idempotency-key"]),
+    ),
+  );
+  const supportDirectory = new SupportDirectory(
+    identity,
+    new PostgresSupportDirectory(new PostgresAudit()),
+  );
+  app.get("/api/v1/operations/support-agents", async (req) =>
+    supportDirectory.search(
+      req.cookies.session,
+      supportDirectoryFilters.parse(req.query),
+    ),
+  );
+  const supportAssignment = new SupportAssignment(
+    identity,
+    new PostgresAssignment(
+      new PostgresStaffAuthorization(),
+      new PostgresAudit(),
+      new PostgresEvents(),
+    ),
+  );
+  app.post("/api/v1/operations/cases/:id/assignment", async (req) =>
+    supportAssignment.assign(
+      req.cookies.session,
+      uuid.parse((req.params as { id: string }).id),
+      z.string().min(8).max(100).parse(req.headers["idempotency-key"]),
+      supportAssignmentInput.parse(req.body),
     ),
   );
   const supportOperations = new SupportOperations(
     identity,
-    new PostgresSupportOperations(new PostgresAudit()),
-  );
-  app.get("/api/v1/operations/cases", async (req) => ({
-    items: await supportOperations.queue(
-      req.cookies.session,
-      caseFilters.parse(req.query),
+    new PostgresSupportOperations(
+      new PostgresAudit(),
+      new PostgresSupportBookingReader(),
+      new PostgresEvents(),
     ),
-  }));
+  );
+  app.get("/api/v1/operations/cases", async (req) =>
+    supportOperations.queue(req.cookies.session, caseFilters.parse(req.query)),
+  );
   app.get("/api/v1/operations/cases/:id", async (req) =>
     supportOperations.detail(
       req.cookies.session,
       uuid.parse((req.params as { id: string }).id),
+      messageFilters.parse(req.query).after,
     ),
   );
   app.post("/api/v1/operations/cases/:id/actions", async (req) =>
@@ -1143,6 +1495,12 @@ export async function buildApp() {
       req.cookies.session,
       uuid.parse((req.params as { id: string }).id),
       caseCommand.parse(req.body),
+      z
+        .string()
+        .min(8)
+        .max(100)
+        .optional()
+        .parse(req.headers["idempotency-key"]),
     ),
   );
   app.post("/api/v1/operations/cases/:id/messages", async (req) =>
@@ -1150,6 +1508,12 @@ export async function buildApp() {
       req.cookies.session,
       uuid.parse((req.params as { id: string }).id),
       staffReply.parse(req.body),
+      z
+        .string()
+        .min(8)
+        .max(100)
+        .optional()
+        .parse(req.headers["idempotency-key"]),
     ),
   );
   app.get("/api/v1/operations/ledger", async (req) => {

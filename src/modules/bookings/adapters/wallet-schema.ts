@@ -12,6 +12,9 @@ export const walletResponse: z.ZodType<WalletView> = z
         .object({
           id: z.string().uuid(),
           venueName: z.string(),
+          venueAddress: z.string().nullable(),
+          venueCity: z.string().nullable(),
+          directionsUrl: z.url().max(2048).nullable(),
           timeZone: z.string(),
           startsAt: z.iso.datetime(),
           endsAt: z.iso.datetime(),

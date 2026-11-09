@@ -1,3 +1,6 @@
+import { PostgresOrganizationCreation } from "../src/modules/providers/adapters/creation.ts";
+import { PostgresActiveAccount } from "../src/modules/identity/adapters/active.ts";
+import { PostgresStaffAuthorization } from "../src/modules/identity/adapters/staff-authorization.ts";
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID, randomBytes } from "node:crypto";
@@ -34,16 +37,18 @@ test("real draft, provider approval, submission and publication become publicly 
     );
     const headers = { cookie: `session=${token}` };
     const providers = new PostgresProviders();
-    const organization = await providers.create(
+    const organization = await new PostgresOrganizationCreation(
+      new PostgresActiveAccount(),
+    ).create(
       owner,
-      "ISOLATED CATALOG FIXTURE",
-      "cinema",
+      { name: "ISOLATED CATALOG FIXTURE", kind: "cinema" },
+      randomUUID(),
     );
     const title = `CATALOG FIXTURE ${randomUUID()}`;
     const draft = await app.inject({
       method: "POST",
       url: `/api/v1/organizations/${organization.id}/listings`,
-      headers,
+      headers: { ...headers, "idempotency-key": randomUUID() },
       payload: {
         title,
         kind: "movie",
@@ -81,6 +86,10 @@ test("real draft, provider approval, submission and publication become publicly 
       403,
       "unapproved organization cannot submit",
     );
+    await pool.query(
+      "INSERT INTO providers.onboarding_details(organization_id,legal_name,business_address,contact_name,contact_email) VALUES($1,'Fixture business','Fixture address','Fixture contact','fixture@example.invalid')",
+      [organization.id],
+    );
     const submitted = await providers.submit(owner, organization.id, 1);
     await new PostgresProviderReview().review(
       organization.id,
@@ -108,12 +117,20 @@ test("real draft, provider approval, submission and publication become publicly 
     });
     assert.equal(denied.statusCode, 403);
     // Exercise the real persistence transition; this is not an assertion of staff MFA UI acceptance.
-    const manager = new PostgresCatalogManagement(providers);
+    await pool.query(
+      "INSERT INTO identity.grants(account_id,permission,scope) VALUES($1,'moderate','platform')",
+      [reviewer],
+    );
+    const manager = new PostgresCatalogManagement(
+      providers,
+      new PostgresStaffAuthorization(),
+    );
     await manager.review(
       listing.id,
       result.json().version,
       "published",
       "Isolated publication approval",
+      reviewer,
     );
     assert.deepEqual(
       (await search("  test catalog CITY  "))
@@ -147,6 +164,7 @@ test("real draft, provider approval, submission and publication become publicly 
         result.json().version,
         "published",
         "Stale review",
+        reviewer,
       ),
       { code: "CONFLICT" },
     );

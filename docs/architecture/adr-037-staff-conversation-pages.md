@@ -1,0 +1,11 @@
+# ADR 037 — Bounded staff conversation pages
+
+Staff GET /api/v1/operations/cases/:id previously returned the complete thread. It now includes the latest 50 messages, oldest-to-newest within each page, plus nullable nextMessageCursor. Pass that cursor as after to read older messages. Case metadata, current version and restricted booking context retain their existing shape. This is an explicit default-limit change: API clients needing full threads must traverse the cursor. The generated response schema describes the message/version/ID subset; other existing case metadata remains additive rather than claiming a complete schema.
+
+Every page authenticates the active account and requires platform support permission with fresh MFA. Cursors bind actor and case in a distinct staff namespace, retain PostgreSQL microseconds and UUID tie-breaking, and convey no authority. The case shared lock, bounded message query, booking context and access audit remain inside one local transaction. Read audits include message count and whether it is an older page, never body or cursor content. Migration 040 indexes case/time/UUID across both message audiences.
+
+The separate StaffThread component reads pages without replacing parent case detail or remounting assignment/reply controls. Reply text, action reason, priority and the reviewed case version therefore remain unchanged during paging. A later stale action still fails version checks; the agent explicitly refreshes case detail before retrying with a new version. Successful changes cause the parent to reload and show latest messages. Internal/customer audience labels remain explicit, and reply audience/body inputs are disabled during submission.
+
+Paging uses latest/newer/older/refresh controls with in-memory history. Failed reads clear the thread view and explain the error; request generations ignore results after component unmount. This is not durable draft or browser-history restoration. The customer endpoint continues to exclude internal notes independently.
+
+PostgreSQL/HTTP tests cover 106 messages including 52 internal notes, tied timestamps, a newer arrival, current metadata versus stale command versions, page audit records, malformed/cross-case/cross-agent cursors, MFA/permission denial and customer privacy. Browser and accessibility acceptance remain unverified.

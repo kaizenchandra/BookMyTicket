@@ -15,7 +15,7 @@ export const listingInput = z
   })
   .strict();
 export const listingUpdate = listingInput
-  .extend({ version: z.number().int().positive() })
+  .extend({ version: z.number().int().positive().max(2147483646) })
   .strict();
 export const catalogFilters = z
   .object({
@@ -74,3 +74,8 @@ export const catalogSearchResponse = z
     serverTime: z.iso.datetime(),
   })
   .strict();
+export const listingSubmitInput = z
+  .object({ version: z.number().int().positive().max(2147483646) })
+  .strict();
+
+export const listingCreationKey = z.string().min(8).max(100);

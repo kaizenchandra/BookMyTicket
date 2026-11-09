@@ -1,0 +1,419 @@
+ Image bookmyticket-tests:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 663B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.09kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#3 DONE 1.8s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 97B done
+#4 DONE 0.0s
+
+#5 [dependencies 1/4] FROM docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9
+#5 resolve docker.io/library/node:26.13.0-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 2.10MB 0.0s done
+#6 DONE 0.1s
+
+#7 [dependencies 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [dependencies 3/4] COPY package.json package-lock.json ./
+#8 DONE 0.1s
+
+#9 [dependencies 4/4] RUN npm ci
+#9 6.320 
+#9 6.320 added 152 packages, and audited 153 packages in 6s
+#9 6.320 
+#9 6.320 42 packages are looking for funding
+#9 6.320   run `npm fund` for details
+#9 6.320 
+#9 6.320 found 0 vulnerabilities
+#9 6.321 npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+#9 6.321 npm warn install-scripts   @embedded-postgres/linux-arm64@18.6.0-beta.19 (postinstall: node scripts/hydrate-symlinks.js)
+#9 6.321 npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+#9 6.321 npm warn install-scripts
+#9 6.321 npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+#9 6.322 npm notice
+#9 6.322 npm notice New major version of npm available! 11.20.0 -> 12.2.2
+#9 6.322 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#9 6.322 npm notice To update run: npm install -g npm@12.2.2
+#9 6.322 npm notice
+#9 DONE 7.0s
+
+#10 [verify 1/2] COPY . .
+#10 DONE 0.1s
+
+#11 [verify 2/2] RUN npm run build && npm run check:architecture
+#11 0.152 
+#11 0.152 > bookmyticket@0.62.0 build
+#11 0.152 > tsc --noEmit && vite build
+#11 0.152 
+#11 0.813 vite v8.3.5 building client environment for production...
+#11 0.819 transforming...
+#11 0.861 ✓ 61 modules transformed.
+#11 0.883 rendering chunks...
+#11 0.913 computing gzip size...
+#11 0.917 dist/index.html                   0.71 kB │ gzip:   0.40 kB
+#11 0.917 dist/assets/index-7lNqs3mn.css   20.64 kB │ gzip:   5.00 kB
+#11 0.917 dist/assets/index-LQEGKAvh.js   428.03 kB │ gzip: 120.67 kB
+#11 0.917 
+#11 0.917 ✓ built in 104ms
+#11 0.970 
+#11 0.970 > bookmyticket@0.62.0 check:architecture
+#11 0.970 > node scripts/check-architecture.mjs
+#11 0.970 
+#11 0.991 Architecture import checks passed for 198 module files. SQL ownership and runtime composition require separate review.
+#11 DONE 1.0s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 4.7s done
+#12 exporting manifest sha256:60501a40a4ffd6cd24aac7c191f54c8391880191878c79e573e6a4a22fa41182
+#12 exporting manifest sha256:60501a40a4ffd6cd24aac7c191f54c8391880191878c79e573e6a4a22fa41182 0.0s done
+#12 exporting config sha256:7a2f1185fc78d71ab40e796aac2a4a870fde11ec4e20551e0e964995127f4c57 0.0s done
+#12 exporting attestation manifest sha256:7a0fba6208963699af56ad5a5c8ddba6a4c351d77885b0af09da45d4cf720c07 0.0s done
+#12 exporting manifest list sha256:590382ef6fc8f74a24910d6f42807e3d366ab55f281d9338aa789c829c84eb93 0.0s done
+#12 naming to docker.io/library/bookmyticket-tests:local done
+#12 unpacking to docker.io/library/bookmyticket-tests:local
+#12 unpacking to docker.io/library/bookmyticket-tests:local 1.2s done
+#12 DONE 6.0s
+
+#13 resolving provenance for metadata file
+#13 DONE 0.0s
+ Image bookmyticket-tests:local Built 
+ Container bookmyticket-verify-database-1 Running 
+ Container bookmyticket-verify-mailpit-1 Running 
+ Container bookmyticket-verify-database-1 Waiting 
+ Container bookmyticket-verify-mailpit-1 Waiting 
+ Container bookmyticket-verify-mailpit-1 Healthy 
+ Container bookmyticket-verify-database-1 Healthy 
+ Container bookmyticket-verify-tests-run-e16a2dd64360 Creating 
+ Container bookmyticket-verify-tests-run-e16a2dd64360 Created 
+
+> bookmyticket@0.62.0 test
+> node --import tsx --test tests/*.test.ts
+
+(node:37) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Audit HTTP search enforces permission/MFA and provides scoped stable pages without raw details (397.158402ms)
+(node:37) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Audit history remains immutable and null actors are preserved (74.420273ms)
+✔ Booking seat controls reflect authoritative availability, selection and accessible labels (55.082912ms)
+✔ General admission quantities are bounded and all controls stop while reserving (3.61563ms)
+✔ Booking progress exposes the current stage without claiming confirmation (3.717047ms)
+(node:40) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Booking history has owner-scoped microsecond-safe pagination and strict filters (518.1922ms)
+(node:40) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Booking timing uses confirmed saved sessions and literal wildcard search (92.557966ms)
+(node:40) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Support cases link only owned bookings and staff receive limited live context (109.589115ms)
+(node:45) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real draft, provider approval, submission and publication become publicly discoverable (428.538613ms)
+(node:52) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ cinema: provider draft to published schedule, customer reservation, free booking, tickets and cancellation (731.901548ms)
+(node:52) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ sports: provider draft to published schedule, customer reservation, free booking, tickets and cancellation (384.2058ms)
+(node:52) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ events: provider draft to published schedule, customer reservation, free booking, tickets and cancellation (545.206739ms)
+(node:52) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ events-seated: provider draft to published schedule, customer reservation, free booking, tickets and cancellation (444.432803ms)
+(node:60) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Communication consent is opt-in, owner scoped, versioned and withdrawal is durable (438.610086ms)
+(node:68) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ title and newest keyset pagination preserve ties and database timestamp precision (523.878708ms)
+(node:68) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ facets reflect published data and search treats SQL wildcard characters literally (211.456469ms)
+(node:68) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ grouped suggestions are bounded and never expose drafts or another city (172.407622ms)
+(node:68) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Upcoming discovery filters expired, unscheduled and cancelled projections with scoped pagination (346.037328ms)
+(node:74) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1794226950891,"pid":74,"hostname":"989958138fdc","msg":"Server listening at http://127.0.0.1:41231"}
+✔ Mailpit SMTP -> email verification -> signup -> authenticated session -> logout -> returning login (459.424908ms)
+✔ real emailed OTP enforces resend cooldown, expiry and attempt limits (138.853115ms)
+✔ Mailpit is prohibited in production and configuration reflects pepper availability (4.635382ms)
+✔ SMTP connection failure returns truthful unavailable state and does not create an account (17.546233ms)
+✔ export validates scope, deduplicates requests, minimizes fields and produces encrypted safe CSV (371.786866ms)
+✔ exports exclude pending orders and require current owner role at request, execution and download (240.989303ms)
+✔ suspension and expiry deny download immediately; cleanup removes encrypted artifact (111.326284ms)
+✔ configuration failure persists a retry and recovers without plaintext or duplicate artifacts (97.369723ms)
+(node:80) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP export requires recent MFA and protects private download headers (310.779987ms)
+✔ CSV cells neutralize formula and control prefixes and preserve quoting (0.552835ms)
+✔ permission revocation committed while generation waits prevents artifact creation (105.146067ms)
+✔ exhausted retries become terminal and ciphertext cannot be copied between jobs (157.339017ms)
+(node:81) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Favorites save/remove are idempotent under concurrency and account scoped (414.950094ms)
+(node:81) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Unpublished favorites never expose private content and remain removable (76.25515ms)
+(node:81) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Favorites use bounded stable cursor pagination and reject invalid inputs (340.365571ms)
+(node:255) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ free HTTP confirmation is idempotent, issues tickets once, and never invents payment (537.178311ms)
+✔ free confirmation rejects paid orders, missing eligibility, expired holds and closed sales (242.982598ms)
+✔ ticket configuration failure rolls inventory and booking back, then a retry can succeed (83.607328ms)
+✔ cancellation racing free confirmation produces one terminal outcome and consistent inventory (90.042337ms)
+(node:291) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ previewed confirmed free cancellation revokes tickets, returns capacity and retries without double release (456.277111ms)
+✔ expired preview, policy deadline, owner isolation and changed occurrence reject cancellation (135.348777ms)
+✔ gate scan racing cancellation cannot both admit and revoke a ticket (124.835304ms)
+✔ cancelled assigned seat can be reserved again without stale cancellation clearing its new owner (114.384038ms)
+✔ BE:INV-04/05 — 32 concurrent database requests for one seat yield exactly one hold (398.779446ms)
+✔ BE:INV-07 — multi-seat conflict rolls back entire request (15.89769ms)
+✔ BE:INV-10/11 — shared pool never exceeds capacity (63.737716ms)
+✔ BE:API-10/11,RSV-04 — lost response retry returns same hold and expiry; changed input conflicts (19.938862ms)
+✔ BE:INV-09 — stale expiry/release cannot clear a newer ownership (32.815297ms)
+✔ BE:RSV-11 — other customer cannot retrieve or release a reservation (14.157853ms)
+✔ BE:INV-15 — duplicate resources and quantities rejected (0.3165ms)
+✔ BE:SCH-06 — closed occurrence rejects reservation regardless of stale snapshot (10.417765ms)
+✔ BE:ACL-02 — organization membership enforced for reads/writes (7.902553ms)
+✔ BE:WHK-01 — exact raw bytes and constant-time HMAC validation (2.570795ms)
+✔ BE:IAM-06/07 — invalid OTP attempts persist and valid challenge is single use (19.516403ms)
+(node:298) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ API integration — validation, auth, origin and revoked-session controls (184.112639ms)
+✔ BE:BKG-09/12, FIN-01, TKT-05 — capture atomically consumes, issues tickets, posts balanced ledger and outbox once (214.489307ms)
+✔ BE:PAY-14/15 — late capture with reassigned inventory records refund liability without displacement (52.073408ms)
+✔ BE:CAT-12 — unpublished catalog never exposes occurrence inventory (17.251608ms)
+✔ BE:SUP-03 — customer case isolation and internal-note protection (25.339203ms)
+✔ Expiry workers preserve replacement holds and safely share batches (53.036451ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Listing queue pages beyond 100 with stable ties, type filters and protected access (715.524357ms)
+✔ Listing review controls escape content and preserve exact navigation boundaries (29.792543ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Listing review decisions are atomic, immutable and retry safe across later transitions (222.070526ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Listing review history paginates and protects reasons, identities and snapshots (481.96294ms)
+✔ Listing history has an explicit load action and truthful historical scope (52.284241ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Listing revisions retain exact bigint cursors and protect legacy snapshots and identities (324.809757ms)
+✔ Saved revision cards escape historical text and explain missing attribution (24.756035ms)
+✔ Revision comparison distinguishes missing and empty values and escapes changed text (2.45467ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Category revision history and comparisons expose only saved fields for their listing kind (141.188911ms)
+✔ Category snapshot projection rejects malformed metadata and renders saved detail text safely (3.58413ms)
+✔ Expanded category history labels distinguish uncaptured legacy fields from future saves (1.649919ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Listing submission retries preserve one transition and never resurrect later review states (204.484126ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Generic draft edit replay is payload scoped and cannot overwrite later edits or publication (135.712153ms)
+(node:306) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Generic creation keys prevent duplicates and are isolated by actor and organization (152.782302ms)
+✔ RFC 4226/6238 vectors and base32 roundtrip (37.817304ms)
+✔ BE:IAM-12 — enrollment encrypts secrets, binds the initiating session and returns recovery codes once (76.855194ms)
+✔ BE:IAM-12/13 — TOTP replay is rejected across sessions and elevation expires (60.20692ms)
+✔ BE:IAM-12 — failed verification attempts persist and enrollment cannot reset lockout (112.912329ms)
+✔ BE:IAM-12 — simultaneous recovery-code uses have one winner, never grant roles (67.508889ms)
+✔ BE:IAM-12 — MFA ciphertext cannot be transplanted to another account (1.588252ms)
+(node:347) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP MFA workflow verifies real session and rechecks account suspension (198.312243ms)
+(node:356) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ atomic consumer deduplicates concurrent deliveries, exposes owner-only pages and durable read state (475.996223ms)
+(node:356) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ failed attempts roll back delivery writes, back off, exhaust, and require authorized audited replay (139.686283ms)
+✔ notification templates reject unknown events and malformed envelopes cannot persist (9.546555ms)
+(node:356) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Notification paging preserves microsecond boundaries and read-state changes (638.888747ms)
+(node:356) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Inbox bulk read is atomic, bounded and owner scoped while new arrivals remain unread (371.536199ms)
+✔ BE:PAY-04/05 — concurrent initiation commits exactly one trusted intent (277.401689ms)
+✔ BE:PRC-08 — changed policy prevents payment intent persistence (104.121607ms)
+✔ BE:RSV-03 — expired hold blocks payment without worker cleanup (53.689243ms)
+✔ BE:ACL-01 — payment preparation and status reject another owner (52.150658ms)
+✔ BE:PAY-10 — unknown outcomes do not erase resolved mappings (77.056819ms)
+✔ BE:WHK-06 — stale observations cannot regress captured/refunded states or change associations (129.853978ms)
+✔ BE:PAY-13 — retry claims require failed observations and serialize concurrent reopen requests (89.394045ms)
+(node:375) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP payments enforce authentication, ownership, strict input and invalid signature rejection (248.964315ms)
+✔ Customer recovery requests persist once under concurrency and preserve worker leases, backoff and review (124.690637ms)
+(node:375) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Raw signed webhook HTTP ingestion rejects malformed content, deduplicates deliveries and detects reused IDs (76.952777ms)
+(node:375) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Recovery HTTP command is owner scoped; callback rejects a different provider order before contacting Razorpay (156.696391ms)
+✔ pending cancellation is atomic, idempotent, releases capacity and persists one durable event (214.013848ms)
+✔ stale preview, missing acknowledgment and cross-account cancellation are rejected (99.980018ms)
+✔ payment initiation after preview requires renewed risk acknowledgment (106.707444ms)
+✔ late successful capture after cancellation records a refund obligation and cannot resurrect booking (78.803821ms)
+✔ capture versus cancellation has one outcome and never both sold inventory and a cancelled pending order (474.316262ms)
+✔ releasing an expired seat hold preserves its new reservation owner (97.376389ms)
+(node:406) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP preview/cancel enforces ownership and records only server-validated cancellation (346.05812ms)
+✔ an inconsistent consumed hold rolls back cancellation, command, audit and outbox writes (67.075054ms)
+✔ BE:PRC-02/05 — exact half-up rounding and inclusive/exclusive tax treatment (0.624376ms)
+✔ BE:PRC-12 — largest remainder allocations conserve every paise deterministically (0.766792ms)
+✔ BE:PRC-02 — rejects unsafe values and no implicit commercial terms (17.312025ms)
+✔ BE:PRC-05 — allocation independent of input ordering (0.236709ms)
+✔ BE:PRC-01/06/07 — server itemization persists and repeated quotes never extend expiry (249.017689ms)
+✔ BE:PRC-04 — absent policy produces unavailable, never zero-fee defaults (34.694258ms)
+✔ BE:PRC-08/09 — policy change requires new quote and explicit review (68.058181ms)
+✔ BE:API-10/11/12 — concurrent acceptance, changed key payload and retry after expiry (115.211832ms)
+✔ BE:PRC-10/11,BKG-04 — accepted policies and amounts cannot be mutated (88.900086ms)
+✔ BE:RSV-03 — expiration and sales suspension are checked during acceptance (153.819928ms)
+✔ BE:BKG-03 — changed schedule cannot be accepted under the old snapshot (94.503843ms)
+✔ BE:ACL-01 — quote ownership and reservation association are enforced (112.277911ms)
+✔ BE:SCH-08 — simultaneous policy assignment updates have one version winner (70.706768ms)
+(node:442) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ HTTP quote → acceptance → booking; tampering, staff MFA/grants and immutable snapshots (317.031038ms)
+(node:449) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Profile edits serialize first saves, preserve identical retries and reject stale overwrite (315.534951ms)
+(node:449) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+{"level":50,"time":1794226952954,"pid":449,"hostname":"989958138fdc","reqId":"req-k","requestId":"req-k","msg":"Request failed"}
+✔ Saved attendees require consent, encrypt private data, isolate accounts and withdraw without retaining details (136.119528ms)
+(node:480) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Provider owners correct and resubmit drafts with retry, version and current-role protection (400.139406ms)
+✔ Provider correction UI exposes escaped feedback and owner resubmission only (8.19597ms)
+(node:480) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Private onboarding supports incomplete drafts and gates submission with owner-only audited details (194.895071ms)
+(node:480) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Provider review history is durable, paginated and private; retries never repeat a transition (427.055153ms)
+(node:480) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Provider queue pages beyond 100 with stable ties, type filters and protected access (267.424841ms)
+✔ Provider queue navigation preserves filters and exact timestamp boundaries (8.18697ms)
+(node:480) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Organization creation retries are atomic, actor scoped and require active current ownership (81.487117ms)
+(node:480) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+{"level":50,"time":1794226954586,"pid":480,"hostname":"989958138fdc","reqId":"req-7","requestId":"req-7","code":"P0001","msg":"Request failed"}
+✔ Provider submission recovery preserves later review state and original actor with atomic persistence (96.195471ms)
+(node:487) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ verified recipient acceptance, owner-only roles, immediate revocation and safe replay (415.312345ms)
+(node:487) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ expired/revoked invitations cannot grant access and cross-tenant staff mutations fail (116.255625ms)
+✔ registration versions, owner privacy, encrypted persistence and retry invariants (170.631286ms)
+✔ server rejects unknown, missing and malformed attendee fields (1.567085ms)
+✔ concurrent form publication has one winner; missing key cannot create an order (93.021967ms)
+✔ Development loopback aliases require the same configured protocol and port; production stays exact (1.557669ms)
+(node:532) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Booking HTTP requests allow local alias but retain authentication and reject cross-site and forged host origins (197.350116ms)
+✔ File secrets reject ambiguous configuration and treat empty provider files as unavailable (0.785959ms)
+✔ Readiness rejects missing or altered migrations and permits additive rolling upgrades (0.268375ms)
+✔ Saved attendee reuse is explicit and excludes declarations, dates and choices (7.211635ms)
+(node:601) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Session listing is private, token-free, owner scoped and identifies current session (174.992293ms)
+(node:601) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Single-session revocation is idempotent, immediate and cannot revoke another account (62.965215ms)
+(node:601) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Revoke others preserves current session and rejects a suspended account (40.491891ms)
+(node:608) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Supervisor assignment verifies grants, target eligibility, replay, conflicts and audit (255.219782ms)
+(node:608) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Assignment rejects inactive targets and serializes competing supervisors (71.949561ms)
+(node:608) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Support directory restricts disclosure, pages results, and assignment rechecks selected agents (389.420683ms)
+(node:608) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Supervisor assignment notices are atomic, private, deduplicated and historical after reassignment (104.694816ms)
+(node:608) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Directory access audit records bounded identities, excludes search/contact data and rolls back on failure (277.595189ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ support lifecycle, audience privacy, access controls and audit persist through real HTTP (282.628446ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ simultaneous claims and a lost-response retry cannot overwrite the winner (72.706979ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Customer escalation is owner-only, atomic, retry-safe and visible to support (76.782818ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Customer escalation conflicts with staff changes and resolved cases require reopening (69.968641ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Case creation retries are atomic, actor-scoped and preserve later case changes (58.390292ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Customer and staff reply retries commit one message and cannot reopen later resolution (108.610239ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ support queue pages preserve timestamp ties, scope and current authorization (62.717673ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Keyed workflow actions recover original outcomes without repeating transitions or audits (148.700879ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Customer-visible staff replies produce one private durable inbox notice and an owned case link (76.699152ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Customer case history traverses timestamp ties without exposing other owners or internal data (51.192198ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Customer conversations page visible messages with precise boundaries and owner/case isolation (46.478483ms)
+(node:609) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Staff thread pages retain audience labels, audit each read and recheck permissions without advancing edits (59.349502ms)
+✔ Ticket directions encode destinations and omit unusable links (1.102544ms)
+✔ Ticket direction rendering escapes addresses and retains a manual fallback (5.167341ms)
+✔ owner wallet renders independently decodable stable QR credentials without issuing new tickets (200.070578ms)
+✔ pending bookings expose no credential or download and incomplete issuance is explicit (48.474195ms)
+✔ per-ticket revoked, transferred and redeemed states suppress QR display (37.486512ms)
+✔ cancelled and expired occurrences never expose QR credentials; current times flag schedule changes (42.112394ms)
+✔ calendar is independently parseable, UTC-correct, folded by bytes and free of ticket credentials (48.967611ms)
+✔ printable documents escape supplied text and include only embedded QR images (43.481979ms)
+(node:656) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ authenticated HTTP ticket, document and calendar routes deny cross-account retrieval (151.858968ms)
+✔ calendar remains available during ticket-key outage and document retry preserves issued identities (38.726847ms)
+(node:656) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ a decoded customer QR works through authorized HTTP admission and redeemed tickets lose their QR (69.714559ms)
+✔ Ticket directions use scheduled venue addresses across wallet, document and calendar without credentials (89.091502ms)
+✔ Venue image initial render preserves descriptions without loading external images or interpreting supplied markup (3.804423ms)
+✔ Plan domain validates capacity, duplicate identities/geometry and companion references (32.200879ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Provider venue/plan APIs isolate tenants and enforce immutable versions with one concurrent winner (126.701848ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Concurrent overlapping schedules from distinct actors produce exactly one occurrence (70.70181ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Scheduling retries return original result, enforce exact prices and honor turnaround (55.543705ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ New plan cannot rewrite scheduled snapshots; foreign plans and unapproved providers are rejected (80.556823ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Scheduling rejects wrong venue-local offsets and obsolete arbitrary-resource payloads (31.865254ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Draft edits preserve revisions, reject stale versions and stay private until moderation (56.466831ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Recurring series preview, excluded dates and concurrent retry create each occurrence exactly once (66.849345ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ A conflict in a later recurring session rolls back earlier sessions, resources, commands and projection (43.656687ms)
+✔ Recurrence bounds, explicit offsets and calendar exclusions are validated (0.655459ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Public venues require published discovery and approved providers, with bounded scoped pages (123.958094ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Venue guidance is tenant protected, versioned, audited and public only through discovery (41.247392ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Venue contacts require explicit publication permission and support withdrawal without leaking private values (48.072819ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Venue media validates references and preserves ordered metadata with tenant, publication and version controls (63.435799ms)
+(node:725) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+✔ Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues (69.610349ms)
+ℹ tests 185
+ℹ suites 0
+ℹ pass 185
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5732.29754
+npm notice
+npm notice New major version of npm available! 11.20.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

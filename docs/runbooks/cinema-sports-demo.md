@@ -24,3 +24,5 @@ The seed refuses non-development configuration, nonlocal hosts and unexpected da
 Evidence: `docs/evidence/demo-seed.json`, `demo-seed-repeat.json`, `demo-http-verification.json`, `cinema-sports-tests.txt`, `cinema-sports-full-suite.txt`, `cinema-sports-container-tests.txt`, `local-smoke.json`. The read-only demo verifier expects available demo capacity and verifies responses/images, not browser rendering. All authenticated category booking tests run in the isolated bookmyticket_test database.
 
 External delivery, live payments/refunds, browser/a11y acceptance, season passes, concessions, advanced category operations and production deployment remain pending.
+
+From v0.52.0, publishing newly submitted demo listings requires `DEMO_REVIEWER_ID` to reference an existing active platform moderator. The seed uses the real review authorization adapter and does not create moderation grants. Existing published demo listings need no new review. See [listing review recovery](listing-review-retries.md).

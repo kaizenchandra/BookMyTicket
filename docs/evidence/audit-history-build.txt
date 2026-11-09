@@ -1,0 +1,24 @@
+
+> bookmyticket@0.22.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 41 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.71 kB │ gzip:   0.40 kB
+dist/assets/index-7lNqs3mn.css   20.64 kB │ gzip:   5.00 kB
+dist/assets/index-DFcH7R8n.js   360.55 kB │ gzip: 105.36 kB
+
+✓ built in 87ms
+
+> bookmyticket@0.22.0 check:architecture
+> node scripts/check-architecture.mjs
+
+Architecture import checks passed for 143 module files. SQL ownership and runtime composition require separate review.
+
+> bookmyticket@0.22.0 contracts
+> node --import tsx scripts/generate-contracts.ts
+
+Generated 94 API paths.

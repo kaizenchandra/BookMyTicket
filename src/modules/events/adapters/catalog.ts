@@ -37,6 +37,12 @@ export class PostgresEventCatalog implements EventCatalogPort {
           city: input.city,
           description: input.description,
           posterUrl: input.posterUrl,
+          retainedMetadata: {
+            organizer: input.organizer,
+            inclusions: input.inclusions,
+            exclusions: input.exclusions,
+            entryInstructions: input.entryInstructions,
+          },
           metadata: {
             managedBy: "events",
             language: input.language,

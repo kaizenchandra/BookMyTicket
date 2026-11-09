@@ -7,6 +7,21 @@ import type {
 const projection =
   'language,marketing_email AS "marketingEmail",version,updated_at AS "updatedAt"';
 export class PostgresCommunications implements CommunicationStore {
+  async history(owner: string, beforeVersion?: number) {
+    const rows = (
+      await pool.query(
+        `SELECT purpose,policy_version AS "policyVersion",granted,preference_version AS "preferenceVersion",recorded_at AS "recordedAt"
+       FROM profiles.marketing_consent_history WHERE account_id=$1 AND ($2::integer IS NULL OR preference_version<$2)
+       ORDER BY preference_version DESC LIMIT 21`,
+        [owner, beforeVersion ?? null],
+      )
+    ).rows;
+    const items = rows.slice(0, 20);
+    return {
+      items,
+      nextCursor: rows.length > 20 ? items.at(-1).preferenceVersion : null,
+    };
+  }
   async get(owner: string) {
     const result = await pool.query(
       `SELECT ${projection} FROM profiles.communication_preferences WHERE account_id=$1`,

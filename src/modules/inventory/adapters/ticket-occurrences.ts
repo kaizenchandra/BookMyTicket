@@ -14,6 +14,16 @@ export class PostgresTicketOccurrences implements TicketOccurrences {
     return rows.map((r) => ({
       id: r.id,
       venueName: r.venue_name,
+      venueAddress:
+        typeof r.venue_snapshot?.address === "string" &&
+        r.venue_snapshot.address.trim()
+          ? r.venue_snapshot.address.trim()
+          : null,
+      venueCity:
+        typeof r.venue_snapshot?.city === "string" &&
+        r.venue_snapshot.city.trim()
+          ? r.venue_snapshot.city.trim()
+          : null,
       timeZone: r.time_zone,
       startsAt: r.starts_at.toISOString(),
       endsAt: r.ends_at.toISOString(),

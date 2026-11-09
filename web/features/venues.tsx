@@ -1,3 +1,5 @@
+import { VenueMediaEditor } from "./venue-media.tsx";
+import type { VenueImage } from "../../src/modules/venues/domain/media.ts";
 import { OnlineAccessEditor } from "./online-access.tsx";
 import { CategoryEditor } from "./category-editor.tsx";
 import { AttendeeExportPanel } from "./attendee-exports.tsx";
@@ -9,7 +11,23 @@ import type {
   Plan,
   PlanResource,
 } from "../../src/modules/venues/domain/plan.ts";
-type Venue = { id: string; name: string; time_zone: string };
+type Venue = {
+  media: VenueImage[];
+  media_version: number;
+  contact_phone: string;
+  contact_email: string;
+  contact_public: boolean;
+  contact_version: number;
+  id: string;
+  name: string;
+  time_zone: string;
+  guidance_version: number;
+  amenities: string;
+  accessibility: string;
+  transport_guidance: string;
+  parking_guidance: string;
+  entry_policies: string;
+};
 type Space = {
   id: string;
   venue_id: string;
@@ -307,6 +325,129 @@ function Workspace({
             Save venue
           </button>
         </form>
+      </details>
+      <details>
+        <summary>Edit venue photos and maps</summary>
+        <p>
+          Add up to eight HTTPS-hosted images you are authorized to publish.
+          Supply descriptions and credits. These appear on public venue pages
+          after saving. Preview and customer images load from external hosts
+          only when requested; those hosts receive the viewer's network address.
+          File uploads and cropping are not available here.
+        </p>
+        {data.venues.map((v) => (
+          <VenueMediaEditor
+            key={`${v.id}:${v.media_version}`}
+            venue={v}
+            busy={busy}
+            onDirty={() => setDirty(true)}
+            save={(input) =>
+              submit(`/organizations/${org}/venues/${v.id}/media`, input)
+            }
+          />
+        ))}
+        {!data.venues.length && <p>Create a venue to add images.</p>}
+      </details>
+      <details>
+        <summary>Edit venue contact details</summary>
+        <p>
+          Use contact details you are authorized to publish. Saving privately
+          does not display them on the public venue page. Publishing requires an
+          approved provider and published venue listing.
+        </p>
+        {data.venues.map((v) => (
+          <form
+            key={`contact:${v.id}:${v.contact_version}`}
+            onChange={() => setDirty(true)}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              await submit(`/organizations/${org}/venues/${v.id}/contact`, {
+                expectedVersion: v.contact_version,
+                phone: text(f, "phone").trim(),
+                email: text(f, "email").trim(),
+                public: f.get("public") === "on",
+              });
+            }}
+          >
+            <h3>{v.name}</h3>
+            <label>
+              Phone with country code (for example +919876543210)
+              <input
+                type="tel"
+                name="phone"
+                defaultValue={v.contact_phone}
+                maxLength={16}
+                pattern="\+[1-9][0-9]{6,14}"
+              />
+            </label>
+            <label>
+              Email
+              <input
+                type="email"
+                name="email"
+                defaultValue={v.contact_email}
+                maxLength={254}
+              />
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="public"
+                defaultChecked={v.contact_public}
+              />
+              I authorize public display of these venue contact details
+            </label>
+            <p>
+              Uncheck to remove public contact details. Clear both fields to
+              delete the saved values.
+            </p>
+            <button disabled={busy}>Save contact details</button>
+          </form>
+        ))}
+        {!data.venues.length && <p>Create a venue to add contact details.</p>}
+      </details>
+      <details>
+        <summary>Edit venue guidance</summary>
+        <p>
+          These details appear publicly when the venue has a published listing
+          and an approved provider. Session-specific restrictions remain
+          separate.
+        </p>
+        {data.venues.map((v) => (
+          <form
+            key={`${v.id}:${v.guidance_version}`}
+            onChange={() => setDirty(true)}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              await submit(`/organizations/${org}/venues/${v.id}/guidance`, {
+                expectedVersion: v.guidance_version,
+                amenities: text(f, "amenities"),
+                accessibility: text(f, "accessibility"),
+                transportGuidance: text(f, "transportGuidance"),
+                parkingGuidance: text(f, "parkingGuidance"),
+                entryPolicies: text(f, "entryPolicies"),
+              });
+            }}
+          >
+            <h3>{v.name}</h3>
+            {[
+              ["amenities", "Amenities", v.amenities],
+              ["accessibility", "Accessibility", v.accessibility],
+              ["transportGuidance", "Transport guidance", v.transport_guidance],
+              ["parkingGuidance", "Parking guidance", v.parking_guidance],
+              ["entryPolicies", "Venue entry policies", v.entry_policies],
+            ].map(([name, label, value]) => (
+              <label key={name}>
+                {label}
+                <textarea name={name} defaultValue={value} maxLength={2000} />
+              </label>
+            ))}
+            <button disabled={busy}>Save guidance</button>
+          </form>
+        ))}
+        {!data.venues.length && <p>Create a venue to add guidance.</p>}
       </details>
       <details>
         <summary>Create a screen or other space</summary>

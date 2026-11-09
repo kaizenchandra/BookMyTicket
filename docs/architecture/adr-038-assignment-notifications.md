@@ -1,0 +1,11 @@
+# ADR 038 — In-app supervisor assignment notices
+
+A successful supervisor assignment publishes support.case_assigned through Reporting's DurableEvents port inside the existing assignment/case/audit/command transaction. Replayed commands return before publishing, while failed eligibility/version checks publish nothing. The event aggregate is the case UUID; payload contains envelope version, ownerId (the recipient agent) and caseVersion. It excludes case subject, customer identity, assignment reason and conversation text.
+
+The existing inbox consumer recognizes the event and writes a generic historical notice linked to /operations?caseId=<UUID>. Existing event-ID deduplication, transactional delivery acknowledgment, bounded retry/backoff/dead-letter handling and authorized replay apply. No separate notification infrastructure, migration or credentials are needed. Normal self-claim actions are outside this event's scope; historical assignments are not backfilled.
+
+A notice reports that a supervisor assigned a case at that time. It does not guarantee current ownership and cannot mutate a later assignment. An active recipient may still read the generic historical notice after their support grant is revoked; opening the case independently requires current support permission and fresh MFA. Suspended accounts cannot authenticate. No subject/reason/body is disclosed through that notice. Links are navigation, not capabilities.
+
+The support workspace selects the linked case at mount and requests existing protected detail independently of queue pagination. The path component is encoded and server UUID validation remains authoritative. Existing case locks and version checks continue to guard all actions. Inbox links have an explicit View assigned case label.
+
+Tests exercise concurrent assignment retries, failed/conflicting commands, reassignment before delivery, repeated consumer delivery, recipient isolation, read-state ownership, no content disclosure and revoked permission/MFA on case opening. Browser deep-link interaction and accessibility remain unverified. Email/SMS/push assignment delivery, self-claim notices, assignment SLA/reminder policies and full notification acceptance remain open.

@@ -1,0 +1,9 @@
+# ADR 042: Provider-managed venue guidance
+
+FE:VEN-02 and FE:VEN-05 require travel guidance and venue-wide policies alongside existing amenities and accessibility. Venues owns transport_guidance, parking_guidance, entry_policies and guidance_version. Migration 042 adds empty defaults for existing venues. No fictional guidance is backfilled.
+
+POST /api/v1/organizations/:id/venues/:venueId/guidance replaces these five informational fields using expectedVersion. The application port delegates to the Venues adapter, which checks writable organization membership within the transaction, locks the tenant-owned venue and rejects stale versions with 409. Successful writes increment the version and record venue.guidance_updated atomically. Audit details contain organization and version, not free text. An audit failure rolls back the update. A repeat with the old version returns a conflict; reload and compare before retrying an uncertain result.
+
+The provider editor preserves entered text on failure and refreshes server data after success. The public API exposes guidance only through the existing provider/publication gates. Plain text is escaped by React; each field accepts up to 2000 characters and may be cleared. Venue-wide guidance is labeled separately from session-specific restrictions. This information does not replace accepted order terms, change seating plans, grant admission or alter existing booking snapshots. Existing occurrence snapshots remain unchanged.
+
+The native and container integration tests cover anonymous/read-only/cross-organization rejection, missing venue, strict validation, concurrent writes, private/public reads, audit metadata, rollback and clearing fields. Browser/keyboard/accessibility acceptance remains open. Contact consent, media and separate venue publication remain future work.

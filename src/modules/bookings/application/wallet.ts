@@ -1,3 +1,4 @@
+import { venueDirections } from "../domain/directions.ts";
 import type { WalletView } from "../contracts/wallet.ts";
 import type { Transaction } from "../../../shared/database.ts";
 import type { TicketOccurrences } from "../../inventory/contracts/index.ts";
@@ -88,6 +89,11 @@ export class TicketWallet {
           "pending" | "issued",
         occurrences: occurrences.map((o) => ({
           ...o,
+          directionsUrl: venueDirections(
+            o.venueName,
+            o.venueAddress,
+            o.venueCity,
+          ),
           admissionOpensAt: new Date(
             Date.parse(o.startsAt) - 3600000,
           ).toISOString(),

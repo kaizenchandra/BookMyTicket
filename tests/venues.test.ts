@@ -431,6 +431,7 @@ test("Draft edits preserve revisions, reject stale versions and stay private unt
       "POST",
       `/api/v1/organizations/${f.org}/listings`,
       input,
+      randomUUID(),
     );
     assert.equal(created.statusCode, 200, created.body);
     const listing = created.json();
@@ -452,12 +453,20 @@ test("Draft edits preserve revisions, reject stale versions and stay private unt
         }),
       ),
     );
-    assert.equal(updates.filter((r) => r.statusCode === 200).length, 1);
-    assert(
-      updates
-        .filter((r) => r.statusCode !== 200)
-        .every((r) => r.json().code === "CONFLICT"),
-    );
+    assert.equal(updates.filter((r) => r.statusCode === 200).length, 6);
+    for (const update of updates)
+      assert.deepEqual(update.json(), updates[0].json());
+    const changedRetry = await f.app.inject({
+      method: "PUT",
+      url: `/api/v1/listings/${listing.id}`,
+      headers: f.headers,
+      payload: {
+        ...input,
+        title: "Different stale edit",
+        version: listing.version,
+      },
+    });
+    assert.equal(changedRetry.statusCode, 409);
     assert.equal(
       (
         await pool.query(
@@ -704,4 +713,634 @@ test("Recurrence bounds, explicit offsets and calendar exclusions are validated"
       ),
     { code: "RECURRENCE_OFFSET_REQUIRED" },
   );
+});
+
+test("Public venues require published discovery and approved providers, with bounded scoped pages", async () => {
+  const f = await fixture();
+  const get = (suffix = "") =>
+    f.app.inject({ method: "GET", url: `/api/v1/venues/${f.venue}${suffix}` });
+  try {
+    assert.equal((await get()).statusCode, 404);
+    const ids: string[] = [];
+    for (let day = 0; day < 23; day++) {
+      const shift = (value: string) =>
+        new Date(Date.parse(value) + day * 86400000).toISOString();
+      const scheduled = await f.request(
+        "POST",
+        "/api/v1/occurrences",
+        {
+          ...f.input,
+          startsAt: shift(f.input.startsAt),
+          endsAt: shift(f.input.endsAt),
+          salesClose: shift(f.input.salesClose),
+        },
+        randomUUID(),
+      );
+      assert.equal(scheduled.statusCode, 200, scheduled.body);
+    }
+    const first = await get();
+    assert.equal(first.statusCode, 200, first.body);
+    const page = first.json();
+    assert.equal(page.venue.name, "TEST VENUE");
+    assert.equal(page.venue.address, "ISOLATED FIXTURE ADDRESS");
+    assert.equal(page.venue.accessibility, "Step-free test fixture");
+    assert.equal(page.venue.organizationId, undefined);
+    assert.equal(page.items.length, 20);
+    assert(page.nextCursor);
+    ids.push(...page.items.map((item: any) => item.id));
+    const next = await get(`?after=${encodeURIComponent(page.nextCursor)}`);
+    assert.equal(next.statusCode, 200, next.body);
+    assert.equal(next.json().items.length, 3);
+    assert.equal(next.json().nextCursor, null);
+    ids.push(...next.json().items.map((item: any) => item.id));
+    assert.equal(new Set(ids).size, 23);
+    assert.equal((await get("?after=invalid")).statusCode, 422);
+    const cursor = JSON.parse(
+      Buffer.from(page.nextCursor, "base64url").toString(),
+    );
+    cursor.scope = "0".repeat(64);
+    assert.equal(
+      (
+        await get(
+          `?after=${Buffer.from(JSON.stringify(cursor)).toString("base64url")}`,
+        )
+      ).statusCode,
+      422,
+    );
+    await pool.query(
+      "UPDATE providers.organizations SET state='suspended' WHERE id=$1",
+      [f.org],
+    );
+    assert.equal((await get()).statusCode, 404);
+    await pool.query(
+      "UPDATE providers.organizations SET state='approved' WHERE id=$1",
+      [f.org],
+    );
+    await pool.query("UPDATE catalog.listings SET state='draft' WHERE id=$1", [
+      f.listing,
+    ]);
+    assert.equal((await get()).statusCode, 404);
+    await pool.query(
+      "UPDATE catalog.listings SET state='published' WHERE id=$1",
+      [f.listing],
+    );
+    await pool.query(
+      "UPDATE catalog.session_projection SET starts_at=now()-interval '1 day' WHERE listing_id=$1",
+      [f.listing],
+    );
+    const empty = await get();
+    assert.equal(empty.statusCode, 200, empty.body);
+    assert.deepEqual(empty.json().items, []);
+    assert.equal(empty.json().nextCursor, null);
+  } finally {
+    await f.app.close();
+  }
+});
+
+test("Venue guidance is tenant protected, versioned, audited and public only through discovery", async () => {
+  const f = await fixture();
+  const url = `/api/v1/organizations/${f.org}/venues/${f.venue}/guidance`;
+  const input = {
+    expectedVersion: 1,
+    amenities: "Water",
+    accessibility: "Step-free entrance",
+    transportGuidance: "Metro exit 2",
+    parkingGuidance: "No on-site parking",
+    entryPolicies: "Bag check at entry",
+  };
+  try {
+    assert.equal(
+      (await f.app.inject({ method: "POST", url, payload: input })).statusCode,
+      401,
+    );
+    assert.equal(
+      (
+        await f.request("POST", url, {
+          ...input,
+          transportGuidance: "x".repeat(2001),
+        })
+      ).statusCode,
+      422,
+    );
+    assert.equal(
+      (await f.request("POST", url, { ...input, unexpected: true })).statusCode,
+      422,
+    );
+    assert.equal(
+      (await f.request("POST", url.replace(f.org, randomUUID()), input))
+        .statusCode,
+      403,
+    );
+    assert.equal(
+      (await f.request("POST", url.replace(f.venue, randomUUID()), input))
+        .statusCode,
+      404,
+    );
+    await pool.query(
+      "UPDATE providers.memberships SET role='viewer' WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    assert.equal((await f.request("POST", url, input)).statusCode, 403);
+    await pool.query(
+      "UPDATE providers.memberships SET role='owner' WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    const results = await Promise.all([
+      f.request("POST", url, input),
+      f.request("POST", url, { ...input, transportGuidance: "Bus stop 3" }),
+    ]);
+    assert.deepEqual(results.map((r) => r.statusCode).sort(), [200, 409]);
+    const stored = (
+      await pool.query("SELECT * FROM venues.venues WHERE id=$1", [f.venue])
+    ).rows[0];
+    assert.equal(stored.guidance_version, 2);
+    const audits = (
+      await pool.query(
+        "SELECT details FROM reporting.audit WHERE target=$1 AND action='venue.guidance_updated'",
+        [f.venue],
+      )
+    ).rows;
+    assert.deepEqual(audits, [
+      { details: { organizationId: f.org, version: 2 } },
+    ]);
+    assert.equal(
+      (await f.app.inject({ method: "GET", url: `/api/v1/venues/${f.venue}` }))
+        .statusCode,
+      404,
+    );
+    const scheduled = await f.request(
+      "POST",
+      "/api/v1/occurrences",
+      f.input,
+      randomUUID(),
+    );
+    assert.equal(scheduled.statusCode, 200, scheduled.body);
+    const read = await f.app.inject({
+      method: "GET",
+      url: `/api/v1/venues/${f.venue}`,
+    });
+    assert.equal(read.statusCode, 200, read.body);
+    assert.equal(
+      read.json().venue.transportGuidance,
+      stored.transport_guidance,
+    );
+    assert.equal(read.json().venue.parkingGuidance, input.parkingGuidance);
+    assert.equal(read.json().venue.entryPolicies, input.entryPolicies);
+    const { PostgresVenues } =
+      await import("../src/modules/venues/adapters/postgres.ts");
+    const { PostgresProviders } =
+      await import("../src/modules/providers/adapters/postgres.ts");
+    const store = new PostgresVenues(new PostgresProviders(), {
+      record: async () => {
+        throw new Error("fixture audit failure");
+      },
+    });
+    await assert.rejects(
+      store.guidance(f.owner, f.org, f.venue, { ...input, expectedVersion: 2 }),
+      /fixture audit failure/,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT guidance_version FROM venues.venues WHERE id=$1",
+          [f.venue],
+        )
+      ).rows[0].guidance_version,
+      2,
+    );
+    const cleared = await f.request("POST", url, {
+      ...input,
+      expectedVersion: 2,
+      transportGuidance: "",
+      parkingGuidance: "",
+      entryPolicies: "",
+    });
+    assert.equal(cleared.statusCode, 200, cleared.body);
+    assert.equal(
+      (
+        await f.app.inject({ method: "GET", url: `/api/v1/venues/${f.venue}` })
+      ).json().venue.entryPolicies,
+      "",
+    );
+  } finally {
+    await f.app.close();
+  }
+});
+
+test("Venue contacts require explicit publication permission and support withdrawal without leaking private values", async () => {
+  const f = await fixture();
+  const url = `/api/v1/organizations/${f.org}/venues/${f.venue}/contact`;
+  const input = {
+    expectedVersion: 1,
+    phone: "+919876543210",
+    email: "venue@fixture.invalid",
+    public: false,
+  };
+  const read = () =>
+    f.app.inject({ method: "GET", url: `/api/v1/venues/${f.venue}` });
+  try {
+    assert.equal(
+      (await f.app.inject({ method: "POST", url, payload: input })).statusCode,
+      401,
+    );
+    assert.equal(
+      (await f.request("POST", url.replace(f.org, randomUUID()), input))
+        .statusCode,
+      403,
+    );
+    assert.equal(
+      (await f.request("POST", url.replace(f.venue, randomUUID()), input))
+        .statusCode,
+      404,
+    );
+    await pool.query(
+      "UPDATE providers.memberships SET role='viewer' WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    assert.equal((await f.request("POST", url, input)).statusCode, 403);
+    await pool.query(
+      "UPDATE providers.memberships SET role='owner' WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    for (const changes of [
+      { phone: "javascript:alert(1)" },
+      { email: "bad\r\nBcc: other@example.com" },
+      { public: true, phone: "", email: "" },
+      { extra: true },
+    ])
+      assert.equal(
+        (await f.request("POST", url, { ...input, ...changes })).statusCode,
+        422,
+      );
+    assert.equal((await f.request("POST", url, input)).statusCode, 200);
+    assert.equal(
+      (await f.request("POST", "/api/v1/occurrences", f.input, randomUUID()))
+        .statusCode,
+      200,
+    );
+    let response = await read();
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().venue.contact, null);
+    assert(!response.body.includes(input.phone));
+    assert(!response.body.includes(input.email));
+    const races = await Promise.all([
+      f.request("POST", url, { ...input, expectedVersion: 2, public: true }),
+      f.request("POST", url, { ...input, expectedVersion: 2, public: true }),
+    ]);
+    assert.deepEqual(races.map((r) => r.statusCode).sort(), [200, 409]);
+    assert.deepEqual((await read()).json().venue.contact, {
+      phone: input.phone,
+      email: input.email,
+    });
+    const audits = (
+      await pool.query(
+        "SELECT details FROM reporting.audit WHERE target=$1 AND action='venue.contact_updated' ORDER BY (details->>'version')::int",
+        [f.venue],
+      )
+    ).rows;
+    assert.deepEqual(audits, [
+      { details: { organizationId: f.org, version: 2, public: false } },
+      { details: { organizationId: f.org, version: 3, public: true } },
+    ]);
+    const { PostgresVenues } =
+      await import("../src/modules/venues/adapters/postgres.ts");
+    const { PostgresProviders } =
+      await import("../src/modules/providers/adapters/postgres.ts");
+    const store = new PostgresVenues(new PostgresProviders(), {
+      record: async () => {
+        throw new Error("contact audit fixture failure");
+      },
+    });
+    await assert.rejects(
+      store.contact(f.owner, f.org, f.venue, { ...input, expectedVersion: 3 }),
+      /contact audit fixture failure/,
+    );
+    assert.deepEqual((await read()).json().venue.contact, {
+      phone: input.phone,
+      email: input.email,
+    });
+    assert.equal(
+      (await f.request("POST", url, { ...input, expectedVersion: 3 }))
+        .statusCode,
+      200,
+    );
+    response = await read();
+    assert.equal(response.json().venue.contact, null);
+    assert(!response.body.includes(input.phone));
+    assert(!response.body.includes(input.email));
+    const row = (
+      await pool.query(
+        "SELECT contact_phone,contact_email,contact_version FROM venues.venues WHERE id=$1",
+        [f.venue],
+      )
+    ).rows[0];
+    assert.equal(row.contact_phone, input.phone);
+    assert.equal(row.contact_version, 4);
+    assert.equal(
+      (
+        await f.request("POST", url, {
+          ...input,
+          expectedVersion: 4,
+          phone: "",
+          email: "",
+        })
+      ).statusCode,
+      200,
+    );
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT contact_email FROM venues.venues WHERE id=$1",
+          [f.venue],
+        )
+      ).rows[0].contact_email,
+      "",
+    );
+  } finally {
+    await f.app.close();
+  }
+});
+
+test("Venue media validates references and preserves ordered metadata with tenant, publication and version controls", async () => {
+  const f = await fixture();
+  const url = `/api/v1/organizations/${f.org}/venues/${f.venue}/media`;
+  const photo = {
+    url: "https://images.fixture.invalid/front.jpg",
+    kind: "photo",
+    alt: "Front entrance with ramp",
+    caption: "Main entrance",
+    attribution: "Fixture photographer",
+  };
+  const map = {
+    ...photo,
+    url: "https://images.fixture.invalid/map.png",
+    kind: "map",
+    alt: "North gate and access ramp",
+    caption: "Access map",
+  };
+  const input = { expectedVersion: 1, items: [photo, map] };
+  const read = () =>
+    f.app.inject({ method: "GET", url: `/api/v1/venues/${f.venue}` });
+  try {
+    assert.equal(
+      (await f.app.inject({ method: "POST", url, payload: input })).statusCode,
+      401,
+    );
+    assert.equal(
+      (await f.request("POST", url.replace(f.org, randomUUID()), input))
+        .statusCode,
+      403,
+    );
+    assert.equal(
+      (await f.request("POST", url.replace(f.venue, randomUUID()), input))
+        .statusCode,
+      404,
+    );
+    await pool.query(
+      "UPDATE providers.memberships SET role='viewer' WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    assert.equal((await f.request("POST", url, input)).statusCode, 403);
+    await pool.query(
+      "UPDATE providers.memberships SET role='owner' WHERE organization_id=$1 AND account_id=$2",
+      [f.org, f.owner],
+    );
+    for (const invalid of [
+      "javascript:alert(1)",
+      "data:image/png;base64,a",
+      "http://images.fixture.invalid/a.jpg",
+      "https://user:secret@images.fixture.invalid/a.jpg",
+      "https://images.fixture.invalid/a.jpg#fragment",
+      "https://images.fixture.invalid/a b.jpg",
+    ]) {
+      const response = await f.request("POST", url, {
+        ...input,
+        items: [{ ...photo, url: invalid }],
+      });
+      assert.equal(response.statusCode, 422, response.body);
+    }
+    for (const items of [
+      [{ ...photo, alt: " " }],
+      [{ ...photo, extra: true }],
+      [photo, photo],
+      Array.from({ length: 9 }, (_, i) => ({
+        ...photo,
+        url: `https://images.fixture.invalid/${i}.jpg`,
+      })),
+    ])
+      assert.equal(
+        (await f.request("POST", url, { ...input, items })).statusCode,
+        422,
+      );
+    const race = await Promise.all([
+      f.request("POST", url, input),
+      f.request("POST", url, input),
+    ]);
+    assert.deepEqual(race.map((r) => r.statusCode).sort(), [200, 409]);
+    assert.equal((await read()).statusCode, 404);
+    assert.equal(
+      (await f.request("POST", "/api/v1/occurrences", f.input, randomUUID()))
+        .statusCode,
+      200,
+    );
+    let response = await read();
+    assert.equal(response.statusCode, 200, response.body);
+    assert.deepEqual(response.json().venue.media, [photo, map]);
+    const audits = (
+      await pool.query(
+        "SELECT details FROM reporting.audit WHERE target=$1 AND action='venue.media_updated'",
+        [f.venue],
+      )
+    ).rows;
+    assert.deepEqual(audits, [
+      { details: { organizationId: f.org, version: 2, count: 2 } },
+    ]);
+    const { PostgresVenues } =
+      await import("../src/modules/venues/adapters/postgres.ts");
+    const { PostgresProviders } =
+      await import("../src/modules/providers/adapters/postgres.ts");
+    const store = new PostgresVenues(new PostgresProviders(), {
+      record: async () => {
+        throw new Error("media audit fixture failure");
+      },
+    });
+    await assert.rejects(
+      store.media(f.owner, f.org, f.venue, { expectedVersion: 2, items: [] }),
+      /media audit fixture failure/,
+    );
+    assert.deepEqual((await read()).json().venue.media, [photo, map]);
+    assert.equal(
+      (
+        await f.request("POST", url, {
+          expectedVersion: 2,
+          items: [map, photo],
+        })
+      ).statusCode,
+      200,
+    );
+    assert.deepEqual((await read()).json().venue.media, [map, photo]);
+    await pool.query("UPDATE catalog.listings SET state='draft' WHERE id=$1", [
+      f.listing,
+    ]);
+    assert.equal((await read()).statusCode, 404);
+    await pool.query(
+      "UPDATE catalog.listings SET state='published' WHERE id=$1",
+      [f.listing],
+    );
+    assert.equal(
+      (await f.request("POST", url, { expectedVersion: 3, items: [] }))
+        .statusCode,
+      200,
+    );
+    assert.deepEqual((await read()).json().venue.media, []);
+  } finally {
+    await f.app.close();
+  }
+});
+
+test("Venue favorites are retry safe, owner scoped, paginated and redact withdrawn venues", async () => {
+  const f = await fixture(),
+    other = randomUUID(),
+    token = randomBytes(24).toString("hex");
+  await pool.query("INSERT INTO identity.accounts(id,contact) VALUES($1,$2)", [
+    other,
+    `${other}@fixture.invalid`,
+  ]);
+  await pool.query(
+    "INSERT INTO identity.sessions(token_hash,account_id,expires_at) VALUES($1,$2,now()+interval '1 hour')",
+    [hashToken(token), other],
+  );
+  const url = `/api/v1/venue-favorites/${f.venue}`;
+  const request = (
+    method: "GET" | "PUT" | "DELETE",
+    path = url,
+    headers: Record<string, string> = f.headers,
+    payload?: any,
+  ) =>
+    f.app.inject({
+      method,
+      url: path,
+      headers,
+      ...(payload ? { payload } : {}),
+    });
+  try {
+    for (const method of ["GET", "PUT", "DELETE"] as const)
+      assert.equal(
+        (await request(method, url, {}, method === "PUT" ? {} : undefined))
+          .statusCode,
+        401,
+      );
+    assert.equal((await request("PUT", url, f.headers, {})).statusCode, 404);
+    assert.equal(
+      (await f.request("POST", "/api/v1/occurrences", f.input, randomUUID()))
+        .statusCode,
+      200,
+    );
+    const saves = await Promise.all(
+      Array.from({ length: 8 }, () => request("PUT", url, f.headers, {})),
+    );
+    assert(saves.every((r) => r.statusCode === 200 && r.json().saved === true));
+    const before = (
+      await pool.query(
+        "SELECT created_at FROM profiles.venue_favorites WHERE account_id=$1 AND venue_id=$2",
+        [f.owner, f.venue],
+      )
+    ).rows;
+    assert.equal(before.length, 1);
+    assert.equal((await request("GET")).json().saved, true);
+    assert.equal(
+      (await request("GET", url, { cookie: `session=${token}` })).json().saved,
+      false,
+    );
+    assert.equal(
+      (await request("PUT", url, f.headers, { accountId: other })).statusCode,
+      422,
+    );
+    let page = await request("GET", "/api/v1/venue-favorites");
+    assert.equal(page.statusCode, 200, page.body);
+    assert.deepEqual(page.json().items[0].venue, {
+      id: f.venue,
+      name: "TEST VENUE",
+      city: "Test city",
+      address: "ISOLATED FIXTURE ADDRESS",
+    });
+    assert.deepEqual(
+      (
+        await request("GET", "/api/v1/venue-favorites", {
+          cookie: `session=${token}`,
+        })
+      ).json().items,
+      [],
+    );
+    await pool.query(
+      "UPDATE providers.organizations SET state='suspended' WHERE id=$1",
+      [f.org],
+    );
+    assert.equal((await request("PUT", url, f.headers, {})).json().saved, true);
+    assert.equal(
+      (await request("PUT", url, { cookie: `session=${token}` }, {}))
+        .statusCode,
+      404,
+    );
+    page = await request("GET", "/api/v1/venue-favorites");
+    assert.equal(page.json().items[0].venue, null);
+    assert(!page.body.includes("TEST VENUE"));
+    assert.equal(
+      (
+        await pool.query(
+          "SELECT created_at FROM profiles.venue_favorites WHERE account_id=$1 AND venue_id=$2",
+          [f.owner, f.venue],
+        )
+      ).rows[0].created_at.toISOString(),
+      before[0].created_at.toISOString(),
+    );
+    // Retained bookmarks whose referenced venues are no longer available still page and remove correctly.
+    for (let i = 0; i < 25; i++)
+      await pool.query(
+        "INSERT INTO profiles.venue_favorites(account_id,venue_id) VALUES($1,$2)",
+        [f.owner, randomUUID()],
+      );
+    page = await request("GET", "/api/v1/venue-favorites");
+    assert.equal(page.json().items.length, 24);
+    assert(page.json().nextCursor);
+    const second = await request(
+      "GET",
+      `/api/v1/venue-favorites?after=${page.json().nextCursor}`,
+    );
+    assert.equal(second.json().items.length, 2);
+    assert.equal(second.json().nextCursor, null);
+    assert.equal(
+      new Set(
+        [...page.json().items, ...second.json().items].map(
+          (x: any) => x.venueId,
+        ),
+      ).size,
+      26,
+    );
+    assert.equal(
+      (await request("GET", "/api/v1/venue-favorites?after=bad")).statusCode,
+      422,
+    );
+    assert.equal(
+      (await request("GET", "/api/v1/venue-favorites?owner=other")).statusCode,
+      422,
+    );
+    const removes = await Promise.all(
+      Array.from({ length: 5 }, () => request("DELETE")),
+    );
+    assert(
+      removes.every((r) => r.statusCode === 200 && r.json().saved === false),
+    );
+    assert.equal((await request("GET")).json().saved, false);
+    await pool.query(
+      "UPDATE identity.accounts SET status='suspended' WHERE id=$1",
+      [f.owner],
+    );
+    assert.equal(
+      (await request("GET", "/api/v1/venue-favorites")).statusCode,
+      401,
+    );
+  } finally {
+    await f.app.close();
+  }
 });

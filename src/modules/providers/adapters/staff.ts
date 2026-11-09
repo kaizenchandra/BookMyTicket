@@ -7,7 +7,12 @@ import {
 import { AppError } from "../../../shared/errors.ts";
 import type { Principal } from "../../identity/contracts/index.ts";
 import type { SecurityAudit } from "../../reporting/contracts/index.ts";
-import type { StaffPort, StaffRole } from "../application/staff.ts";
+import type {
+  InvitationPageFilter,
+  StaffPort,
+  StaffPageFilter,
+  StaffRole,
+} from "../application/staff.ts";
 export class PostgresProviderStaff implements StaffPort {
   constructor(private audit: SecurityAudit) {}
   private async owner(tx: Transaction, actor: Principal, org: string) {
@@ -32,30 +37,67 @@ export class PostgresProviderStaff implements StaffPort {
         403,
       );
   }
-  async inbox(actor: Principal) {
-    return (
+  async inbox(actor: Principal, filter: InvitationPageFilter = {}) {
+    const rows = (
       await pool.query(
-        "SELECT i.id,i.organization_id,o.name AS organization_name,i.role,i.expires_at FROM providers.invitations i JOIN providers.organizations o ON o.id=i.organization_id WHERE i.email=$1 AND i.state='pending' AND i.expires_at>clock_timestamp() ORDER BY i.created_at DESC LIMIT 100",
-        [actor.contact],
+        `SELECT i.id,i.organization_id,o.name AS organization_name,i.role,i.expires_at,
+       to_char(i.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS "createdAt"
+       FROM providers.invitations i JOIN providers.organizations o ON o.id=i.organization_id
+       WHERE i.email=$1 AND i.state='pending' AND i.expires_at>clock_timestamp()
+       AND ($2::timestamptz IS NULL OR (i.created_at,i.id)<($2::timestamptz,$3::uuid))
+       ORDER BY i.created_at DESC,i.id DESC LIMIT 21`,
+        [actor.contact, filter.afterCreatedAt ?? null, filter.afterId ?? null],
       )
     ).rows;
+    const items = rows.slice(0, 20),
+      last = items.at(-1);
+    return {
+      items,
+      nextCursor:
+        rows.length > 20
+          ? { afterCreatedAt: last.createdAt, afterId: last.id }
+          : null,
+    };
   }
-  async list(actor: Principal, org: string) {
+  async list(actor: Principal, org: string, filter: StaffPageFilter = {}) {
     return transaction(async (tx) => {
       await this.owner(tx, actor, org);
+      const rows = (
+        await tx.query(
+          `SELECT id,email,role,CASE WHEN state='pending' AND expires_at<=statement_timestamp() THEN 'expired' ELSE state END AS state,version,expires_at,
+         to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS "createdAt"
+         FROM providers.invitations WHERE organization_id=$1
+         AND ($4::text IS NULL OR (CASE WHEN state='pending' AND expires_at<=statement_timestamp() THEN 'expired' ELSE state END)=$4)
+         AND ($2::timestamptz IS NULL OR (created_at,id)<($2::timestamptz,$3::uuid))
+         ORDER BY created_at DESC,id DESC LIMIT 21`,
+          [
+            org,
+            filter.afterCreatedAt ?? null,
+            filter.afterId ?? null,
+            filter.invitationState ?? null,
+          ],
+        )
+      ).rows;
+      const invitations = rows.slice(0, 20),
+        last = invitations.at(-1);
+      const memberRows = (
+        await tx.query(
+          "SELECT account_id,role,version FROM providers.memberships WHERE organization_id=$1 AND ($2::uuid IS NULL OR account_id>$2) AND ($3::text IS NULL OR role=$3) ORDER BY account_id LIMIT 21",
+          [org, filter.afterMemberId ?? null, filter.memberRole ?? null],
+        )
+      ).rows;
+      const members = memberRows.slice(0, 20);
       return {
-        members: (
-          await tx.query(
-            "SELECT account_id,role,version FROM providers.memberships WHERE organization_id=$1 ORDER BY account_id",
-            [org],
-          )
-        ).rows,
-        invitations: (
-          await tx.query(
-            "SELECT id,email,role,CASE WHEN state='pending' AND expires_at<=clock_timestamp() THEN 'expired' ELSE state END AS state,version,expires_at FROM providers.invitations WHERE organization_id=$1 ORDER BY created_at DESC LIMIT 100",
-            [org],
-          )
-        ).rows,
+        members,
+        nextMemberCursor:
+          memberRows.length > 20
+            ? { afterMemberId: members.at(-1).account_id }
+            : null,
+        invitations,
+        nextCursor:
+          rows.length > 20
+            ? { afterCreatedAt: last.createdAt, afterId: last.id }
+            : null,
       };
     });
   }
@@ -178,6 +220,21 @@ export class PostgresProviderStaff implements StaffPort {
   async revoke(actor: Principal, org: string, id: string, version: number) {
     return transaction(async (tx) => {
       await this.owner(tx, actor, org);
+      const prior = (
+        await tx.query(
+          "SELECT actor_id,input_version FROM providers.invitation_revocations WHERE invitation_id=$1 AND organization_id=$2",
+          [id, org],
+        )
+      ).rows[0];
+      if (prior) {
+        if (prior.actor_id !== actor.id || prior.input_version !== version)
+          throw new AppError(
+            "REVOCATION_CONFLICT",
+            "This invitation has a different recorded revocation.",
+            409,
+          );
+        return { id, state: "revoked" };
+      }
       const r = await tx.query(
         "UPDATE providers.invitations SET state='revoked',version=version+1 WHERE id=$1 AND organization_id=$2 AND version=$3 AND state='pending' RETURNING id,state",
         [id, org, version],
@@ -187,6 +244,10 @@ export class PostgresProviderStaff implements StaffPort {
           "CONFLICT",
           "Invitation changed. Refresh its status.",
         );
+      await tx.query(
+        "INSERT INTO providers.invitation_revocations(invitation_id,organization_id,actor_id,input_version) VALUES($1,$2,$3,$4)",
+        [id, org, actor.id, version],
+      );
       await this.audit.record(
         tx,
         actor.id,
@@ -201,18 +262,33 @@ export class PostgresProviderStaff implements StaffPort {
     actor: Principal,
     org: string,
     id: string,
-    version: number,
+    version: string,
     role: StaffRole | "revoke",
   ) {
     return transaction(async (tx) => {
       await this.owner(tx, actor, org);
+      const prior = (
+        await tx.query(
+          "SELECT actor_id,action FROM providers.membership_commands WHERE organization_id=$1 AND account_id=$2 AND input_version=$3",
+          [org, id, version],
+        )
+      ).rows[0];
+      if (prior) {
+        if (prior.actor_id !== actor.id || prior.action !== role)
+          throw new AppError(
+            "MEMBERSHIP_COMMAND_CONFLICT",
+            "This membership version already has a different recorded action.",
+            409,
+          );
+        return { accountId: id, role: prior.action };
+      }
       const row = (
         await tx.query(
           "SELECT role,version FROM providers.memberships WHERE organization_id=$1 AND account_id=$2 FOR UPDATE",
           [org, id],
         )
       ).rows[0];
-      if (!row || Number(row.version) !== version)
+      if (!row || row.version !== version)
         throw new AppError(
           "CONFLICT",
           "Membership changed. Refresh its status.",
@@ -233,6 +309,10 @@ export class PostgresProviderStaff implements StaffPort {
           "UPDATE providers.memberships SET role=$3,version=nextval('providers.membership_versions') WHERE organization_id=$1 AND account_id=$2",
           [org, id, role],
         );
+      await tx.query(
+        "INSERT INTO providers.membership_commands(organization_id,account_id,input_version,actor_id,action) VALUES($1,$2,$3,$4,$5)",
+        [org, id, version, actor.id, role],
+      );
       await this.audit.record(
         tx,
         actor.id,

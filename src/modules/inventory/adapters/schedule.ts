@@ -141,6 +141,7 @@ export class PostgresSchedule implements ScheduleStore {
       timeZone: plan.timeZone,
       venueName: `${plan.venueName} · ${plan.spaceName}`,
       state: "open",
+      venueId: plan.venueId,
     });
     for (const r of plan.configuration.resources)
       await tx.query(
@@ -162,7 +163,7 @@ export class PostgresSchedule implements ScheduleStore {
     await this.catalog.requirePublished(id);
     return (
       await pool.query(
-        "SELECT o.id,o.venue_name,o.time_zone,o.starts_at,o.ends_at,o.state,o.plan_id,o.is_demo,clock_timestamp()>=o.sales_open AND clock_timestamp()<o.sales_close AS sales_valid,(SELECT min(price_paise) FROM inventory.resources WHERE occurrence_id=o.id) AS min_price_paise,coalesce((SELECT sum(greatest(r.capacity-r.sold-coalesce((SELECT sum(i.quantity) FROM inventory.reservation_items i JOIN inventory.reservations h ON h.id=i.reservation_id WHERE i.occurrence_id=r.occurrence_id AND i.resource_id=r.id AND h.state='active' AND h.expires_at>clock_timestamp()),0),0)) FROM inventory.resources r WHERE r.occurrence_id=o.id),0)::int AS available_units FROM inventory.occurrences o WHERE o.listing_id=$1 ORDER BY o.starts_at LIMIT 100",
+        "SELECT o.id,o.venue_snapshot->>'venueId' AS venue_id,o.venue_name,o.time_zone,o.starts_at,o.ends_at,o.state,o.plan_id,o.is_demo,clock_timestamp()>=o.sales_open AND clock_timestamp()<o.sales_close AS sales_valid,(SELECT min(price_paise) FROM inventory.resources WHERE occurrence_id=o.id) AS min_price_paise,coalesce((SELECT sum(greatest(r.capacity-r.sold-coalesce((SELECT sum(i.quantity) FROM inventory.reservation_items i JOIN inventory.reservations h ON h.id=i.reservation_id WHERE i.occurrence_id=r.occurrence_id AND i.resource_id=r.id AND h.state='active' AND h.expires_at>clock_timestamp()),0),0)) FROM inventory.resources r WHERE r.occurrence_id=o.id),0)::int AS available_units FROM inventory.occurrences o WHERE o.listing_id=$1 ORDER BY o.starts_at LIMIT 100",
         [id],
       )
     ).rows;

@@ -6,6 +6,7 @@ export type WalletView = {
   issuance: "not_confirmed" | "pending" | "issued";
   instructions: string;
   occurrences: (TicketOccurrence & {
+    directionsUrl: string | null;
     admissionOpensAt: string;
     scheduleChanged: boolean;
   })[];

@@ -37,6 +37,12 @@ export class PostgresFixtures implements FixturesPort {
           city: input.city,
           description: input.description,
           posterUrl: input.posterUrl,
+          retainedMetadata: {
+            season: input.season,
+            homeTeam: input.homeTeam,
+            awayTeam: input.awayTeam,
+            hospitality: input.hospitality,
+          },
           metadata: {
             managedBy: "sports",
             sport: input.sport,

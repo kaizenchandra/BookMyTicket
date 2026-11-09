@@ -1,0 +1,11 @@
+# ADR 048: Scheduled venue directions on tickets
+
+FE:TKT-08 requires directions alongside calendar actions. Inventory's TicketOccurrences public contract now exposes nullable venueAddress/venueCity from the occurrence's saved venue snapshot. Bookings combines those values with the occurrence venue name to generate directions. No runtime module reads Venues tables directly. Public venue profile edits do not alter this snapshot; the existing database guard prevents silently replacing it. This is the scheduled occurrence address, not a live geocoding or venue-relocation service.
+
+The wallet returns directionsUrl alongside address/city. The fixed Google Maps HTTPS URL includes only api=1 and the encoded destination. Missing/blank addresses produce no link; URLs exceeding 2048 characters are omitted while the address remains readable. There are no order IDs, ticket IDs, QR credentials, buyer details or source-page parameters. No server fetch, device-location request or travel-mode assumption is made. Syntax follows [official Google Maps URL documentation](https://developers.google.com/maps/documentation/urls/get-started).
+
+The wallet UI and downloaded HTML ticket display the scheduled address, an explicitly external link with noopener/noreferrer, and manual-address fallback. Legacy/online occurrences without a street address show an explicit unavailable message rather than guessing a destination. Downloaded documents retain existing sandbox/CSP and offline-validity notices. Supported viewers can open the external link; restrictive viewers can still use the printed address.
+
+Calendar LOCATION now includes the scheduled address/city when present. Existing escaping, UTF-8 line folding, UTC conversion and credential exclusion remain in effect. Calendar times and occurrence state continue to follow the existing wallet policy. No admission, cancellation, reservation or payment behavior changes.
+
+Tests cover snapshot independence from public venue edits, the immutable-snapshot guard, missing data, encoded destination punctuation/Unicode, oversized links, credential omission, HTML escaping, independent calendar parsing and server-rendered fallback states. Live map navigation, offline-file viewer behavior, browser/print/accessibility acceptance and controlled venue relocation remain open. No database migration is required.

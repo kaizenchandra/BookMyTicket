@@ -8,6 +8,9 @@ import { AppError } from "../../../shared/errors.ts";
 import type { OrganizationAccess } from "../../providers/contracts/index.ts";
 import type { SecurityAudit } from "../../reporting/contracts/index.ts";
 import type {
+  VenueMedia,
+  VenueContact,
+  VenueGuidance,
   VenueStore,
   VenueInput,
   SpaceInput,
@@ -67,6 +70,100 @@ export class PostgresVenues implements VenueStore, VenuePlans {
         organizationId: org,
       });
       return { id };
+    });
+  }
+  media(actor: string, org: string, venue: string, input: VenueMedia) {
+    return transaction(async (tx) => {
+      await this.access.requireMember(actor, org, true, tx);
+      const row = (
+        await tx.query(
+          "SELECT media_version FROM venues.venues WHERE id=$1 AND organization_id=$2 FOR UPDATE",
+          [venue, org],
+        )
+      ).rows[0];
+      if (!row) throw new AppError("NOT_FOUND", "Venue not found.", 404);
+      if (row.media_version !== input.expectedVersion)
+        throw new AppError(
+          "VERSION_CONFLICT",
+          "Venue images changed. Reload and review before saving again.",
+          409,
+        );
+      const version = row.media_version + 1;
+      await tx.query(
+        "UPDATE venues.venues SET media=$2::jsonb,media_version=$3 WHERE id=$1",
+        [venue, JSON.stringify(input.items), version],
+      );
+      await this.audit.record(tx, actor, "venue.media_updated", venue, {
+        organizationId: org,
+        version,
+        count: input.items.length,
+      });
+      return { id: venue, version };
+    });
+  }
+  contact(actor: string, org: string, venue: string, input: VenueContact) {
+    return transaction(async (tx) => {
+      await this.access.requireMember(actor, org, true, tx);
+      const row = (
+        await tx.query(
+          "SELECT contact_version FROM venues.venues WHERE id=$1 AND organization_id=$2 FOR UPDATE",
+          [venue, org],
+        )
+      ).rows[0];
+      if (!row) throw new AppError("NOT_FOUND", "Venue not found.", 404);
+      if (row.contact_version !== input.expectedVersion)
+        throw new AppError(
+          "VERSION_CONFLICT",
+          "Venue contact details changed. Reload and review before saving again.",
+          409,
+        );
+      const version = row.contact_version + 1;
+      await tx.query(
+        "UPDATE venues.venues SET contact_phone=$2,contact_email=$3,contact_public=$4,contact_version=$5 WHERE id=$1",
+        [venue, input.phone, input.email, input.public, version],
+      );
+      await this.audit.record(tx, actor, "venue.contact_updated", venue, {
+        organizationId: org,
+        version,
+        public: input.public,
+      });
+      return { id: venue, version };
+    });
+  }
+  guidance(actor: string, org: string, venue: string, input: VenueGuidance) {
+    return transaction(async (tx) => {
+      await this.access.requireMember(actor, org, true, tx);
+      const current = (
+        await tx.query(
+          "SELECT guidance_version FROM venues.venues WHERE id=$1 AND organization_id=$2 FOR UPDATE",
+          [venue, org],
+        )
+      ).rows[0];
+      if (!current) throw new AppError("NOT_FOUND", "Venue not found.", 404);
+      if (current.guidance_version !== input.expectedVersion)
+        throw new AppError(
+          "VERSION_CONFLICT",
+          "Venue guidance changed. Reload and review before saving again.",
+          409,
+        );
+      const version = current.guidance_version + 1;
+      await tx.query(
+        "UPDATE venues.venues SET amenities=$2,accessibility=$3,transport_guidance=$4,parking_guidance=$5,entry_policies=$6,guidance_version=$7 WHERE id=$1",
+        [
+          venue,
+          input.amenities,
+          input.accessibility,
+          input.transportGuidance,
+          input.parkingGuidance,
+          input.entryPolicies,
+          version,
+        ],
+      );
+      await this.audit.record(tx, actor, "venue.guidance_updated", venue, {
+        organizationId: org,
+        version,
+      });
+      return { id: venue, version };
     });
   }
   space(actor: string, org: string, venue: string, input: SpaceInput) {

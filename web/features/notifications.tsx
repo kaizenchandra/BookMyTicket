@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../api.ts";
 export function NotificationInbox({
   accountId,
@@ -14,10 +14,16 @@ export function NotificationInbox({
     [revision, setRevision] = useState(0),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState<string | null>(null);
+    [busy, setBusy] = useState<string | null>(null),
+    [unreadCount, setUnreadCount] = useState<number | null>(null),
+    [message, setMessage] = useState("");
+  const actor = useRef(accountId);
+  actor.current = accountId;
   useEffect(() => {
     let active = true;
     setItems([]);
+    setNext(null);
+    setUnreadCount(null);
     setError("");
     setLoading(true);
     if (!accountId) {
@@ -33,6 +39,7 @@ export function NotificationInbox({
         if (active) {
           setItems(r.items);
           setNext(r.nextCursor);
+          setUnreadCount(r.unreadCount);
         }
       })
       .catch((e) => {
@@ -45,16 +52,48 @@ export function NotificationInbox({
       active = false;
     };
   }, [accountId, cursor, unread, revision]);
-  async function mark(id: string) {
+  async function mark(id: string, read: boolean) {
+    const expected = accountId;
     setBusy(id);
     setError("");
+    setMessage("");
     try {
-      await api(`/notifications/${id}/read`, { method: "POST", body: "{}" });
-      setRevision((r) => r + 1);
+      await api(`/notifications/${id}/read`, {
+        method: read ? "POST" : "DELETE",
+        ...(read ? { body: "{}" } : {}),
+      });
+      if (actor.current === expected) {
+        setMessage(
+          read ? "Notification marked read." : "Notification marked unread.",
+        );
+        setRevision((r) => r + 1);
+      }
     } catch (e) {
-      setError((e as Error).message);
+      if (actor.current === expected) setError((e as Error).message);
     } finally {
-      setBusy(null);
+      if (actor.current === expected) setBusy(null);
+    }
+  }
+  async function markDisplayed() {
+    const ids = items.filter((n) => !n.read_at).map((n) => n.id),
+      expected = accountId;
+    if (!ids.length) return;
+    setBusy("page");
+    setError("");
+    setMessage("");
+    try {
+      await api("/notifications/read", {
+        method: "POST",
+        body: JSON.stringify({ ids }),
+      });
+      if (actor.current === expected) {
+        setMessage("Displayed unread notifications marked read.");
+        setRevision((r) => r + 1);
+      }
+    } catch (e) {
+      if (actor.current === expected) setError((e as Error).message);
+    } finally {
+      if (actor.current === expected) setBusy(null);
     }
   }
   if (!accountId)
@@ -68,14 +107,19 @@ export function NotificationInbox({
   return (
     <section className="reading">
       <h1>Notifications</h1>
+      {unreadCount !== null && (
+        <p role="status">{unreadCount} unread notifications in your inbox.</p>
+      )}
+      {message && <p role="status">{message}</p>}
       <p>
-        Updates describe events when they occurred. Open your booking for its
-        current status.
+        Updates describe events when they occurred. Open the linked record for
+        its current status.
       </p>
       <label>
         <input
           type="checkbox"
           checked={unread}
+          disabled={loading || busy !== null}
           onChange={(e) => {
             setUnread(e.target.checked);
             setCursor(null);
@@ -84,12 +128,23 @@ export function NotificationInbox({
         Unread only
       </label>
       <button
+        disabled={loading || busy !== null}
         onClick={() => {
           setCursor(null);
           setRevision((r) => r + 1);
         }}
       >
         Refresh
+      </button>
+      <button
+        disabled={
+          loading || busy !== null || !!error || !items.some((n) => !n.read_at)
+        }
+        onClick={() => void markDisplayed()}
+      >
+        {busy === "page"
+          ? "Saving…"
+          : "Mark displayed unread notifications as read"}
       </button>
       {error && (
         <p className="notice" role="alert">
@@ -98,7 +153,7 @@ export function NotificationInbox({
       )}
       {loading ? (
         <p role="status">Loading notifications…</p>
-      ) : items.length === 0 ? (
+      ) : error && items.length === 0 ? null : items.length === 0 ? (
         <p>No {unread ? "unread " : ""}notifications on this page.</p>
       ) : (
         items.map((n) => (
@@ -108,24 +163,40 @@ export function NotificationInbox({
             <p>{n.body}</p>
             <time>{new Date(n.occurred_at).toLocaleString("en-IN")}</time>
             <p>
-              <a href={n.href}>View booking</a>
+              <a href={n.href}>
+                {n.href.startsWith("/cases?")
+                  ? "View support case"
+                  : n.href.startsWith("/operations?")
+                    ? "View assigned case"
+                    : "View booking"}
+              </a>
             </p>
-            {!n.read_at && (
-              <button disabled={busy !== null} onClick={() => void mark(n.id)}>
-                {busy === n.id ? "Saving…" : "Mark as read"}
-              </button>
-            )}
+            <button
+              disabled={busy !== null || loading}
+              onClick={() => void mark(n.id, Boolean(!n.read_at))}
+            >
+              {busy === n.id
+                ? "Saving…"
+                : n.read_at
+                  ? "Mark as unread"
+                  : "Mark as read"}
+            </button>
           </article>
         ))
       )}
       <div className="chips">
         {cursor && (
-          <button disabled={loading} onClick={() => setCursor(null)}>
+          <button
+            disabled={loading || busy !== null}
+            onClick={() => setCursor(null)}
+          >
             Newest updates
           </button>
         )}
-        {next && !loading && (
-          <button onClick={() => setCursor(next)}>Older updates</button>
+        {next && !loading && !error && (
+          <button disabled={busy !== null} onClick={() => setCursor(next)}>
+            Older updates
+          </button>
         )}
       </div>
     </section>

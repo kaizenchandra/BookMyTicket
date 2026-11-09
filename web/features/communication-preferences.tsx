@@ -1,3 +1,4 @@
+import { MarketingConsentHistory } from "./marketing-consent-history.tsx";
 import { useEffect, useState } from "react";
 import { api } from "../api.ts";
 type Preferences = {
@@ -111,6 +112,7 @@ export function CommunicationPreferences() {
         </button>
       </form>
       <p role="status">{message}</p>
+      <MarketingConsentHistory revision={saved?.version ?? 0} />
     </section>
   );
 }

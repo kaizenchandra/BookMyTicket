@@ -117,6 +117,7 @@ export const quoteResponseSchema = z
             .object({
               id: z.string().uuid(),
               listingId: z.string().uuid(),
+              title: z.string().optional(),
               isDemo: z.boolean().optional(),
               venueName: z.string(),
               timeZone: z.string(),

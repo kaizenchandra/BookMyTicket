@@ -1,0 +1,31 @@
+(node:15380) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ Notification paging preserves microsecond boundaries and read-state changes (156.569709ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 473.188125
+
+✖ failing tests:
+
+test at tests/notifications.test.ts:1:6013
+✖ Notification paging preserves microsecond boundaries and read-state changes (156.569709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 20
+  
+      at TestContext.<anonymous> (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/tests/notifications.test.ts:282:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 20,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

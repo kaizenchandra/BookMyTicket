@@ -1,0 +1,90 @@
+✖ Supervisor assignment verifies grants, target eligibility, replay, conflicts and audit (9.768708ms)
+✖ Assignment rejects inactive targets and serializes competing supervisors (0.898333ms)
+✖ Support directory restricts disclosure, pages results, and assignment rechecks selected agents (0.068375ms)
+✖ Supervisor assignment notices are atomic, private, deduplicated and historical after reassignment (0.022541ms)
+✖ Directory access audit records bounded identities, excludes search/contact data and rolls back on failure (0.024625ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 0
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 599.92625
+
+✖ failing tests:
+
+test at tests/support-assignment.test.ts:1:1201
+✖ Supervisor assignment verifies grants, target eligibility, replay, conflicts and audit (9.768708ms)
+  Error: connect ECONNREFUSED 127.0.0.1:55432
+      at /Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/node_modules/pg-pool/index.js:45:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async transaction (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/src/shared/database.ts:14:16)
+      at async TestContext.migrate (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/scripts/migrate.ts:5:3)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    errno: -61,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 55432
+  }
+
+test at tests/support-assignment.test.ts:1:3357
+✖ Assignment rejects inactive targets and serializes competing supervisors (0.898333ms)
+  Error: connect ECONNREFUSED 127.0.0.1:55432
+      at /Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/node_modules/pg-pool/index.js:45:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async transaction (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/src/shared/database.ts:14:16)
+      at async TestContext.migrate (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/scripts/migrate.ts:5:3)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    errno: -61,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 55432
+  }
+
+test at tests/support-assignment.test.ts:1:4551
+✖ Support directory restricts disclosure, pages results, and assignment rechecks selected agents (0.068375ms)
+  Error: connect ECONNREFUSED 127.0.0.1:55432
+      at /Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/node_modules/pg-pool/index.js:45:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async transaction (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/src/shared/database.ts:14:16)
+      at async TestContext.migrate (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/scripts/migrate.ts:5:3)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    errno: -61,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 55432
+  }
+
+test at tests/support-assignment.test.ts:1:8123
+✖ Supervisor assignment notices are atomic, private, deduplicated and historical after reassignment (0.022541ms)
+  Error: connect ECONNREFUSED 127.0.0.1:55432
+      at /Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/node_modules/pg-pool/index.js:45:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async transaction (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/src/shared/database.ts:14:16)
+      at async TestContext.migrate (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/scripts/migrate.ts:5:3)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    errno: -61,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 55432
+  }
+
+test at tests/support-assignment.test.ts:1:12855
+✖ Directory access audit records bounded identities, excludes search/contact data and rolls back on failure (0.024625ms)
+  Error: connect ECONNREFUSED 127.0.0.1:55432
+      at /Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/node_modules/pg-pool/index.js:45:11
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async transaction (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/src/shared/database.ts:14:16)
+      at async TestContext.migrate (/Volumes/KaizenChandra/Workspace/04-Development/Projects/Active/Gen AI/BookMyTicket/scripts/migrate.ts:5:3)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    errno: -61,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 55432
+  }

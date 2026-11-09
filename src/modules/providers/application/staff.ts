@@ -1,9 +1,22 @@
 import { AppError } from "../../../shared/errors.ts";
 import type { Access, Principal } from "../../identity/contracts/index.ts";
 export type StaffRole = "editor" | "viewer";
+export type InvitationPageFilter = {
+  afterCreatedAt?: string;
+  afterId?: string;
+};
+export type StaffPageFilter = InvitationPageFilter & {
+  afterMemberId?: string;
+  memberRole?: "owner" | "editor" | "viewer";
+  invitationState?: "pending" | "expired" | "accepted" | "revoked";
+};
 export interface StaffPort {
-  inbox(actor: Principal): Promise<unknown>;
-  list(actor: Principal, org: string): Promise<unknown>;
+  inbox(actor: Principal, filter?: InvitationPageFilter): Promise<unknown>;
+  list(
+    actor: Principal,
+    org: string,
+    filter?: StaffPageFilter,
+  ): Promise<unknown>;
   invite(
     actor: Principal,
     org: string,
@@ -21,7 +34,7 @@ export interface StaffPort {
     actor: Principal,
     org: string,
     id: string,
-    version: number,
+    version: string,
     role: StaffRole | "revoke",
   ): Promise<unknown>;
 }
@@ -40,11 +53,15 @@ export class ProviderStaff {
       );
     return actor;
   }
-  async inbox(token: string | undefined) {
-    return this.port.inbox(await this.identity.authenticate(token));
+  async inbox(token: string | undefined, filter: InvitationPageFilter = {}) {
+    return this.port.inbox(await this.identity.authenticate(token), filter);
   }
-  async list(token: string | undefined, org: string) {
-    return this.port.list(await this.ownerSession(token), org);
+  async list(
+    token: string | undefined,
+    org: string,
+    filter: StaffPageFilter = {},
+  ) {
+    return this.port.list(await this.ownerSession(token), org, filter);
   }
   async invite(
     token: string | undefined,
@@ -69,7 +86,7 @@ export class ProviderStaff {
     token: string | undefined,
     org: string,
     id: string,
-    version: number,
+    version: string,
     role: StaffRole | "revoke",
   ) {
     return this.port.member(

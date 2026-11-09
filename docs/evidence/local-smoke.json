@@ -1,8 +1,38 @@
 {
-  "checkedAt": "2026-11-07T06:32:14.360Z",
+  "checkedAt": "2026-11-09T15:58:46.575Z",
   "baseUrl": "http://127.0.0.1:3101",
   "verificationLevel": "HTTP only; no browser rendering or authenticated live workflows",
   "checks": [
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff/00000000-0000-4000-8000-000000000002",
+      "method": "PUT",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/onboarding",
+      "method": "PUT",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/draft",
+      "method": "PUT",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/listings/00000000-0000-4000-8000-000000000001",
+      "method": "PUT",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/operations/cases/00000000-0000-4000-8000-000000000001/assignment",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/cases/00000000-0000-4000-8000-000000000001/escalation",
+      "method": "POST",
+      "status": 401
+    },
     {
       "path": "/api/v1/occurrences/series",
       "method": "POST",
@@ -10,6 +40,31 @@
     },
     {
       "path": "/api/v1/occurrences/series/preview",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/organizations",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/invitations/00000000-0000-4000-8000-000000000002/revoke",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/submit",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/listings",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/listings/00000000-0000-4000-8000-000000000001/submit",
       "method": "POST",
       "status": 401
     },
@@ -49,47 +104,7 @@
       "status": 401
     },
     {
-      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/events",
-      "status": 401,
-      "contentType": "application/json; charset=utf-8",
-      "body": {
-        "code": "AUTH_REQUIRED",
-        "message": "Sign in to continue.",
-        "requestId": "req-i"
-      }
-    },
-    {
-      "path": "/api/v1/catalog/00000000-0000-4000-8000-000000000001/events",
-      "status": 404,
-      "contentType": "application/json; charset=utf-8",
-      "body": {
-        "code": "NOT_FOUND",
-        "message": "This listing is not available.",
-        "requestId": "req-j"
-      }
-    },
-    {
-      "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/registration-form",
-      "status": 401,
-      "contentType": "application/json; charset=utf-8",
-      "body": {
-        "code": "AUTH_REQUIRED",
-        "message": "Sign in to continue.",
-        "requestId": "req-k"
-      }
-    },
-    {
-      "path": "/api/v1/reservations/00000000-0000-4000-8000-000000000001/registration-form",
-      "status": 401,
-      "contentType": "application/json; charset=utf-8",
-      "body": {
-        "code": "AUTH_REQUIRED",
-        "message": "Sign in to continue.",
-        "requestId": "req-l"
-      }
-    },
-    {
-      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/registration",
+      "path": "/api/v1/bookings?q=example&state=confirmed",
       "status": 401,
       "contentType": "application/json; charset=utf-8",
       "body": {
@@ -99,27 +114,19 @@
       }
     },
     {
-      "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/attendee-exports",
-      "status": 401,
-      "contentType": "application/json; charset=utf-8",
-      "body": {
-        "code": "AUTH_REQUIRED",
-        "message": "Sign in to continue.",
-        "requestId": "req-n"
-      }
+      "path": "/admin/audit",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
     },
     {
-      "path": "/api/v1/attendee-exports/00000000-0000-4000-8000-000000000001/download",
-      "status": 401,
-      "contentType": "application/json; charset=utf-8",
-      "body": {
-        "code": "AUTH_REQUIRED",
-        "message": "Sign in to continue.",
-        "requestId": "req-o"
-      }
+      "path": "/admin/provider-history",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
     },
     {
-      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/tickets",
+      "path": "/api/v1/admin/providers",
       "status": 401,
       "contentType": "application/json; charset=utf-8",
       "body": {
@@ -129,7 +136,7 @@
       }
     },
     {
-      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/tickets/download",
+      "path": "/api/v1/admin/listings",
       "status": 401,
       "contentType": "application/json; charset=utf-8",
       "body": {
@@ -139,13 +146,211 @@
       }
     },
     {
+      "path": "/admin/listings",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/listings/00000000-0000-4000-8000-000000000001/revisions/compare?fromId=1&toId=2",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-s"
+      }
+    },
+    {
+      "path": "/api/v1/admin/listings/00000000-0000-4000-8000-000000000001/revisions/compare?fromId=1&toId=2",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-t"
+      }
+    },
+    {
+      "path": "/api/v1/listings/00000000-0000-4000-8000-000000000001/revisions",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-u"
+      }
+    },
+    {
+      "path": "/api/v1/admin/listings/00000000-0000-4000-8000-000000000001/revisions",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-v"
+      }
+    },
+    {
+      "path": "/admin/listing-history",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/partner/listing-history",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/listings/00000000-0000-4000-8000-000000000001/reviews",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-y"
+      }
+    },
+    {
+      "path": "/api/v1/admin/listings/00000000-0000-4000-8000-000000000001/reviews",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-z"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/reviews",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-10"
+      }
+    },
+    {
+      "path": "/api/v1/admin/providers/00000000-0000-4000-8000-000000000001/reviews",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-11"
+      }
+    },
+    {
+      "path": "/api/v1/admin/audit",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-12"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/events",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-13"
+      }
+    },
+    {
+      "path": "/api/v1/catalog/00000000-0000-4000-8000-000000000001/events",
+      "status": 404,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "NOT_FOUND",
+        "message": "This listing is not available.",
+        "requestId": "req-14"
+      }
+    },
+    {
+      "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/registration-form",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-15"
+      }
+    },
+    {
+      "path": "/api/v1/reservations/00000000-0000-4000-8000-000000000001/registration-form",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-16"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/registration",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-17"
+      }
+    },
+    {
+      "path": "/api/v1/occurrences/00000000-0000-4000-8000-000000000001/attendee-exports",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-18"
+      }
+    },
+    {
+      "path": "/api/v1/attendee-exports/00000000-0000-4000-8000-000000000001/download",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-19"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/tickets",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1a"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/tickets/download",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1b"
+      }
+    },
+    {
       "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/calendar",
       "status": 401,
       "contentType": "application/json; charset=utf-8",
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-r"
+        "requestId": "req-1c"
       }
     },
     {
@@ -154,7 +359,7 @@
       "contentType": "application/json; charset=utf-8",
       "body": {
         "status": "ok",
-        "version": "0.21.0"
+        "version": "0.28.0"
       }
     },
     {
@@ -258,7 +463,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-09T09:00:00.000Z",
+              "startsAt": "2026-11-10T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Bengaluru Event Studio 1 · Event Hall"
             }
@@ -302,7 +507,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-09T09:00:00.000Z",
+              "startsAt": "2026-11-10T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Mumbai Arena 2 · Main stadium"
             }
@@ -323,11 +528,7 @@
               "entryInstructions": "DEMO: arrive 30 minutes before start. No real venue entry is offered."
             },
             "version": 3,
-            "nextSession": {
-              "startsAt": "2026-11-08T09:00:00.000Z",
-              "timeZone": "Asia/Kolkata",
-              "venueName": "DEMO Bengaluru Arena 1 · Main stadium"
-            }
+            "nextSession": null
           },
           {
             "id": "3b19e18a-bb66-4a77-a871-8a690ca4b506",
@@ -399,7 +600,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-09T09:00:00.000Z",
+              "startsAt": "2026-11-10T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Mumbai Aurora Cinema 2 · Screen 1"
             }
@@ -423,11 +624,7 @@
               "certification": "Unrated (demo)"
             },
             "version": 3,
-            "nextSession": {
-              "startsAt": "2026-11-08T09:00:00.000Z",
-              "timeZone": "Asia/Kolkata",
-              "venueName": "DEMO Bengaluru Aurora Cinema 1 · Screen 1"
-            }
+            "nextSession": null
           }
         ],
         "total": 11,
@@ -453,7 +650,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-07T06:32:14.330Z"
+        "serverTime": "2026-11-09T15:58:46.529Z"
       }
     },
     {
@@ -482,7 +679,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-09T09:00:00.000Z",
+              "startsAt": "2026-11-10T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Mumbai Aurora Cinema 2 · Screen 1"
             }
@@ -528,7 +725,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-07T06:32:14.334Z"
+        "serverTime": "2026-11-09T15:58:46.532Z"
       }
     },
     {
@@ -537,7 +734,7 @@
       "contentType": "application/json; charset=utf-8",
       "body": {
         "groups": [],
-        "serverTime": "2026-11-07T06:32:14.336Z"
+        "serverTime": "2026-11-09T15:58:46.533Z"
       }
     },
     {
@@ -577,7 +774,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-z"
+        "requestId": "req-1k"
       }
     },
     {
@@ -587,7 +784,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-10"
+        "requestId": "req-1l"
       }
     },
     {
@@ -597,7 +794,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-11"
+        "requestId": "req-1m"
       }
     },
     {
@@ -607,7 +804,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-12"
+        "requestId": "req-1n"
       }
     },
     {
@@ -617,10 +814,62 @@
       "htmlEntry": true
     },
     {
+      "path": "/favorites/venues",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/venue-favorites",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1q"
+      }
+    },
+    {
       "path": "/partner/venues",
       "status": 200,
       "contentType": "text/html; charset=utf-8",
       "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/onboarding",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1s"
+      }
+    },
+    {
+      "path": "/api/v1/admin/providers/00000000-0000-4000-8000-000000000001/onboarding",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1t"
+      }
+    },
+    {
+      "path": "/venue/00000000-0000-4000-8000-000000000001",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
+      "path": "/api/v1/venues/00000000-0000-4000-8000-000000000001",
+      "status": 404,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "NOT_FOUND",
+        "message": "Venue is not publicly available.",
+        "requestId": "req-1v"
+      }
     },
     {
       "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/venues",
@@ -629,7 +878,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-15"
+        "requestId": "req-1w"
       }
     },
     {
@@ -639,7 +888,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-16"
+        "requestId": "req-1x"
       }
     },
     {
@@ -655,6 +904,26 @@
       "htmlEntry": true
     },
     {
+      "path": "/api/v1/profile/attendees",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-20"
+      }
+    },
+    {
+      "path": "/api/v1/profile/communications/history",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-21"
+      }
+    },
+    {
       "path": "/admin/pricing",
       "status": 200,
       "contentType": "text/html; charset=utf-8",
@@ -667,13 +936,39 @@
       "htmlEntry": true
     },
     {
+      "path": "/operations?caseId=00000000-0000-4000-8000-000000000001",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "htmlEntry": true
+    },
+    {
       "path": "/api/v1/operations/cases",
       "status": 401,
       "contentType": "application/json; charset=utf-8",
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1b"
+        "requestId": "req-25"
+      }
+    },
+    {
+      "path": "/api/v1/cases?caseId=00000000-0000-4000-8000-000000000001",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-26"
+      }
+    },
+    {
+      "path": "/api/v1/operations/support-agents?q=fixture",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-27"
       }
     },
     {
@@ -683,7 +978,17 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1c"
+        "requestId": "req-28"
+      }
+    },
+    {
+      "path": "/api/v1/provider-invitations?afterCreatedAt=2026-01-02T03%3A04%3A05.123456Z&afterId=00000000-0000-4000-8000-000000000001",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-29"
       }
     },
     {
@@ -693,7 +998,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1d"
+        "requestId": "req-2a"
       }
     },
     {
@@ -703,7 +1008,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1e"
+        "requestId": "req-2b"
       }
     },
     {
@@ -725,7 +1030,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1h"
+        "requestId": "req-2e"
       }
     },
     {
@@ -735,7 +1040,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1i"
+        "requestId": "req-2f"
       }
     },
     {
@@ -757,7 +1062,47 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1l"
+        "requestId": "req-2i"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff?memberRole=editor",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2j"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff?invitationState=expired",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2k"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff?afterMemberId=00000000-0000-4000-8000-000000000002",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2l"
+      }
+    },
+    {
+      "path": "/api/v1/organizations/00000000-0000-4000-8000-000000000001/staff?afterCreatedAt=2026-01-02T03%3A04%3A05.123456Z&afterId=00000000-0000-4000-8000-000000000001",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-2m"
       }
     },
     {
@@ -767,7 +1112,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1m"
+        "requestId": "req-2n"
       }
     },
     {

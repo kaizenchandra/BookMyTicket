@@ -11,6 +11,7 @@ export type ReservedSnapshot = {
   occurrences: {
     id: string;
     listingId: string;
+    title?: string;
     isDemo?: boolean;
     venueName: string;
     timeZone: string;
@@ -52,6 +53,8 @@ export interface RegistrationTarget {
 export type TicketOccurrence = {
   id: string;
   venueName: string;
+  venueAddress: string | null;
+  venueCity: string | null;
   timeZone: string;
   startsAt: string;
   endsAt: string;

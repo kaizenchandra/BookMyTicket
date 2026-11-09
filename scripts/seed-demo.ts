@@ -1,3 +1,6 @@
+import { PostgresOrganizationCreation } from "../src/modules/providers/adapters/creation.ts";
+import { PostgresActiveAccount } from "../src/modules/identity/adapters/active.ts";
+import { PostgresStaffAuthorization } from "../src/modules/identity/adapters/staff-authorization.ts";
 import { EventCatalog } from "../src/modules/events/application/catalog.ts";
 import { PostgresEventCatalog } from "../src/modules/events/adapters/catalog.ts";
 import { commerce } from "../src/composition.ts";
@@ -162,7 +165,10 @@ async function seed() {
   const providers = new PostgresProviders(),
     catalog = new PostgresCatalog(),
     drafts = new PostgresCategoryDrafts(providers),
-    managed = new PostgresCatalogManagement(providers),
+    managed = new PostgresCatalogManagement(
+      providers,
+      new PostgresStaffAuthorization(),
+    ),
     audit = new PostgresAudit(),
     venues = new PostgresVenues(providers, audit),
     schedule = new Scheduling(
@@ -197,10 +203,15 @@ async function seed() {
       )
     ).rows[0];
     if (!org) {
-      org = await providers.create(
+      org = await new PostgresOrganizationCreation(
+        new PostgresActiveAccount(),
+      ).create(
         owner,
-        `DEMO ${kind} organization`,
-        kind === "events" ? "event" : kind,
+        {
+          name: `DEMO ${kind} organization`,
+          kind: kind === "events" ? "event" : kind,
+        },
+        `demo-organization-${kind}`,
       );
       await pool.query(
         "UPDATE providers.organizations SET state='approved',reason='USER-AUTHORIZED LOCAL DEMO SEED; NOT REAL PROVIDER APPROVAL',version=version+1 WHERE id=$1",
@@ -267,13 +278,20 @@ async function seed() {
       }
       if (["draft", "changes_requested"].includes(listing.state))
         listing = await managed.submit(owner, listing.id, listing.version);
-      if (listing.state === "submitted")
+      if (listing.state === "submitted") {
+        const reviewer = process.env.DEMO_REVIEWER_ID;
+        if (!reviewer)
+          throw new Error(
+            "DEMO_REVIEWER_ID must identify an existing authorized moderator to publish demo listings.",
+          );
         listing = await managed.review(
           listing.id,
           listing.version,
           "published",
           "USER-AUTHORIZED LOCAL DEMO PUBLICATION; FICTIONAL CONTENT",
+          reviewer,
         );
+      }
       await pool.query(
         'UPDATE catalog.listings SET metadata=metadata||\'{"demo":"true"}\'::jsonb WHERE id=$1',
         [listing.id],

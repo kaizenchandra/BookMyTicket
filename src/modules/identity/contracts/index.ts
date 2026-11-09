@@ -14,3 +14,11 @@ export interface ActiveAccount {
     actor: string,
   ): Promise<void>;
 }
+
+export interface StaffAuthorization {
+  requirePermission(
+    tx: import("../../../shared/database.ts").Transaction,
+    actor: string,
+    permission: string,
+  ): Promise<void>;
+}

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { SavedAttendeeValue } from "./saved-attendees.tsx";
+import type { SavedAttendee } from "../../src/modules/profiles/application/saved-attendees.ts";
+import { useEffect, useState, useRef } from "react";
 import { api } from "../api.ts";
 import type {
   AssignedForm,
@@ -14,17 +16,74 @@ export function AttendeeFields({
   answers,
   onChange,
   disabled = false,
+  allowSaved = false,
 }: {
   preview: RegistrationPreview;
   answers: Answers[];
   onChange: (a: Answers[]) => void;
   disabled?: boolean;
+  allowSaved?: boolean;
 }) {
+  const [saved, setSaved] = useState<SavedAttendee[] | null>(null),
+    [savedError, setSavedError] = useState(""),
+    [savedBusy, setSavedBusy] = useState(false);
+  const session = useRef(0);
+  useEffect(() => {
+    const reset = () => {
+      session.current++;
+      setSaved(null);
+      setSavedError("");
+      setSavedBusy(false);
+    };
+    window.addEventListener("bmt-session", reset);
+    return () => {
+      reset();
+      window.removeEventListener("bmt-session", reset);
+    };
+  }, []);
   const form = preview.form;
   if (!form?.definition.fields.length) return null;
   return (
     <section>
       <h3>{form.definition.title}</h3>
+      {allowSaved && (
+        <div>
+          <p>
+            Saved attendees are optional. Choose values explicitly and review
+            each field before accepting the order. Declarations are never filled
+            from saved details.
+          </p>
+          <button
+            type="button"
+            disabled={disabled || savedBusy}
+            onClick={async () => {
+              const expected = session.current;
+              setSavedBusy(true);
+              setSavedError("");
+              try {
+                const result = await api<{ items: SavedAttendee[] }>(
+                  "/profile/attendees",
+                );
+                if (session.current === expected) setSaved(result.items);
+              } catch (e) {
+                if (session.current === expected)
+                  setSavedError((e as Error).message);
+              } finally {
+                if (session.current === expected) setSavedBusy(false);
+              }
+            }}
+          >
+            {savedBusy ? "Loading…" : "Load saved attendees"}
+          </button>
+          {savedError && <p role="alert">{savedError}</p>}
+          {saved?.length === 0 && (
+            <p>
+              No saved attendees. Manage your list in{" "}
+              <a href="/profile">Profile</a>, or enter details below.
+            </p>
+          )}
+        </div>
+      )}
       <p>{form.definition.instructions}</p>
       <p>Form version {form.version}. Information is saved with this order.</p>
       {Array.from({ length: preview.quantity }, (_, i) => (
@@ -47,6 +106,14 @@ export function AttendeeFields({
                   {f.label}
                   {f.required ? " (required)" : ""}
                 </label>
+                {allowSaved && saved && (
+                  <SavedAttendeeValue
+                    items={saved}
+                    type={f.type}
+                    disabled={disabled}
+                    onChoose={change}
+                  />
+                )}
                 <p id={`${id}-help`} className="muted">
                   {f.purpose}
                 </p>

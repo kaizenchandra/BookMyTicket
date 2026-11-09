@@ -234,3 +234,190 @@ test("notification templates reject unknown events and malformed envelopes canno
     ),
   );
 });
+
+test("Notification paging preserves microsecond boundaries and read-state changes", async () => {
+  const owner = await account(),
+    other = await account(),
+    app = await buildApp(),
+    store = new PostgresNotifications();
+  try {
+    for (let i = 0; i < 45; i++) {
+      const source = await event(owner.id, `fixture.precision.${randomUUID()}`);
+      await transaction((tx) =>
+        store.deliver(tx, source, notificationTemplate("booking.confirmed")),
+      );
+      await pool.query(
+        `UPDATE notifications.messages SET created_at='2090-01-01T12:00:00.123456Z'::timestamptz + ($2::int * interval '1 microsecond') WHERE event_id=$1`,
+        [source.id, Math.floor(i / 15)],
+      );
+    }
+    const expected = (
+      await pool.query(
+        "SELECT id FROM notifications.messages WHERE owner_id=$1 ORDER BY created_at DESC,id DESC",
+        [owner.id],
+      )
+    ).rows.map((row) => row.id);
+    const get = (after?: string, who = owner, unread = false) =>
+      app.inject({
+        method: "GET",
+        url: `/api/v1/notifications?unread=${unread}${after ? `&after=${after}` : ""}`,
+        headers: who.headers,
+      });
+    const first = await get();
+    assert.equal(first.statusCode, 200, first.body);
+    assert.equal(first.json().items.length, 20);
+    const { notificationPage } =
+      await import("../src/modules/notifications/adapters/schemas.ts");
+    notificationPage.parse(first.json());
+    const boundary = first.json().nextCursor;
+    // Marking the boundary read must not invalidate it for an unread traversal.
+    await store.read(owner.id, boundary);
+    const added = await event(owner.id, `fixture.arrival.${randomUUID()}`);
+    await transaction((tx) =>
+      store.deliver(tx, added, notificationTemplate("booking.confirmed")),
+    );
+    await pool.query(
+      "UPDATE notifications.messages SET created_at='2091-01-01T00:00:00Z' WHERE event_id=$1",
+      [added.id],
+    );
+    const second = await get(boundary);
+    assert.equal(second.statusCode, 200, second.body);
+    assert.equal(second.json().items.length, 20);
+    const third = await get(second.json().nextCursor);
+    assert.equal(third.statusCode, 200, third.body);
+    assert.equal(third.json().items.length, 5);
+    assert.equal(third.json().nextCursor, null);
+    const actual = [first, second, third].flatMap((result) =>
+      result.json().items.map((item: any) => item.id),
+    );
+    assert.deepEqual(actual, expected);
+    assert.equal(new Set(actual).size, 45);
+    const unreadSecond = await get(boundary, owner, true);
+    assert.deepEqual(
+      unreadSecond.json().items.map((item: any) => item.id),
+      second.json().items.map((item: any) => item.id),
+    );
+    const latest = await get(undefined, owner, true);
+    assert.ok(!latest.json().items.some((item: any) => item.id === boundary));
+    assert.equal((await get(boundary, other)).statusCode, 422);
+    assert.equal((await get(randomUUID())).statusCode, 422);
+    await pool.query(
+      "UPDATE identity.accounts SET status='suspended' WHERE id=$1",
+      [owner.id],
+    );
+    assert.equal((await get(boundary)).statusCode, 401);
+  } finally {
+    await app.close();
+  }
+});
+
+test("Inbox bulk read is atomic, bounded and owner scoped while new arrivals remain unread", async () => {
+  const owner = await account(),
+    other = await account(),
+    app = await buildApp(),
+    store = new PostgresNotifications();
+  const deliver = async (id: string) => {
+    const source = await event(id, `fixture.bulk.${randomUUID()}`);
+    await transaction((tx) =>
+      store.deliver(tx, source, notificationTemplate("booking.confirmed")),
+    );
+    return (
+      await pool.query(
+        "SELECT id FROM notifications.messages WHERE event_id=$1",
+        [source.id],
+      )
+    ).rows[0].id as string;
+  };
+  const get = (headers = owner.headers) =>
+    app.inject({ url: "/api/v1/notifications", headers });
+  const bulk = (
+    ids: string[],
+    headers: Record<string, string> = owner.headers,
+  ) =>
+    app.inject({
+      method: "POST",
+      url: "/api/v1/notifications/read",
+      headers,
+      payload: { ids },
+    });
+  try {
+    for (let i = 0; i < 22; i++) await deliver(owner.id);
+    const foreign = await deliver(other.id),
+      page = (await get()).json(),
+      ids = page.items.map((n: any) => n.id) as string[];
+    assert.equal(page.unreadCount, 22);
+    assert.equal(ids.length, 20);
+    assert.equal((await bulk(ids, {})).statusCode, 401);
+    for (const invalid of [
+      [],
+      Array.from({ length: 21 }, () => randomUUID()),
+      [ids[0], ids[0].toUpperCase()],
+    ])
+      assert.equal((await bulk(invalid)).statusCode, 422);
+    assert.equal((await bulk([ids[0], foreign])).statusCode, 404);
+    assert.equal((await bulk([ids[0], randomUUID()])).statusCode, 404);
+    assert.equal((await get()).json().unreadCount, 22);
+    const initialRead = await app.inject({
+      method: "POST",
+      url: `/api/v1/notifications/${ids[0]}/read`,
+      headers: owner.headers,
+      payload: {},
+    });
+    const timestamp = initialRead.json().read_at;
+    const arrival = await deliver(owner.id);
+    const results = await Promise.all([
+      bulk(ids),
+      bulk([...ids].reverse()),
+      bulk(ids),
+    ]);
+    assert(results.every((r) => r.statusCode === 200));
+    assert.deepEqual(results[0].json().ids, [...ids].sort());
+    assert.equal((await get()).json().unreadCount, 3);
+    assert.equal((await get(other.headers)).json().unreadCount, 1);
+    const rows = (
+      await pool.query(
+        "SELECT id,read_at FROM notifications.messages WHERE id=ANY($1::uuid[])",
+        [[ids[0], arrival, foreign]],
+      )
+    ).rows;
+    assert.equal(
+      rows.find((r) => r.id === ids[0]).read_at.toISOString(),
+      timestamp,
+    );
+    assert.equal(rows.find((r) => r.id === arrival).read_at, null);
+    assert.equal(rows.find((r) => r.id === foreign).read_at, null);
+    const unread = () =>
+      app.inject({
+        method: "DELETE",
+        url: `/api/v1/notifications/${ids[0]}/read`,
+        headers: owner.headers,
+      });
+    assert.equal((await unread()).statusCode, 200);
+    assert.equal((await unread()).json().read_at, null);
+    assert.equal((await get()).json().unreadCount, 4);
+    assert.equal(
+      (
+        await app.inject({
+          method: "DELETE",
+          url: `/api/v1/notifications/${foreign}/read`,
+          headers: owner.headers,
+        })
+      ).statusCode,
+      404,
+    );
+    const filtered = await app.inject({
+      url: "/api/v1/notifications?unread=true",
+      headers: owner.headers,
+    });
+    assert.equal(filtered.json().unreadCount, 4);
+    assert.equal(filtered.json().items.length, 4);
+    await pool.query(
+      "UPDATE identity.accounts SET status='suspended' WHERE id=$1",
+      [owner.id],
+    );
+    assert.equal((await bulk(ids)).statusCode, 401);
+    assert.equal((await unread()).statusCode, 401);
+  } finally {
+    await app.close();
+  }
+});

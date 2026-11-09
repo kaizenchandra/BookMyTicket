@@ -22,3 +22,11 @@ export interface VenuePlans {
     planId: string,
   ): Promise<ScheduledPlan>;
 }
+
+export interface PublicVenueDiscovery {
+  read(
+    id: string,
+  ): Promise<{
+    venue: { id: string; name: string; city: string; address: string };
+  }>;
+}

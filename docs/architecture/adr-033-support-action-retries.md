@@ -1,0 +1,11 @@
+# ADR 033 — Durable support workflow action retries
+
+Scope: FE:SUP-A-07/08, BE:SUP-02/06/08 and the retry-sensitive command requirements. Claim, release, escalate, resolve, reopen and priority actions previously returned a stale-version conflict after a committed response was lost. Preserve existing transitions while adding optional Idempotency-Key support and stable keys in the first-party workspace.
+
+Migration 037 stores actor-scoped command fingerprints and original results. The fingerprint includes case ID, expected version, action, optional priority and reason. Keyed requests serialize on the actor, lock the case, recover the original outcome if present, or commit transition, audit and command together. A changed payload conflicts. Failed transitions save no command. Different actors may use the same key independently. Replays do not rerun transition policy or emit another audit, and cannot reclaim/reopen/resolve a case changed later.
+
+Authentication, active-account checks, support permission and recent MFA are required at the application boundary on every attempt, including replay. Recovering an original result does not grant current assignment; later actions still use current state and permissions. The UI explicitly reports saved/recovered outcomes and reloads current detail. Inputs affecting action fingerprints are disabled during submission; failures preserve the draft/key while mounted.
+
+The stored result retains the original endpoint's case metadata shape for compatibility, including subject and logical booking reference; no conversation messages or credentials are added. Retention/erasure rules for these durable metadata copies need approval. Command rows currently have no expiry. Headerless callers remain compatible and use existing version-conflict behavior without durable replay. Page closure/view remount does not preserve keys; inspect current status before resubmitting then.
+
+PostgreSQL/HTTP tests cover concurrent claims, all action replays, changed payloads, actor scoping, later assignment/state preservation, failure rollback, invalid keys, MFA/role denial and revoked permission. No notification, booking, financial or inventory changes are introduced. Browser acceptance remains unverified.

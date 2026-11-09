@@ -1,0 +1,13 @@
+# ADR 046: Versioned profile editing and preferred city
+
+FE:PRO-01/07 and BE:CUS-01/03 require editable profile data and preferred city. The existing Profiles preferences table already owns name, LIGHT/DARK theme, optional city and version; no migration is required. A new application port wraps this existing storage boundary. GET returns version 0 for accounts with no preference record.
+
+PUT /api/v1/profile now requires expectedVersion alongside name/theme/city. The adapter inserts an initial version-0 row when needed, locks it, compares versions and commits an increment. A lost-response retry matching all fields at exactly expectedVersion+1 returns the existing result without incrementing again. Other stale writes return 409. First-save races are serialized by account uniqueness and row locking. Validation bounds and trims names/cities; null clears a city, and only LIGHT/DARK themes are valid. Authenticated account identity is the sole ownership selector.
+
+This is an intentional request-contract change: clients must GET the current profile and submit its version. Both in-repository callers (profile editor and theme synchronization) are updated. Existing stored versions remain valid. The profile form edits name/city while retaining the reviewed server theme; if a separate theme change wins, its old version conflicts rather than overwriting the theme.
+
+The editor keeps drafts on save errors and disables a stale save after 409. Discard draft and load latest profile is an explicit recovery action. Failed reads offer retry. Optional city clearing removes the account preference; Browse city now supplies an explicit URL selection.
+
+Discovery city precedence is URL city (including explicit empty), device-selected bmt-city (including empty), then authenticated account preference, then empty/all cities. Account fallback is not copied into device storage. The account effect clears fallback on account change and ignores obsolete async responses or a newly selected device/URL city. A profile preference takes effect on next account load/navigation unless Browse city now is selected. Theme precedence is otherwise unchanged; this increment prevents cross-tab overwrite rather than redesigning theme initialization.
+
+Tests cover defaults, owner isolation, competing first saves, timestamp-independent version stability for identical retries, stale overwrite rejection, trimming/clearing, invalid/missing versions, theme bounds and suspended accounts. Browser city/sign-in/two-tab/keyboard/accessibility acceptance remains open. Verified contact changes and broader profile/privacy requirements are separate pending work.

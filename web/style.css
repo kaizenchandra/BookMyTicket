@@ -1462,3 +1462,8 @@ html[data-theme="DARK"] {
     gap: 16px;
   }
 }
+
+.audit-records { list-style: none; padding: 0; }
+.audit-records li { overflow-wrap: anywhere; }
+.audit-records dt { font-weight: 600; }
+.audit-records dd { margin: 0 0 0.75rem; }

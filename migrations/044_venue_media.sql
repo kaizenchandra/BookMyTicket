@@ -1,0 +1,1 @@
+ALTER TABLE venues.venues ADD COLUMN media jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(media)='array' AND jsonb_array_length(media)<=8), ADD COLUMN media_version integer NOT NULL DEFAULT 1 CHECK (media_version>0);

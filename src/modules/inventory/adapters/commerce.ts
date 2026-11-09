@@ -33,8 +33,12 @@ export class PostgresInventoryCommerce implements InventoryCommerce {
         "Sales are no longer open for this reservation.",
         409,
       );
+    const titles = new Map<string, string>();
     for (const occurrence of occurrences)
-      await this.catalog.requirePublished(occurrence.listing_id, tx);
+      titles.set(
+        occurrence.id,
+        await this.catalog.bookingTitle(occurrence.listing_id, tx),
+      );
     const r = (
       await tx.query(
         "SELECT *,expires_at>clock_timestamp() fresh FROM inventory.reservations WHERE id=$1 AND owner_id=$2 FOR UPDATE",
@@ -79,6 +83,7 @@ export class PostgresInventoryCommerce implements InventoryCommerce {
       occurrences: occurrences.map((o) => ({
         id: o.id,
         listingId: o.listing_id,
+        title: titles.get(o.id)!,
         isDemo: o.is_demo,
         venueName: o.venue_name,
         timeZone: o.time_zone,

@@ -12,6 +12,8 @@ export interface NotificationStore {
   ): Promise<void>;
   list(owner: string, after?: string, unread?: boolean): Promise<unknown>;
   read(owner: string, id: string): Promise<unknown>;
+  unread(owner: string, id: string): Promise<unknown>;
+  readMany(owner: string, ids: string[]): Promise<unknown>;
 }
 export class Notifications {
   constructor(
@@ -28,6 +30,12 @@ export class Notifications {
   }
   list(owner: string, after?: string, unread = false) {
     return this.store.list(owner, after, unread);
+  }
+  unread(owner: string, id: string) {
+    return this.store.unread(owner, id);
+  }
+  readMany(owner: string, ids: string[]) {
+    return this.store.readMany(owner, ids);
   }
   read(owner: string, id: string) {
     return this.store.read(owner, id);

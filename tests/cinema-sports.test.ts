@@ -1,6 +1,6 @@
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
-import { randomUUID, randomBytes } from "node:crypto";
+import { randomUUID, randomBytes, createHash } from "node:crypto";
 import { pool } from "../src/shared/database.ts";
 import { migrate } from "../scripts/migrate.ts";
 import { buildApp } from "../src/app.ts";
@@ -67,6 +67,10 @@ for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
           name: "ISOLATED CATEGORY FIXTURE",
           kind: kind === "events" ? "event" : kind,
         }),
+      );
+      await pool.query(
+        "INSERT INTO providers.onboarding_details(organization_id,legal_name,business_address,contact_name,contact_email) VALUES($1,'Fixture business','Fixture address','Fixture contact','fixture@example.invalid')",
+        [org.id],
       );
       const submitted = await ok(
         request("POST", `/api/v1/organizations/${org.id}/submit`, {
@@ -137,6 +141,77 @@ for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
             key,
           ),
         );
+      const retainedKeys =
+        kind === "cinema"
+          ? ["crew"]
+          : kind === "events"
+            ? ["organizer", "inclusions", "exclusions", "entryInstructions"]
+            : ["season", "homeTeam", "awayTeam", "hospitality"];
+      const { movieInput } =
+        await import("../src/modules/cinema/adapters/schema.ts");
+      const { fixtureInput } =
+        await import("../src/modules/sports/adapters/schema.ts");
+      const { eventInput } =
+        await import("../src/modules/events/adapters/catalog-schema.ts");
+      const parsed: any = (
+        kind === "cinema"
+          ? movieInput
+          : kind === "events"
+            ? eventInput
+            : fixtureInput
+      ).parse(input);
+      const oldMetadata =
+        kind === "cinema"
+          ? {
+              managedBy: "cinema",
+              language: parsed.language,
+              genre: parsed.genre,
+              format: parsed.format,
+              certification: parsed.certification,
+              duration: String(parsed.durationMinutes) + " min",
+              performers: parsed.cast,
+              releaseDate: parsed.releaseDate,
+            }
+          : kind === "events"
+            ? {
+                managedBy: "events",
+                language: parsed.language,
+                genre: parsed.genre,
+                duration: String(parsed.durationMinutes) + " min",
+                performers: parsed.performers,
+                minimumAge: String(parsed.minimumAge),
+              }
+            : {
+                managedBy: "sports",
+                sport: parsed.sport,
+                competition: parsed.competition,
+                teams: parsed.homeTeam + " vs " + parsed.awayTeam,
+                entryInstructions: parsed.entryInstructions,
+              };
+      const oldEnvelope = {
+        kind:
+          kind === "cinema" ? "movie" : kind === "events" ? "event" : "sports",
+        input: {
+          requestFingerprint: createHash("sha256")
+            .update(JSON.stringify(parsed))
+            .digest("hex"),
+          title: parsed.title,
+          city: parsed.city,
+          description: parsed.description,
+          posterUrl: parsed.posterUrl,
+          metadata: oldMetadata,
+        },
+      };
+      assert.equal(
+        (
+          await pool.query(
+            "SELECT fingerprint FROM catalog.category_commands WHERE owner_id=$1 AND organization_id=$2 AND operation_key=$3",
+            [owner.id, org.id, key],
+          )
+        ).rows[0].fingerprint,
+        createHash("sha256").update(JSON.stringify(oldEnvelope)).digest("hex"),
+        "Projection expansion preserves pre-upgrade retry fingerprint",
+      );
       assert.equal(
         (await request("GET", `/api/v1/catalog/${draft.id}/${kind}`))
           .statusCode,
@@ -175,6 +250,11 @@ for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
       const changed = {
         ...input,
         description: "Updated isolated category fixture description",
+        ...(kind === "cinema"
+          ? { crew: "Updated crew" }
+          : kind === "events"
+            ? { exclusions: "Updated exclusions" }
+            : { hospitality: "Updated hospitality" }),
         version: draft.version,
       };
       const edited = await ok(
@@ -201,6 +281,20 @@ for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
         changed.description,
         "replay must not overwrite newer category data",
       );
+      const revisionHistorySnapshot = await ok(
+        request("GET", `/api/v1/listings/${draft.id}/revisions`),
+      );
+      for (const field of retainedKeys)
+        assert.equal(
+          revisionHistorySnapshot.items[0].snapshot.categoryDetails[field],
+          parsed[field],
+          `Saved original ${field}`,
+        );
+      assert.equal(
+        revisionHistorySnapshot.items.length,
+        1,
+        "Identical create replay adds no revisions",
+      );
       const listingSubmitted = await ok(
         request("POST", `/api/v1/listings/${draft.id}/submit`, {
           version: edited.version,
@@ -216,6 +310,29 @@ for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
             reason: "Isolated listing review",
           },
           admin,
+        ),
+      );
+      const retainedHistory = await ok(
+        request("GET", `/api/v1/listings/${draft.id}/revisions`),
+      );
+      const compareHistory = await ok(
+        request(
+          "GET",
+          `/api/v1/listings/${draft.id}/revisions/compare?fromId=${revisionHistorySnapshot.items[0].id}&toId=${retainedHistory.items[0].id}`,
+        ),
+      );
+      const changedRetainedField =
+        kind === "cinema"
+          ? "crew"
+          : kind === "events"
+            ? "exclusions"
+            : "hospitality";
+      assert(
+        compareHistory.changes.some(
+          (change: any) =>
+            change.field === `categoryDetails.${changedRetainedField}` &&
+            change.before === parsed[changedRetainedField] &&
+            change.after === (changed as any)[changedRetainedField],
         ),
       );
       const publicDetail = await ok(
@@ -484,6 +601,34 @@ for (const scenario of ["cinema", "sports", "events", "events-seated"] as const)
           },
           buyer,
         ),
+      );
+      assert.equal(order.snapshot.occurrences[0].title, input.title);
+      const renamedTitle = "ISOLATED RENAMED " + randomUUID();
+      await pool.query("UPDATE catalog.listings SET title=$2 WHERE id=$1", [
+        draft.id,
+        renamedTitle,
+      ]);
+      const history = await ok(
+        request(
+          "GET",
+          `/api/v1/bookings?q=${encodeURIComponent(input.title)}`,
+          undefined,
+          buyer,
+        ),
+      );
+      assert.equal(history.items[0].occurrences[0].title, input.title);
+      assert.equal(
+        (
+          await ok(
+            request(
+              "GET",
+              `/api/v1/bookings?q=${encodeURIComponent(renamedTitle)}`,
+              undefined,
+              buyer,
+            ),
+          )
+        ).items.length,
+        0,
       );
       if (kind === "events") {
         await ok(

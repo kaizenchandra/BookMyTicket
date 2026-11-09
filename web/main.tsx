@@ -1,3 +1,23 @@
+import { OrganizationCreationForm } from "./features/organization-creation.tsx";
+import { ListingReviewHistoryPage } from "./features/listing-review-history.tsx";
+import { ListingReviewQueue } from "./features/listing-review-queue.tsx";
+import {
+  providerQueueSearch,
+  ProviderQueueNavigation,
+} from "./features/provider-queue-navigation.tsx";
+import {
+  ProviderReviewHistory,
+  ProviderReviewHistoryPage,
+} from "./features/provider-review-history.tsx";
+import { ProviderOnboarding } from "./features/provider-onboarding.tsx";
+import { ProviderDraft } from "./features/provider-draft.tsx";
+import { SavedAttendeesEditor } from "./features/saved-attendees.tsx";
+import { ProfileEditor } from "./features/profile-editor.tsx";
+import { VenueFavoritesPage } from "./features/venue-favorites.tsx";
+import { VenuePage } from "./features/public-venue.tsx";
+import { CustomerEscalation } from "./features/customer-escalation.tsx";
+import { BookingHistory } from "./features/booking-history.tsx";
+import { AuditHistory } from "./features/audit-history.tsx";
 import { BookingProgress, SeatSelection } from "./features/booking-design.tsx";
 import { CommunicationPreferences } from "./features/communication-preferences.tsx";
 import { CategoryDetail } from "./features/category-detail.tsx";
@@ -142,6 +162,27 @@ function App() {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("bmt-theme", theme);
   }, [theme]);
+  useEffect(() => {
+    let active = true;
+    const explicit =
+      new URLSearchParams(location.search).get("city") ??
+      localStorage.getItem("bmt-city");
+    setCity(explicit ?? "");
+    if (me && explicit === null)
+      api("/profile")
+        .then((p) => {
+          if (
+            active &&
+            !new URLSearchParams(location.search).has("city") &&
+            localStorage.getItem("bmt-city") === null
+          )
+            setCity(p.city ?? "");
+        })
+        .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [me?.id]);
   const route = location.pathname;
   const category =
     route === "/events" ? "event" : route === "/sports" ? "sports" : "movie";
@@ -154,6 +195,7 @@ function App() {
         await api("/profile", {
           method: "PUT",
           body: JSON.stringify({
+            expectedVersion: profile.version,
             name: profile.name,
             city: profile.city,
             theme: next,
@@ -255,6 +297,12 @@ function App() {
             search={new URLSearchParams(location.search).get("q") ?? ""}
             selectCity={() => setCityOpen(true)}
           />
+        ) : route.startsWith("/venue/") ? (
+          <VenuePage
+            id={route.split("/")[2]}
+            accountId={me?.id}
+            signIn={() => setAuthOpen(true)}
+          />
         ) : route.startsWith("/listing/") ? (
           <Detail
             id={route.split("/")[2]}
@@ -265,6 +313,12 @@ function App() {
           <Seats id={route.split("/")[2]} signIn={() => setAuthOpen(true)} />
         ) : route.startsWith("/checkout/") ? (
           <Reservation id={route.split("/")[2]} />
+        ) : route === "/favorites/venues" ? (
+          <VenueFavoritesPage
+            key={me?.id ?? "anonymous"}
+            accountId={me?.id}
+            signIn={() => setAuthOpen(true)}
+          />
         ) : route === "/favorites" ? (
           <FavoritesPage
             key={me?.id ?? "anonymous"}
@@ -294,17 +348,27 @@ function App() {
         ) : route.startsWith("/bookings/") ? (
           <BookingDetail key={me?.id ?? "anonymous"} id={route.split("/")[2]} />
         ) : route === "/bookings" ? (
-          <Bookings />
+          <BookingHistory key={me?.id ?? "anonymous"} />
         ) : route === "/scanner" ? (
           <Scanner key={me?.id ?? "anonymous"} />
+        ) : route === "/admin/audit" ? (
+          <AuditHistory key={me?.id ?? "anonymous"} />
         ) : route === "/admin/pricing" ? (
           <PricingAdmin />
+        ) : route === "/admin/provider-history" ? (
+          <ProviderReviewHistoryPage key={me?.id ?? "anonymous"} />
+        ) : route === "/admin/listing-history" ? (
+          <ListingReviewHistoryPage key={me?.id ?? "anonymous"} reviewer />
+        ) : route === "/partner/listing-history" ? (
+          <ListingReviewHistoryPage key={me?.id ?? "anonymous"} />
+        ) : route === "/admin/listings" ? (
+          <ListingReviewQueue key={me?.id ?? "anonymous"} />
         ) : route === "/admin" ? (
           <Admin />
         ) : route === "/operations" ? (
           <Operations key={me?.id ?? "anonymous"} />
         ) : route === "/cases" ? (
-          <Cases />
+          <Cases key={me?.id ?? "anonymous"} />
         ) : route === "/help" ? (
           <section className="reading">
             <p className="eyebrow">HELP & ACCESSIBILITY</p>
@@ -987,6 +1051,13 @@ function Seats({ id, signIn }: { id: string; signIn: () => void }) {
           </p>
         </div>
       </div>
+      {data.occurrence.venue_snapshot?.venueId && (
+        <p>
+          <a href={`/venue/${data.occurrence.venue_snapshot.venueId}`}>
+            Venue details and directions
+          </a>
+        </p>
+      )}
       {data.occurrence.venue_snapshot?.accessibility && (
         <p className="venue-access">
           {data.occurrence.venue_snapshot.accessibility}
@@ -1109,12 +1180,6 @@ function Profile({
   signIn: () => void;
   setTheme: (theme: string) => void;
 }) {
-  const { data, error, loading } = useLoad<any>("/profile");
-  const [name, setName] = useState(""),
-    [message, setMessage] = useState("");
-  useEffect(() => {
-    if (data) setName(data.name);
-  }, [data]);
   if (!me)
     return (
       <Empty title="Sign in to manage your account">
@@ -1125,37 +1190,8 @@ function Profile({
     <section className="reading">
       <h1>Your profile</h1>
       <p>{me.contact}</p>
-      {error && <Notice message={error} />}
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          try {
-            await api("/profile", {
-              method: "PUT",
-              body: JSON.stringify({
-                name,
-                theme: document.documentElement.dataset.theme,
-                city: data?.city ?? null,
-              }),
-            });
-            setMessage("Profile saved.");
-          } catch (e) {
-            setMessage((e as Error).message);
-          }
-        }}
-      >
-        <label htmlFor="name">Name</label>
-        <input
-          id="name"
-          value={name}
-          maxLength={100}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button className="primary" disabled={loading}>
-          Save profile
-        </button>
-      </form>
-      {message && <Notice message={message} />}
+      <ProfileEditor key={me.id} />
+      <SavedAttendeesEditor key={me.id} />
       <CommunicationPreferences key={me.id} />
       <AccountSecurity />
       <SessionManagement />
@@ -1176,9 +1212,9 @@ function Provider({ signIn }: { signIn: () => void }) {
   const { data, error, loading, retry } = useLoad<{ items: any[] }>(
     "/organizations",
   );
-  const [name, setName] = useState(""),
-    [kind, setKind] = useState("cinema"),
-    [message, setMessage] = useState("");
+  const [onboardingDirty, setOnboardingDirty] = useState<
+    Record<string, boolean>
+  >({});
   return (
     <section className="reading">
       <p className="eyebrow">PARTNER WITH BOOKMYTICKET</p>
@@ -1194,51 +1230,17 @@ function Provider({ signIn }: { signIn: () => void }) {
       </p>
       <a href="/partner/venues">Manage listings, venues and showtimes</a>
       <ProviderStaff onChanged={retry} />
-      {error ? (
+      {error && !data ? (
         <>
           <Notice message={error} />
           <button onClick={signIn}>Sign in</button>
         </>
       ) : (
         <>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                await api("/organizations", {
-                  method: "POST",
-                  body: JSON.stringify({ name, kind }),
-                });
-                setName("");
-                setMessage("Organization draft saved.");
-                retry();
-              } catch (e) {
-                setMessage((e as Error).message);
-              }
-            }}
-          >
-            <label htmlFor="organization">Organization name</label>
-            <input
-              id="organization"
-              minLength={2}
-              maxLength={150}
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <label htmlFor="kind">Organization type</label>
-            <select
-              id="kind"
-              value={kind}
-              onChange={(e) => setKind(e.target.value)}
-            >
-              <option value="cinema">Cinema partner</option>
-              <option value="event">Event organizer</option>
-              <option value="sports">Sports organizer</option>
-            </select>
-            <button className="primary">Save onboarding draft</button>
-          </form>
-          {loading ? (
+          <OrganizationCreationForm onSaved={retry} />
+          {error && <Notice message={error} />}
+          {loading && <p role="status">Refreshing organizations…</p>}
+          {loading && !data ? (
             <p>Loading organizations…</p>
           ) : (
             data?.items.map((o) => (
@@ -1250,29 +1252,31 @@ function Provider({ signIn }: { signIn: () => void }) {
                 {o.role === "owner" && (
                   <ProviderStaff key={o.id} org={o.id} onChanged={retry} />
                 )}
-                {o.state === "draft" && o.role === "owner" && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        await api(`/organizations/${o.id}/submit`, {
-                          method: "POST",
-                          body: JSON.stringify({ version: o.version }),
-                        });
-                        retry();
-                      } catch (e) {
-                        setMessage((e as Error).message);
-                      }
-                    }}
-                  >
-                    Submit for review
-                  </button>
+                {o.role === "owner" && (
+                  <ProviderOnboarding
+                    key={`onboarding:${o.id}`}
+                    org={o.id}
+                    state={o.state}
+                    onDirty={(dirty) =>
+                      setOnboardingDirty((old) =>
+                        old[o.id] === dirty ? old : { ...old, [o.id]: dirty },
+                      )
+                    }
+                    onSaved={retry}
+                  />
                 )}
+                <ProviderDraft
+                  key={o.id}
+                  organization={o}
+                  onSaved={retry}
+                  blockedByOtherDraft={onboardingDirty[o.id] === true}
+                />
+                {o.role === "owner" && <ProviderReviewHistory org={o.id} />}
               </article>
             ))
           )}
         </>
       )}
-      {message && <Notice message={message} />}
     </section>
   );
 }
@@ -1395,6 +1399,9 @@ function Occurrences({ listingId }: { listingId: string }) {
                       o.available_units > 0;
                     return (
                       <div className="showtime-option" key={o.id}>
+                        {o.venue_id && (
+                          <a href={`/venue/${o.venue_id}`}>Venue details</a>
+                        )}
                         {available ? (
                           <a
                             className="showtime-button"
@@ -1462,40 +1469,6 @@ function Occurrences({ listingId }: { listingId: string }) {
   );
 }
 
-function Bookings() {
-  const { data, error, loading, retry } = useLoad<{ items: any[] }>(
-    "/bookings",
-  );
-  return (
-    <section className="reading">
-      <p className="eyebrow">YOUR EXPERIENCES</p>
-      <h1>My bookings</h1>
-      {loading ? (
-        <p>Loading bookings…</p>
-      ) : error ? (
-        <Notice message={error} />
-      ) : !data?.items.length ? (
-        <Empty title="No bookings yet">
-          Your bookings will appear here after you begin checkout.
-        </Empty>
-      ) : (
-        data.items.map((b) => (
-          <article className="organization" key={b.id}>
-            <h2>
-              <a href={`/bookings/${b.id}`}>Booking {b.id.slice(0, 8)}</a>
-            </h2>
-            <p>
-              {b.state} · {money(b.amount_paise)}
-            </p>
-            <p>{new Date(b.created_at).toLocaleString("en-IN")}</p>
-            <p>Payment, ticket and refund states are tracked separately.</p>
-          </article>
-        ))
-      )}
-      <button onClick={retry}>Check latest status</button>
-    </section>
-  );
-}
 function Scanner() {
   const [occurrenceId, setOccurrence] = useState(""),
     [gate, setGate] = useState(""),
@@ -1573,63 +1546,145 @@ function Scanner() {
   );
 }
 function Cases() {
-  const { data, error, loading, retry } = useLoad<{ items: any[] }>("/cases");
+  const creation = React.useRef({ payload: "", key: "" });
+  const params = new URLSearchParams(window.location.search);
+  const caseId = params.get("caseId"),
+    after = params.get("after");
+  const query = new URLSearchParams();
+  if (caseId !== null) query.set("caseId", caseId);
+  if (after !== null) query.set("after", after);
+  const { data, error, loading, retry } = useLoad<{
+    items: any[];
+    nextCursor: string | null;
+  }>(`/cases?${query}`);
   const [subject, setSubject] = useState(""),
     [body, setBody] = useState(""),
     [category, setCategory] = useState("booking"),
+    [bookingId, setBookingId] = useState(""),
+    [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
+  function leaveDraft(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (
+      (subject || body || bookingId) &&
+      !window.confirm("Discard your unsent new case draft?")
+    )
+      event.preventDefault();
+  }
   return (
     <section className="reading">
-      <h1>Your support cases</h1>
+      <h1>{caseId ? "Your support case" : "Your support cases"}</h1>
+      {caseId && (
+        <p>
+          <a href="/cases">View all your cases</a>
+        </p>
+      )}
+      {caseId && !loading && !error && data?.items.length === 0 && (
+        <p role="status">This case is unavailable for your account.</p>
+      )}
+      <button onClick={retry}>Refresh case status</button>
+      {!caseId && (
+        <p>
+          Newest first, up to 100 cases per page. Open a case to read or reply.
+        </p>
+      )}
+      {after && (
+        <p>
+          <a href="/cases" onClick={leaveDraft}>
+            Newest cases
+          </a>
+        </p>
+      )}
+      {!caseId && !loading && !error && data?.items.length === 0 && (
+        <p>No cases on this page.</p>
+      )}
       <p>Do not include OTPs, card details, or payment secrets.</p>
+      <p>
+        If a response is lost, retry the unchanged form to recover your request.
+        Keep this page open until its outcome is known.
+      </p>
+      {loading && <p role="status">Loading support cases…</p>}
       {error && <Notice message={error} />}
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          try {
-            await api("/cases", {
-              method: "POST",
-              body: JSON.stringify({ subject, category, body }),
+      {!caseId && (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (busy) return;
+            setBusy(true);
+            const payload = JSON.stringify({
+              subject: subject.trim(),
+              category,
+              body: body.trim(),
+              ...(bookingId.trim() ? { bookingId: bookingId.trim() } : {}),
             });
-            setMessage("Your case has been recorded.");
-            setSubject("");
-            setBody("");
-            retry();
-          } catch (e) {
-            setMessage((e as Error).message);
-          }
-        }}
-      >
-        <label htmlFor="subject">Subject</label>
-        <input
-          id="subject"
-          required
-          minLength={5}
-          maxLength={150}
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-        <label htmlFor="category">Category</label>
-        <select
-          id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+            if (creation.current.payload !== payload)
+              creation.current = { payload, key: crypto.randomUUID() };
+            try {
+              const result = await api("/cases", {
+                method: "POST",
+                headers: { "idempotency-key": creation.current.key },
+                body: payload,
+              });
+              setMessage(
+                `Case ${result.id} ${result.replayed ? "recovered from your earlier request" : "recorded"}.`,
+              );
+              creation.current = { payload: "", key: "" };
+              setSubject("");
+              setBody("");
+              setBookingId("");
+              retry();
+            } catch (e) {
+              setMessage((e as Error).message);
+            } finally {
+              setBusy(false);
+            }
+          }}
         >
-          {["booking", "payment", "accessibility", "other"].map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
-        <label htmlFor="case-body">How can we help?</label>
-        <textarea
-          id="case-body"
-          required
-          minLength={10}
-          maxLength={5000}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-        />
-        <button className="primary">Create case</button>
-      </form>
+          <fieldset disabled={busy}>
+            <label htmlFor="case-booking">Booking reference (optional)</label>
+            <input
+              id="case-booking"
+              value={bookingId}
+              onChange={(e) => setBookingId(e.target.value)}
+              placeholder="Full booking UUID from My bookings"
+            />
+            <p>
+              Only bookings in your account can be linked.{" "}
+              <a href="/bookings">Find your booking reference</a>
+            </p>
+            <label htmlFor="subject">Subject</label>
+            <input
+              id="subject"
+              required
+              minLength={5}
+              maxLength={150}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+            <label htmlFor="category">Category</label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {["booking", "payment", "accessibility", "other"].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+            <label htmlFor="case-body">How can we help?</label>
+            <textarea
+              id="case-body"
+              required
+              minLength={10}
+              maxLength={5000}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+            <button className="primary" disabled={busy}>
+              {busy ? "Creating case…" : "Create case"}
+            </button>
+          </fieldset>
+        </form>
+      )}
       {message && <Notice message={message} />}{" "}
       {!loading &&
         data?.items.map((c) => (
@@ -1638,55 +1693,149 @@ function Cases() {
             <p>
               {c.state} · {c.category}
             </p>
-            <CaseMessages id={c.id} />
+            {c.booking_id && (
+              <p>
+                <a href={`/bookings/${c.booking_id}`}>
+                  View linked booking {c.booking_id}
+                </a>
+              </p>
+            )}
+            {caseId ? (
+              <>
+                <CustomerEscalation item={c} onSaved={retry} />
+                <CaseMessages key={c.version} id={c.id} onReplied={retry} />
+              </>
+            ) : (
+              <a href={`/cases?caseId=${c.id}`} onClick={leaveDraft}>
+                View conversation
+              </a>
+            )}
           </article>
         ))}
+      {!caseId && !loading && !error && data?.nextCursor && (
+        <nav aria-label="Case history pages">
+          <a
+            href={`/cases?after=${encodeURIComponent(data.nextCursor)}`}
+            onClick={leaveDraft}
+          >
+            Older cases
+          </a>
+        </nav>
+      )}
     </section>
   );
 }
-function CaseMessages({ id }: { id: string }) {
-  const { data, error, retry } = useLoad<{ items: any[] }>(
-    `/cases/${id}/messages`,
+function CaseMessages({
+  id,
+  onReplied,
+}: {
+  id: string;
+  onReplied: () => void;
+}) {
+  const [pages, setPages] = useState<string[]>([]);
+  const after = pages.at(-1);
+  const { data, error, loading, retry } = useLoad<{
+    items: any[];
+    nextCursor: string | null;
+  }>(
+    `/cases/${id}/messages${after ? `?after=${encodeURIComponent(after)}` : ""}`,
   );
+  const command = React.useRef({ input: "", key: "" });
+  const [busy, setBusy] = useState(false);
   const [body, setBody] = useState(""),
     [message, setMessage] = useState("");
   return (
     <>
       {error && <Notice message={error} />}{" "}
-      {data?.items.map((m) => (
-        <p key={m.id}>{m.body}</p>
-      ))}
+      <p>Up to 50 messages per page, oldest to newest within this page.</p>
+      {loading && <p role="status">Loading conversation…</p>}
+      {!loading &&
+        !error &&
+        data?.items.map((m) => (
+          <article key={m.id}>
+            <time dateTime={m.created_at}>
+              {new Date(m.created_at).toLocaleString("en-IN")}
+            </time>
+            <p style={{ whiteSpace: "pre-wrap" }}>{m.body}</p>
+          </article>
+        ))}
+      {!loading && !error && data?.items.length === 0 && (
+        <p>No visible messages on this page.</p>
+      )}
+      <nav className="chips" aria-label="Conversation pages">
+        <button
+          disabled={loading || busy || !pages.length}
+          onClick={() => setPages([])}
+        >
+          Latest messages
+        </button>
+        <button
+          disabled={loading || busy || !pages.length}
+          onClick={() => setPages((p) => p.slice(0, -1))}
+        >
+          Newer messages
+        </button>
+        <span role="status">
+          {pages.length
+            ? `Older messages: page ${pages.length + 1}`
+            : "Latest messages"}
+        </span>
+        <button
+          disabled={loading || busy || !!error || !data?.nextCursor}
+          onClick={() => {
+            if (data?.nextCursor) setPages((p) => [...p, data.nextCursor!]);
+          }}
+        >
+          Older messages
+        </button>
+        <button disabled={loading || busy} onClick={retry}>
+          Refresh messages
+        </button>
+      </nav>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
+          if (busy) return;
+          setBusy(true);
+          const input = JSON.stringify({ body });
+          if (command.current.input !== input)
+            command.current = { input, key: crypto.randomUUID() };
           try {
             await api(`/cases/${id}/messages`, {
               method: "POST",
-              body: JSON.stringify({ body }),
+              headers: { "idempotency-key": command.current.key },
+              body: input,
             });
+            command.current = { input: "", key: "" };
             setBody("");
+            setPages([]);
             retry();
+            onReplied();
           } catch (e) {
             setMessage((e as Error).message);
+          } finally {
+            setBusy(false);
           }
         }}
       >
         <label htmlFor={`reply-${id}`}>Reply to support</label>
         <input
+          disabled={busy}
           id={`reply-${id}`}
           required
           maxLength={5000}
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />
-        <button>Send reply</button>
+        <button disabled={busy}>{busy ? "Sending…" : "Send reply"}</button>
       </form>
       {message && <Notice message={message} />}
     </>
   );
 }
 function Admin() {
-  const { data, error, loading, retry } = useLoad<any>("/admin/reviews");
+  const queueParams = providerQueueSearch(location.search);
+  const providers = useLoad<any>(`/admin/providers?${queueParams}`);
   const [message, setMessage] = useState("");
   async function review(kind: string, item: any, state: string) {
     const reason = window.prompt("Record the reason for this review decision:");
@@ -1697,7 +1846,7 @@ function Admin() {
         body: JSON.stringify({ version: item.version, state, reason }),
       });
       setMessage("Review decision saved.");
-      retry();
+      providers.retry();
     } catch (e) {
       setMessage((e as Error).message);
     }
@@ -1707,50 +1856,73 @@ function Admin() {
       <p className="eyebrow">PLATFORM ADMINISTRATION</p>
       <h1>Review queue</h1>
       <p>
+        <a href="/admin/provider-history">Find provider decision history</a>
+      </p>
+      <p>
+        <a href="/admin/audit">Search audit history</a>
+      </p>
+      <p>
         <a className="primary" href="/admin/pricing">
           Manage commercial policies
         </a>
       </p>
-      {loading ? (
-        <p>Loading review queue…</p>
-      ) : error ? (
-        <Notice message={error} />
+      <p>
+        <a href="/admin/listings">Review listing submissions</a>
+      </p>
+      <h2>Provider applications</h2>
+      <form action="/admin" method="get">
+        <label>
+          Provider type{" "}
+          <select name="kind" defaultValue={queueParams.get("kind") ?? ""}>
+            <option value="">All provider types</option>
+            <option value="cinema">Cinema</option>
+            <option value="event">Events</option>
+            <option value="sports">Sports</option>
+          </select>
+        </label>
+        <button>Filter applications</button>
+      </form>
+      <p>
+        Oldest created applications first. The queue changes as applications are
+        reviewed; refresh the first page to see earlier applications resubmitted
+        later.
+      </p>
+      {providers.loading ? (
+        <p role="status">Loading provider applications…</p>
+      ) : providers.error ? (
+        <>
+          <Notice message={providers.error} />
+          <button onClick={providers.retry}>Retry applications</button>
+        </>
       ) : (
         <>
-          <h2>Provider applications</h2>
-          {!data?.providers.length && <p>No submitted applications.</p>}
-          {data?.providers.map((p: any) => (
+          {!providers.data?.items.length && (
+            <p>No submitted applications on this page.</p>
+          )}
+          {providers.data?.items.map((p: any) => (
             <article className="organization" key={p.id}>
               <h3>{p.name}</h3>
               <p>
                 {p.kind} · version {p.version}
               </p>
-              <button onClick={() => review("providers", p, "approved")}>
-                Approve
-              </button>
-              <button
-                onClick={() => review("providers", p, "changes_requested")}
-              >
-                Request changes
-              </button>
+              <p>
+                <a href={`/admin/provider-history?organizationId=${p.id}`}>
+                  View decision history
+                </a>
+              </p>
+              <ProviderOnboarding
+                key={`${p.id}:${p.version}`}
+                org={p.id}
+                onSaved={providers.retry}
+                review={(item, state) => void review("providers", item, state)}
+              />
             </article>
           ))}
-          <h2>Listings</h2>
-          {!data?.listings.length && <p>No listings awaiting review.</p>}
-          {data?.listings.map((p: any) => (
-            <article className="organization" key={p.id}>
-              <h3>{p.title}</h3>
-              <p>{p.description}</p>
-              <button onClick={() => review("listings", p, "published")}>
-                Publish approved listing
-              </button>
-              <button
-                onClick={() => review("listings", p, "changes_requested")}
-              >
-                Request changes
-              </button>
-            </article>
-          ))}
+          <ProviderQueueNavigation
+            kind={queueParams.get("kind") ?? ""}
+            paged={queueParams.has("afterId")}
+            next={providers.data?.nextCursor ?? null}
+          />
         </>
       )}
       {message && <Notice message={message} />}

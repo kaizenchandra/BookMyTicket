@@ -1,6 +1,8 @@
 export type CalendarOccurrence = {
   id: string;
   venueName: string;
+  venueAddress?: string | null;
+  venueCity?: string | null;
   timeZone: string;
   startsAt: string;
   endsAt: string;
@@ -54,7 +56,7 @@ export function calendar(
       `SEQUENCE:${o.version}`,
       `STATUS:${o.state === "cancelled" ? "CANCELLED" : "CONFIRMED"}`,
       `SUMMARY:${calendarText("Booking at " + o.venueName)}`,
-      `LOCATION:${calendarText(o.venueName)}`,
+      `LOCATION:${calendarText([o.venueName, o.venueAddress, o.venueCity].filter(Boolean).join(", "))}`,
       `DESCRIPTION:${calendarText("Venue time zone: " + o.timeZone + ". Check the app for current schedule and admission status. This calendar entry is not a ticket.")}`,
       "END:VEVENT",
     );

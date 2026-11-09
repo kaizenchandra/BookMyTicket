@@ -192,6 +192,7 @@ export function CheckoutQuote({
           </section>
           {registration && (
             <AttendeeFields
+              allowSaved
               preview={registration}
               answers={answers}
               disabled={busy || !active}

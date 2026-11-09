@@ -1,0 +1,11 @@
+# ADR 068: Owner invitation history pagination
+
+FE:PRV-09 and BE:PRV-08 require invitation management, and BE:API-05 requires stable pagination. The owner staff API previously returned only the newest 100 invitations with no way to reach older records. GET /api/v1/organizations/:id/staff now returns at most 20 invitations plus nextCursor; members remain the existing complete list. Clients must follow nextCursor for older invitation history.
+
+The cursor contains exact six-digit UTC createdAt and UUID afterId. Both boundary fields are required together. Unknown fields and malformed dates/UUIDs are rejected. PostgreSQL emits timestamps directly as strings to avoid JavaScript millisecond truncation. Descending (created_at,id) ordering and strict tuple comparison handle equal timestamps without duplicates or omissions in unchanged data. Migration 061 indexes organization/creation time/ID.
+
+The application use case retains fresh MFA authentication. The persistence adapter locks the organization and checks current owner membership before each page query. Pagination does not grant access to another organization, and opaque cursor coordinates are only boundaries, not authorization. Status is calculated at read time, including expired pending invitations. Pages are live views rather than a frozen snapshot: returning to First page reveals new invitations and status may change between reads.
+
+The owner staff panel offers First, Previous and Next controls, records cursor history, displays page number and preserves existing member and invitation actions. Creating an invitation resets to the first page; session and organization changes reset pagination. Recipient inbox behavior is unchanged and remains capped at 100. OpenAPI documents query boundaries and the paged response.
+
+Tests traverse 106 records in 20/20/20/20/20/6 pages, compare exact database ordering, exercise equal timestamps and one-microsecond differences, verify expired projection and first-page repeatability, and cover malformed queries, outsider/anonymous requests, MFA loss and membership downgrade. Browser paging/accessibility, load acceptance, member-list pagination and recipient-inbox pagination remain open.
