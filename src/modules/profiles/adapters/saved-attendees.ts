@@ -5,7 +5,11 @@ import {
   hkdfSync,
   randomBytes,
 } from "node:crypto";
-import { pool, transaction } from "../../../shared/database.ts";
+import {
+  pool,
+  transaction,
+  type Transaction,
+} from "../../../shared/database.ts";
 import { AppError } from "../../../shared/errors.ts";
 import type {
   SavedAttendee,
@@ -13,6 +17,28 @@ import type {
   SavedAttendeesStore,
 } from "../application/saved-attendees.ts";
 export class PostgresSavedAttendees implements SavedAttendeesStore {
+  async maskedForAdministration(tx: Transaction, owner: string) {
+    const row = (
+      await tx.query(
+        `SELECT ciphertext FROM profiles.saved_attendees WHERE account_id=$1 AND (SELECT granted FROM profiles.attendee_consent_history WHERE account_id=$1 ORDER BY preference_version DESC LIMIT 1)=true`,
+        [owner],
+      )
+    ).rows[0];
+    if (!row?.ciphertext) return { available: true, items: [] };
+    try {
+      return {
+        available: true,
+        items: this.decrypt(owner, row.ciphertext).map((i) => ({
+          id: i.id,
+          name: i.name ? i.name.slice(0, 1) + "***" : "",
+          email: i.email ? i.email.replace(/^(.).*(@.*)$/, "$1***$2") : "",
+          phone: i.phone ? "***" + i.phone.slice(-4) : "",
+        })),
+      };
+    } catch {
+      return { available: false, items: [] };
+    }
+  }
   async history(owner: string, beforeVersion?: number) {
     const rows = (
       await pool.query(

@@ -1,3 +1,4 @@
+import { paymentMetadata } from "../domain/metadata.ts";
 import {
   pool,
   transaction,
@@ -63,9 +64,20 @@ export class PostgresCollection implements CollectionStore {
     ).rows[0];
   }
   async observe(orderId: string, payment: ProviderPayment) {
+    const metadata = paymentMetadata(payment);
     const r = await pool.query(
-      `INSERT INTO payments.attempts(provider_payment_id,order_id,amount_paise,currency,state) VALUES($1,$2,$3,$4,$5) ON CONFLICT(provider_payment_id) DO UPDATE SET state=CASE WHEN payments.attempts.state='refunded' THEN 'refunded' WHEN payments.attempts.state='captured' AND EXCLUDED.state<>'refunded' THEN 'captured' WHEN EXCLUDED.state='created' THEN payments.attempts.state ELSE EXCLUDED.state END,observed_at=clock_timestamp() WHERE payments.attempts.order_id=EXCLUDED.order_id AND payments.attempts.amount_paise=EXCLUDED.amount_paise AND payments.attempts.currency=EXCLUDED.currency RETURNING state`,
-      [payment.id, orderId, payment.amount, payment.currency, payment.status],
+      `INSERT INTO payments.attempts(provider_payment_id,order_id,amount_paise,currency,state,method,error_code,error_reason,amount_refunded_paise) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(provider_payment_id) DO UPDATE SET method=coalesce(payments.attempts.method,EXCLUDED.method),error_code=coalesce(EXCLUDED.error_code,payments.attempts.error_code),error_reason=coalesce(EXCLUDED.error_reason,payments.attempts.error_reason),amount_refunded_paise=greatest(payments.attempts.amount_refunded_paise,EXCLUDED.amount_refunded_paise),state=CASE WHEN payments.attempts.state='refunded' THEN 'refunded' WHEN payments.attempts.state='captured' AND EXCLUDED.state<>'refunded' THEN 'captured' WHEN EXCLUDED.state='created' THEN payments.attempts.state ELSE EXCLUDED.state END,observed_at=clock_timestamp() WHERE payments.attempts.order_id=EXCLUDED.order_id AND payments.attempts.amount_paise=EXCLUDED.amount_paise AND payments.attempts.currency=EXCLUDED.currency RETURNING state`,
+      [
+        payment.id,
+        orderId,
+        payment.amount,
+        payment.currency,
+        payment.status,
+        metadata.method,
+        metadata.errorCode,
+        metadata.errorReason,
+        metadata.refunded,
+      ],
     );
     if (r.rowCount !== 1)
       throw new AppError(

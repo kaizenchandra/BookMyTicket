@@ -1,0 +1,9 @@
+# ADR 100: Complete FR-03 access inspection and navigation
+
+Review of the existing FR-03 implementation found that self-account comparison used the raw transport UUID while PostgreSQL UUID equality is case-insensitive. Normalize actor and target identities in the application use case before comparing or auditing. Role-update targets are normalized as well. Activity lookup canonicalizes target scope and compares legacy audit target strings case-insensitively. The application-level guard now rejects uppercase spellings of the acting account, independent of transport validation.
+
+Add a protected GET `/api/v1/admin/users/:id` and `/admin/users/:id` screen. The identity-owned query obtains masked account metadata, direct/effective platform grants and active/inactive role definitions in one statement snapshot. The read requires access.manage/current MFA and is audited. No contact, credential or gate/tenant-grant disclosure is added. Unknown accounts return 404 after authorization. The detail page explains permission provenance and permits the existing guarded editing workflow.
+
+Admin/role directories support newest/oldest ordering with timestamp/UUID keysets in matching directions. Sort belongs to cursor scope; changing it rejects the old cursor. First-page links preserve all filters and sort. New cursor scopes intentionally require starting over for old pre-release cursors. The current projection and role mutation policies from ADR 099 remain unchanged.
+
+Tests exercise case-insensitive self denial and history, masked/authorized detail responses, missing accounts, full two-page traversal in both directions with equal timestamps, sort-change rejection, filter-preserving navigation and exclusion of inactive roles from permission explanations. No database migration or dependency upgrade is required. Browser acceptance remains separate from database/HTTP/build evidence.

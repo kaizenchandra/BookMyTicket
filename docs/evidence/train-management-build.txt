@@ -1,0 +1,29 @@
+
+> bookmyticket@0.103.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 85 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.71 kB │ gzip:   0.40 kB
+dist/assets/index-BKSbfAa-.css   22.33 kB │ gzip:   5.31 kB
+dist/assets/index-Dttz4A3n.js   582.53 kB │ gzip: 152.09 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 99ms
+
+> bookmyticket@0.103.0 check:architecture
+> node scripts/check-architecture.mjs
+
+Architecture import checks passed for 269 module files. SQL ownership and runtime composition require separate review.
+
+> bookmyticket@0.103.0 contracts
+> node --import tsx scripts/generate-contracts.ts
+
+Generated 173 API paths.

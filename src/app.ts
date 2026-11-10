@@ -1,3 +1,64 @@
+import {PaymentAdministration} from './modules/payments/application/administration.ts';
+import {PostgresPaymentAdministration} from './modules/payments/adapters/administration.ts';
+import {paymentAdminFilters,paymentReportInput,paymentDetailQuery} from './modules/payments/adapters/administration-schema.ts';
+import {BookingExceptions} from './modules/bookings/application/exceptions.ts';
+import {PostgresBookingExceptions} from './modules/bookings/adapters/exceptions.ts';
+import {exceptionInput,exceptionKey,exceptionHistory} from './modules/bookings/adapters/exceptions-schema.ts';
+import {PostgresEvents as BookingAdminEvents} from './modules/reporting/adapters/outbox.ts';
+import {CabAdministration} from './modules/cabs/application/administration.ts';
+import {PostgresCabs} from './modules/cabs/adapters/postgres.ts';
+import {cabKind,cabCreate,cabEdit,cabFilters,cabDisruption,cabKey,cabHistoryQuery,cabPreview} from './modules/cabs/adapters/schema.ts';
+import {PackageAdministration} from './modules/packages/application/administration.ts';
+import {PostgresPackages} from './modules/packages/adapters/postgres.ts';
+import {PostgresPackageAllotments} from './modules/inventory/adapters/package-allotments.ts';
+import {packageCreate,packageEdit,packageAction,packageFilters,packagePreview,packageAllotment,packageKey,packageHistoryQuery} from './modules/packages/adapters/schema.ts';
+import {TrainAdministration} from './modules/trains/application/administration.ts';
+import {PostgresTrains} from './modules/trains/adapters/postgres.ts';
+import {trainKind,trainCreate,trainEdit,trainFilters,trainIncident,trainKey,trainHistoryQuery} from './modules/trains/adapters/schema.ts';
+import {BusAdministration} from './modules/buses/application/administration.ts';
+import {PostgresBuses} from './modules/buses/adapters/postgres.ts';
+import {busKind,busCreate,busEdit,busFilters,busDisruption,busKey,busHistoryQuery} from './modules/buses/adapters/schema.ts';
+import {HotelInventory} from './modules/inventory/application/hotel.ts';
+import {PostgresHotelInventory} from './modules/inventory/adapters/hotel.ts';
+import {PostgresHotelInventoryTarget} from './modules/hotels/adapters/inventory-target.ts';
+import {hotelRoomInput,hotelRoomEdit,hotelPlanInput,hotelPlanEdit,hotelCalendarQuery,hotelBulkInput,hotelHoldInput,hotelAllocationAction,hotelInventoryKey,hotelHistoryQuery,hotelReconciliationInput} from './modules/inventory/adapters/hotel-schema.ts';
+import {PropertyAdministration} from './modules/hotels/application/administration.ts';
+import {PostgresProperties} from './modules/hotels/adapters/postgres.ts';
+import {propertyCreate,propertyEdit,propertyAction,propertyFilters,propertyRequestKey} from './modules/hotels/adapters/schema.ts';
+import {FlightAdministration} from './modules/flights/application/administration.ts';
+import {PostgresFlights} from './modules/flights/adapters/postgres.ts';
+import {supplierInput,supplierUpdate,supplierFilters,commercialInput,previewInput,flightRequestKey} from './modules/flights/adapters/schema.ts';
+import { CustomerAdministration } from './modules/identity/application/customer-admin.ts';
+import { PostgresCustomerAdministration } from './modules/identity/adapters/customer-admin.ts';
+import { customerFilters, customerStatusChange, customerHistoryFilters } from './modules/identity/adapters/customer-admin-schema.ts';
+import { PostgresCustomerProfiles } from './modules/profiles/adapters/customer-admin.ts';
+import { PostgresCustomerBookings } from './modules/bookings/adapters/customer-admin.ts';
+import { PostgresCustomerPayments } from './modules/payments/adapters/customer-admin.ts';
+import { PostgresCustomerSupport } from './modules/support/adapters/customer-admin.ts';
+import {AdminRoles} from "./modules/identity/application/roles.ts";
+import {PostgresRoles} from "./modules/identity/adapters/roles.ts";
+import {roleInput,roleUpdate,roleFilters,adminCreation,adminRequestKey} from "./modules/identity/adapters/roles-schema.ts";
+import {PostgresAdminActivity} from "./modules/reporting/adapters/admin-history.ts";
+import {DashboardReports} from "./modules/reporting/application/dashboard-reports.ts";
+import { DashboardHistory } from "./modules/reporting/adapters/dashboard-history.ts";
+import { SupportDashboard } from "./modules/support/adapters/dashboard.ts";
+import { BookingDashboardRecords } from "./modules/bookings/adapters/dashboard-records.ts";
+import { PaymentDashboardRecords } from "./modules/payments/adapters/dashboard-records.ts";
+import { SupportDashboardRecords } from "./modules/support/adapters/dashboard-records.ts";
+import {dashboardRecordKind} from "./modules/reporting/adapters/dashboard-schema.ts";
+import {AdminPaymentRecords, financeRecordFilters} from "./modules/payments/adapters/admin.ts";
+import { AdminBookings } from "./modules/bookings/application/admin.ts";
+import { PostgresAdminBookings } from "./modules/bookings/adapters/admin.ts";
+import { adminBookingFilters, adminPaymentFilters } from "./modules/bookings/adapters/admin-schema.ts";
+import { PostgresAdminFulfillment } from "./modules/ticketing/adapters/admin.ts";
+import { AccountAdministration } from "./modules/identity/application/administration.ts";
+import { PostgresAccountAdministration, AdminDirectory } from "./modules/identity/adapters/administration.ts";
+import { accountFilters, accountChange } from "./modules/identity/adapters/administration-schema.ts";
+import { dashboardFilters } from "./modules/reporting/adapters/dashboard-schema.ts";
+import { CatalogDashboard } from "./modules/catalog/adapters/dashboard.ts";
+import { BookingDashboard } from "./modules/bookings/adapters/dashboard.ts";
+import { PaymentDashboard } from "./modules/payments/adapters/dashboard.ts";
+import { InventoryDashboard } from "./modules/inventory/adapters/dashboard.ts";
 import { BookingPaymentHistory } from "./modules/bookings/application/payment-history.ts";
 import { PostgresPaymentHistory } from "./modules/payments/adapters/history.ts";
 import { paymentHistoryFilters } from "./modules/bookings/adapters/payment-history-schema.ts";
@@ -241,7 +302,9 @@ export async function buildApp() {
     bookings,
     tickets,
     wallet,
+    adminWallet,
     pendingCancellation,
+    adminPendingCancellation,
     freeConfirmation,
     freeCancellation,
     quotes,
@@ -1313,6 +1376,27 @@ export async function buildApp() {
       uuid.parse((req.params as { id: string }).id),
     ),
   );
+  app.get("/api/v1/admin/bookings/:id/tickets/download", async (req, reply) => {
+    const id = uuid.parse((req.params as { id: string }).id),
+      actor = await identity.authenticate(req.cookies.session);
+    await identity.require(actor,"bookings.manage");
+    const document = await adminWallet.document(
+        actor.id,
+        id,
+      );
+    return reply
+      .header("Cache-Control", "private, no-store")
+      .header(
+        "Content-Disposition",
+        `attachment; filename="tickets-${id}.html"`,
+      )
+      .header(
+        "Content-Security-Policy",
+        "default-src 'none'; img-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; sandbox",
+      )
+      .type("text/html; charset=utf-8")
+      .send(ticketDocument(document));
+  });
   app.get("/api/v1/bookings/:id/tickets/download", async (req, reply) => {
     const id = uuid.parse((req.params as { id: string }).id),
       document = await wallet.document(
@@ -1583,6 +1667,159 @@ export async function buildApp() {
         .parse(req.headers["idempotency-key"]),
     ),
   );
+  const paymentAdministration=new PaymentAdministration(new PostgresPaymentAdministration(),new PostgresStaffAuthorization(),new PostgresAudit());
+  const adminPaymentRecords=new AdminPaymentRecords(new PostgresStaffAuthorization(),new PostgresAudit());
+  app.get('/api/v1/admin/payments',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'finance');
+    const query=Object.fromEntries(Object.entries(req.query as Record<string,unknown>).filter(([,v])=>v!==''));
+    return paymentAdministration.list(actor.id,paymentAdminFilters.parse(query));
+  });
+  app.get('/api/v1/admin/payment-exceptions',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'finance');return paymentAdministration.exceptions(a.id,paymentDetailQuery.parse(req.query).after)});
+  app.get('/api/v1/admin/payments/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'finance');return paymentAdministration.detail(a.id,z.uuid().parse((req.params as {id:string}).id),paymentDetailQuery.parse(req.query).after)});
+  app.post('/api/v1/admin/payments/reports',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'finance');return paymentAdministration.export(a.id,paymentReportInput.parse(req.body))});
+  app.get('/api/v1/admin/refunds',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'finance');
+    const query=Object.fromEntries(Object.entries(req.query as Record<string,unknown>).filter(([,v])=>v!==''));
+    return adminPaymentRecords.list(actor.id,true,financeRecordFilters.parse(query));
+  });
+  const holidayPackages=new PackageAdministration(new PostgresPackages(new PostgresStaffAuthorization()),new PostgresPackageAllotments(),new PostgresAudit());
+  app.get('/api/v1/holiday-packages',async req=>holidayPackages.list(null,packageFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!=='')))));
+  app.get('/api/v1/admin/packages',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.read');return holidayPackages.list(a.id,packageFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!==''))))});
+  app.post('/api/v1/admin/packages',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.manage');return holidayPackages.create(a.id,packageKey.parse(req.headers['idempotency-key']),packageCreate.parse(req.body))});
+  app.get('/api/v1/admin/packages/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.read');return holidayPackages.detail(a.id,z.uuid().parse((req.params as {id:string}).id))});
+  app.patch('/api/v1/admin/packages/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.manage');return holidayPackages.edit(a.id,z.uuid().parse((req.params as {id:string}).id),packageEdit.parse(req.body))});
+  app.post('/api/v1/admin/packages/:id/actions',async req=>{const a=await identity.authenticate(req.cookies.session);identity.requireMfa(a);return holidayPackages.action(a.id,z.uuid().parse((req.params as {id:string}).id),packageAction.parse(req.body))});
+  app.post('/api/v1/admin/packages/:id/preview',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.read');return holidayPackages.preview(a.id,z.uuid().parse((req.params as {id:string}).id),packagePreview.parse(req.body))});
+  app.put('/api/v1/admin/packages/:id/allotments',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.manage');return holidayPackages.allotment(a.id,z.uuid().parse((req.params as {id:string}).id),packageAllotment.parse(req.body))});
+  app.get('/api/v1/admin/packages/:id/history',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'packages.read');return holidayPackages.history(a.id,z.uuid().parse((req.params as {id:string}).id),packageHistoryQuery.parse(req.query).before)});
+  const trains=new TrainAdministration(new PostgresTrains(new PostgresStaffAuthorization()),new PostgresAudit());
+  app.get('/api/v1/admin/trains/:kind',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'trains.read');return trains.list(a.id,trainKind.parse((req.params as {kind:string}).kind),trainFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!==''))))});
+  app.post('/api/v1/admin/trains/:kind',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'trains.manage');const kind=trainKind.parse((req.params as {kind:string}).kind);return trains.create(a.id,kind,trainKey.parse(req.headers['idempotency-key']),trainCreate[kind].parse(req.body))});
+  app.get('/api/v1/admin/trains/:kind/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'trains.read');const p=z.object({kind:trainKind,id:z.uuid()}).parse(req.params);return trains.detail(a.id,p.kind,p.id)});
+  app.patch('/api/v1/admin/trains/:kind/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'trains.manage');const p=z.object({kind:trainKind,id:z.uuid()}).parse(req.params);return trains.edit(a.id,p.kind,p.id,trainEdit[p.kind].parse(req.body))});
+  app.get('/api/v1/admin/trains/:kind/:id/history',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'trains.read');const p=z.object({kind:trainKind,id:z.uuid()}).parse(req.params);return trains.history(a.id,p.kind,p.id,trainHistoryQuery.parse(req.query).before)});
+  app.post('/api/v1/admin/trains/services/:id/incidents',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'trains.manage');return trains.incident(a.id,z.uuid().parse((req.params as {id:string}).id),trainIncident.parse(req.body))});
+  const cabs=new CabAdministration(new PostgresCabs(new PostgresStaffAuthorization()),new PostgresAudit());
+  app.get('/api/v1/admin/cabs/:kind',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.read');return cabs.list(a.id,cabKind.parse((req.params as {kind:string}).kind),cabFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!==''))))});
+  app.post('/api/v1/admin/cabs/:kind',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.manage');const kind=cabKind.parse((req.params as {kind:string}).kind);return cabs.create(a.id,kind,cabKey.parse(req.headers['idempotency-key']),cabCreate[kind].parse(req.body))});
+  app.get('/api/v1/admin/cabs/:kind/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.read');const p=z.object({kind:cabKind,id:z.uuid()}).parse(req.params);return cabs.detail(a.id,p.kind,p.id)});
+  app.patch('/api/v1/admin/cabs/:kind/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.manage');const p=z.object({kind:cabKind,id:z.uuid()}).parse(req.params);return cabs.edit(a.id,p.kind,p.id,cabEdit[p.kind].parse(req.body))});
+  app.get('/api/v1/admin/cabs/:kind/:id/history',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.read');const p=z.object({kind:cabKind,id:z.uuid()}).parse(req.params);return cabs.history(a.id,p.kind,p.id,cabHistoryQuery.parse(req.query).before)});
+  app.post('/api/v1/admin/cabs/services/:id/disruptions',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.manage');return cabs.disruption(a.id,z.uuid().parse((req.params as {id:string}).id),cabDisruption.parse(req.body))});
+  app.post('/api/v1/admin/cabs/services/:id/preview',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'cabs.read');return cabs.preview(a.id,z.uuid().parse((req.params as {id:string}).id),cabPreview.parse(req.body))});
+
+  const buses=new BusAdministration(new PostgresBuses(new PostgresStaffAuthorization()),new PostgresAudit());
+  app.get('/api/v1/admin/buses/:kind',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'buses.read');return buses.list(a.id,busKind.parse((req.params as {kind:string}).kind),busFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!==''))))});
+  app.post('/api/v1/admin/buses/:kind',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'buses.manage');const kind=busKind.parse((req.params as {kind:string}).kind);return buses.create(a.id,kind,busKey.parse(req.headers['idempotency-key']),busCreate[kind].parse(req.body))});
+  app.get('/api/v1/admin/buses/:kind/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'buses.read');const p=z.object({kind:busKind,id:z.uuid()}).parse(req.params);return buses.detail(a.id,p.kind,p.id)});
+  app.patch('/api/v1/admin/buses/:kind/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'buses.manage');const p=z.object({kind:busKind,id:z.uuid()}).parse(req.params);return buses.edit(a.id,p.kind,p.id,busEdit[p.kind].parse(req.body))});
+  app.get('/api/v1/admin/buses/:kind/:id/history',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'buses.read');const p=z.object({kind:busKind,id:z.uuid()}).parse(req.params);return buses.history(a.id,p.kind,p.id,busHistoryQuery.parse(req.query).before)});
+  app.post('/api/v1/admin/buses/services/:id/disruptions',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'buses.manage');return buses.disruption(a.id,z.uuid().parse((req.params as {id:string}).id),busDisruption.parse(req.body))});
+  const hotelStock=new HotelInventory(new PostgresHotelInventory(new PostgresStaffAuthorization(),new PostgresHotelInventoryTarget()),new PostgresAudit());
+  app.get('/api/v1/admin/hotels/:id/rooms',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.read');return hotelStock.rooms(a.id,z.uuid().parse((req.params as {id:string}).id))});
+  app.post('/api/v1/admin/hotels/:id/rooms',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.manage');return hotelStock.createRoom(a.id,z.uuid().parse((req.params as {id:string}).id),hotelInventoryKey.parse(req.headers['idempotency-key']),hotelRoomInput.parse(req.body))});
+  app.patch('/api/v1/admin/hotel-rooms/:id',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.manage');return hotelStock.editRoom(a.id,z.uuid().parse((req.params as {id:string}).id),hotelRoomEdit.parse(req.body))});
+  app.post('/api/v1/admin/hotel-rooms/:id/plans',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'pricing');return hotelStock.plan(a.id,z.uuid().parse((req.params as {id:string}).id),hotelPlanInput.parse(req.body),hotelInventoryKey.parse(req.headers['idempotency-key']))});
+  app.patch('/api/v1/admin/hotel-rooms/:id/plans/:planId',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'pricing');const p=z.object({id:z.uuid(),planId:z.uuid()}).parse(req.params),b=hotelPlanEdit.parse(req.body);return hotelStock.plan(a.id,p.id,b,'unused',p.planId,b.planVersion)});
+  app.get('/api/v1/admin/hotel-rooms/:id/calendar',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.read');const q=hotelCalendarQuery.parse(req.query);return hotelStock.calendar(a.id,z.uuid().parse((req.params as {id:string}).id),q.planId,q.from,q.until)});
+  app.put('/api/v1/admin/hotel-rooms/:id/calendar',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.manage');await identity.require(a,'pricing');return hotelStock.bulk(a.id,z.uuid().parse((req.params as {id:string}).id),hotelBulkInput.parse(req.body))});
+  app.post('/api/v1/admin/hotel-rooms/:id/holds',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.manage');return hotelStock.hold(a.id,z.uuid().parse((req.params as {id:string}).id),hotelInventoryKey.parse(req.headers['idempotency-key']),hotelHoldInput.parse(req.body))});
+  app.post('/api/v1/admin/hotel-rooms/:id/allocations/:allocationId/actions',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.manage');const p=z.object({id:z.uuid(),allocationId:z.uuid()}).parse(req.params),b=hotelAllocationAction.parse(req.body);return hotelStock.action(a.id,p.id,p.allocationId,b.action,b.reason)});
+  app.get('/api/v1/admin/hotel-rooms/:id/allocations',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.read');return hotelStock.allocations(a.id,z.uuid().parse((req.params as {id:string}).id),hotelHistoryQuery.parse(req.query).before)});
+  app.post('/api/v1/admin/hotel-rooms/:id/reconciliation',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.manage');return hotelStock.reconcile(a.id,z.uuid().parse((req.params as {id:string}).id),hotelInventoryKey.parse(req.headers['idempotency-key']),hotelReconciliationInput.parse(req.body))});
+  app.get('/api/v1/admin/hotel-rooms/:id/history',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'hotels.read');return hotelStock.history(a.id,z.uuid().parse((req.params as {id:string}).id),hotelHistoryQuery.parse(req.query).before)});
+  const properties=new PropertyAdministration(new PostgresProperties(new PostgresStaffAuthorization()),new PostgresAudit());
+  app.get('/api/v1/hotels',async req=>properties.list(null,propertyFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!=='')))));
+  app.get('/api/v1/admin/hotels',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'hotels.read');return properties.list(actor.id,propertyFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!==''))))});
+  app.post('/api/v1/admin/hotels',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'hotels.manage');return properties.create(actor.id,propertyRequestKey.parse(req.headers['idempotency-key']),propertyCreate.parse(req.body))});
+  app.get('/api/v1/admin/hotels/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'hotels.read');return properties.detail(actor.id,z.uuid().parse((req.params as {id:string}).id))});
+  app.patch('/api/v1/admin/hotels/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'hotels.manage');return properties.edit(actor.id,z.uuid().parse((req.params as {id:string}).id),propertyEdit.parse(req.body))});
+  app.post('/api/v1/admin/hotels/:id/actions',async req=>{const actor=await identity.authenticate(req.cookies.session);identity.requireMfa(actor);return properties.action(actor.id,z.uuid().parse((req.params as {id:string}).id),propertyAction.parse(req.body))});
+  app.get('/api/v1/admin/hotels/:id/history',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'hotels.read');return properties.history(actor.id,z.uuid().parse((req.params as {id:string}).id),z.object({before:z.coerce.number().int().positive().optional()}).strict().parse(req.query).before)});
+  const flights=new FlightAdministration(new PostgresFlights(new PostgresStaffAuthorization()),new PostgresAudit());
+  app.get('/api/v1/admin/flights/suppliers',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'flights.read');return flights.list(actor.id,supplierFilters.parse(Object.fromEntries(Object.entries(req.query as object).filter(([,v])=>v!==''))))});
+  app.post('/api/v1/admin/flights/suppliers',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'flights.manage');return flights.create(actor.id,flightRequestKey.parse(req.headers['idempotency-key']),supplierInput.parse(req.body))});
+  app.get('/api/v1/admin/flights/suppliers/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'flights.read');return flights.detail(actor.id,z.uuid().parse((req.params as {id:string}).id))});
+  app.patch('/api/v1/admin/flights/suppliers/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'flights.manage');return flights.update(actor.id,z.uuid().parse((req.params as {id:string}).id),supplierUpdate.parse(req.body))});
+  app.put('/api/v1/admin/flights/suppliers/:id/commercial-rule',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'pricing');return flights.saveRule(actor.id,z.uuid().parse((req.params as {id:string}).id),commercialInput.parse(req.body))});
+  app.post('/api/v1/admin/flights/suppliers/:id/price-preview',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'pricing');const input=previewInput.parse(req.body);return flights.preview(actor.id,z.uuid().parse((req.params as {id:string}).id),input.basePaise,input.taxPaise)});
+  const adminDirectory=new AdminDirectory(new PostgresAudit());
+  app.post('/api/v1/admin/bookings/:id/pending-cancellation/preview',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'bookings.manage');z.object({}).strict().parse(req.body??{});return adminPendingCancellation.preview(a.id,z.uuid().parse((req.params as {id:string}).id));});
+  app.post('/api/v1/admin/bookings/:id/pending-cancellation',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'bookings.manage');return adminPendingCancellation.cancel(a.id,z.uuid().parse((req.params as {id:string}).id),exceptionKey.parse(req.headers['idempotency-key']),pendingCancelInput.parse(req.body));});
+  const bookingExceptions=new BookingExceptions(new PostgresBookingExceptions(),new PostgresStaffAuthorization(),new PostgresAudit(),new BookingAdminEvents());
+  app.get('/api/v1/admin/bookings/:id/exceptions',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'bookings.read');return bookingExceptions.detail(a.id,z.uuid().parse((req.params as {id:string}).id),exceptionHistory.parse(req.query).before)});
+  app.post('/api/v1/admin/bookings/:id/exceptions',async req=>{const a=await identity.authenticate(req.cookies.session);await identity.require(a,'bookings.manage');return bookingExceptions.change(a.id,z.uuid().parse((req.params as {id:string}).id),exceptionKey.parse(req.headers['idempotency-key']),exceptionInput.parse(req.body))});
+  const adminBookings=new AdminBookings(new PostgresAdminBookings(),new PostgresStaffAuthorization(),new PostgresAudit(),new PostgresPaymentHistory(),new PostgresAdminFulfillment(),new CatalogDashboard());
+  app.get('/api/v1/admin/capabilities',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);identity.requireMfa(actor);
+    return adminDirectory.capabilities(actor.id);
+  });
+  const roleStore=new PostgresRoles(new PostgresAdminActivity(),new PostgresAudit()),adminRoles=new AdminRoles(roleStore,new PostgresAudit());
+  app.get('/api/v1/admin/roles',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');const query=Object.fromEntries(Object.entries(req.query as Record<string,unknown>).filter(([,v])=>v!==''));return roleStore.list(actor.id,roleFilters.parse(query))});
+  app.get('/api/v1/admin/roles/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');return roleStore.detail(actor.id,z.uuid().parse((req.params as {id:string}).id))});
+  app.post('/api/v1/admin/roles',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');return adminRoles.create(actor.id,roleInput.parse(req.body),adminRequestKey.parse(req.headers['idempotency-key']))});
+  app.patch('/api/v1/admin/roles/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');return adminRoles.update(actor.id,z.uuid().parse((req.params as {id:string}).id),roleUpdate.parse(req.body))});
+  app.post('/api/v1/admin/users',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');return adminRoles.createAccount(actor.id,adminCreation.parse(req.body),adminRequestKey.parse(req.headers['idempotency-key']))});
+  app.get('/api/v1/admin/users/:id/activity',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');return roleStore.activity(actor.id,z.uuid().parse((req.params as {id:string}).id),z.object({after:z.string().max(1500).optional()}).strict().parse(req.query).after)});
+  app.get('/api/v1/admin/users/:id',async req=>{const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');return adminDirectory.detail(actor.id,z.uuid().parse((req.params as {id:string}).id))});
+  app.get('/api/v1/admin/users',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');
+    return adminDirectory.list(actor.id,true,accountFilters.parse(req.query));
+  });
+  const customers = new CustomerAdministration(new PostgresCustomerAdministration(),new PostgresCustomerProfiles(),new PostgresCustomerBookings(),new PostgresCustomerPayments(),new PostgresCustomerSupport(),new PostgresAudit());
+  app.get('/api/v1/admin/customers',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'customers.read');
+    return customers.list(actor.id,customerFilters.parse(req.query));
+  });
+  app.get('/api/v1/admin/customers/:id',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'customers.read');
+    return customers.detail(actor.id,z.uuid().parse((req.params as {id:string}).id));
+  });
+  app.get('/api/v1/admin/customers/:id/history',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'customers.read');
+    const q=customerHistoryFilters.parse(req.query);return customers.history(actor.id,z.uuid().parse((req.params as {id:string}).id),q.kind,q.after);
+  });
+  app.patch('/api/v1/admin/customers/:id/status',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'customers.read');await identity.require(actor,'access.manage');
+    await new AccountAdministration(new PostgresAccountAdministration(true),new PostgresAudit()).change(actor.id,z.uuid().parse((req.params as {id:string}).id),customerStatusChange.parse(req.body));
+    return {updated:true};
+  });
+  app.patch('/api/v1/admin/users/:id',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'access.manage');
+    return new AccountAdministration(new PostgresAccountAdministration(),new PostgresAudit()).change(actor.id,z.uuid().parse((req.params as {id:string}).id),accountChange.parse(req.body));
+  });
+  app.get('/api/v1/admin/bookings',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'bookings.read');
+    return adminBookings.list(actor.id,adminBookingFilters.parse(req.query));
+  });
+  app.get('/api/v1/admin/bookings/:id',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'bookings.read');
+    return adminBookings.detail(actor.id,z.uuid().parse((req.params as {id:string}).id));
+  });
+  app.get('/api/v1/admin/bookings/:id/payments',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'bookings.read');
+    return adminBookings.paymentHistory(actor.id,z.uuid().parse((req.params as {id:string}).id),adminPaymentFilters.parse(req.query).after);
+  });
+  const dashboardReports=new DashboardReports(new DashboardHistory(),new PostgresStaffAuthorization(),new PostgresAudit(),
+    {bookings:new BookingDashboard(),payments:new PaymentDashboard(),inventory:new InventoryDashboard(),catalog:new CatalogDashboard(),support:new SupportDashboard()},
+    {bookings:new BookingDashboardRecords(),payments:new PaymentDashboardRecords(),support:new SupportDashboardRecords()});
+  app.get('/api/v1/admin/dashboard/history',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'finance');
+    return dashboardReports.history(actor.id);
+  });
+  app.get('/api/v1/admin/dashboard/history/:id',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'finance');
+    return dashboardReports.saved(actor.id,z.uuid().parse((req.params as {id:string}).id));
+  });
+  app.get('/api/v1/admin/dashboard/records',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'finance');
+    const {kind,after,...filters}=req.query as Record<string,unknown>;
+    return dashboardReports.records(actor.id,dashboardFilters.parse(filters),dashboardRecordKind.parse(kind),z.string().max(1500).optional().parse(after));
+  });
+  app.get('/api/v1/admin/dashboard',async req=>{
+    const actor=await identity.authenticate(req.cookies.session);await identity.require(actor,'finance');
+    return dashboardReports.current(actor.id,dashboardFilters.parse(req.query));
+  });
   app.get("/api/v1/operations/ledger", async (req) => {
     await identity.require(
       await identity.authenticate(req.cookies.session),

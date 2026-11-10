@@ -1,0 +1,9 @@
+CREATE SCHEMA packages;
+CREATE TABLE packages.definitions(id uuid PRIMARY KEY,code text NOT NULL UNIQUE,content jsonb NOT NULL,state text NOT NULL DEFAULT 'draft' CHECK(state IN ('draft','pending_review','published')),version integer NOT NULL DEFAULT 1,created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE packages.history(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,package_id uuid NOT NULL REFERENCES packages.definitions(id),actor_id uuid NOT NULL,action text NOT NULL,reason text NOT NULL,snapshot jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
+CREATE FUNCTION packages.immutable_history() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Package history is immutable'; END $$;
+CREATE TRIGGER package_history_immutable BEFORE UPDATE OR DELETE ON packages.history FOR EACH ROW EXECUTE FUNCTION packages.immutable_history();
+CREATE TABLE packages.requests(actor_id uuid NOT NULL,key text NOT NULL,fingerprint text NOT NULL,result jsonb NOT NULL,PRIMARY KEY(actor_id,key));
+CREATE TABLE inventory.package_allotments(package_id uuid NOT NULL,departure date NOT NULL,version integer NOT NULL DEFAULT 1,definition_version integer NOT NULL,capacity integer NOT NULL CHECK(capacity>=0),components jsonb NOT NULL,PRIMARY KEY(package_id,departure));
+ALTER TABLE identity.admin_role_permissions DROP CONSTRAINT admin_role_permissions_permission_check;
+ALTER TABLE identity.admin_role_permissions ADD CONSTRAINT admin_role_permissions_permission_check CHECK(permission IN ('access.manage','customers.read','bookings.read','finance','support','support_assign','moderate','pricing','audit','flights.read','flights.manage','hotels.read','hotels.manage','hotels.review','buses.read','buses.manage','trains.read','trains.manage','packages.read','packages.manage','packages.review'));

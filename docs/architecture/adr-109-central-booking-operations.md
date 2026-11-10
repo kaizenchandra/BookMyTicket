@@ -1,0 +1,17 @@
+# ADR 109: Central booking filters, exceptions and pending cancellation
+
+FR-12 extends existing administration for persisted movie/event/sports bookings. Travel catalogues do not create bookings, so no PNRs or supplier confirmations are inferred. The common booking UUID remains the authoritative reference.
+
+Bookings owns exception workflow records and immutable history. Identity grants `bookings.read` plus `bookings.manage` for changes; the HTTP boundary also requires current MFA. The existing Catalog adapter implements an application-facing BookingCatalog contract for product/supplier matching; Bookings does not query Catalog tables. Travel/session dates filter immutable saved occurrence starts, whereas product and supplier filters use current catalogue classification. Matching happens before pagination. PNR queries return no matches explicitly; no supplier reference is manufactured.
+
+Database time classifies pending_payment bookings older than 30 minutes as stalled for review. This is an operational heuristic, not a payment-failure assertion. Refund-required and manual open/escalated/resolved cases have separate filters. Case resolution never changes booking, inventory, ticket or financial states.
+
+One exception record per booking supports open, assignment/unassignment, escalation, resolution and reopening. Mutations lock the booking, check the exception version, validate active assignee read/manage grants, record before/after plus reason and publish a transactional booking.exception_changed event. Actor/key fingerprints return the original result on retry; changed payloads conflict. Existing records cannot be opened again. Resolved cases must be reopened before reassignment/escalation. History is immutable by database trigger and paginated.
+
+Pending cancellation reuses the established application workflow and Inventory/Payments public contracts. An optional authority adapter resolves the customer only after locking/rechecking administrator grants in the same transaction. Customer APIs remain owner-scoped. Administrator keys are hashed with the actor before the existing customer-scoped replay store. Audit identifies the acting administrator and actual customer, including the reason. State/payment activity/preview expiry are rechecked before atomic inventory release, cancellation record and lifecycle event. Confirmed bookings cannot be cancelled through this path. A late capture still enters the existing recovery workflow; no completed refund is promised.
+
+Outstanding FR-12: supplier voucher/invoice/confirmation documents; broader masked traveller details and full booking context; confirmed cancellation, rescheduling/corrections; travel product lifecycles and supplier callbacks/reconciliation. These are explicit incomplete clauses, not disabled implementations. Existing ticket count summaries do not constitute document access. No new downstream consumer or external notification is claimed.
+
+Migration 083 adds exception tables and assignable bookings.manage, with no automatic grants. Evidence: booking-exceptions.test.ts (concurrency, access, replay, assignment, cancellation, filter and audit rollback cases), existing administration/customer booking tests, generated contracts and booking-management evidence. Browser host unavailable; browser acceptance unverified.
+
+Staff admission documents reuse TicketWallet through an optional owner-resolution authority checked within its transaction; customer wallet endpoints remain owner-scoped. No QR credentials are included in audit payloads.

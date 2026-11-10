@@ -1,8 +1,343 @@
 {
-  "checkedAt": "2026-11-10T04:15:21.163Z",
+  "checkedAt": "2026-11-10T10:31:19.959Z",
   "baseUrl": "http://127.0.0.1:3101",
   "verificationLevel": "HTTP only; no browser rendering or authenticated live workflows",
   "checks": [
+    {
+      "path": "/api/v1/admin/bookings/00000000-0000-4000-8000-000000000001/exceptions",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/bookings?exception=stalled",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/payment-exceptions",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/payments/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/payment-exceptions",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/payments/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/holidays",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/packages",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/holiday-packages",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/packages",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/packages/00000000-0000-4000-8000-000000000001/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/cabs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/cabs?kind=services",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/cabs/suppliers",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/cabs/categories",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/cabs/services",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/cabs/services/00000000-0000-4000-8000-000000000001/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/trains",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/trains?kind=services",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/trains/stations",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/trains/routes",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/trains/services",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/trains/services/00000000-0000-4000-8000-000000000001/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/buses",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/buses?kind=services",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/buses/operators",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/buses/routes",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/buses/services",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/buses/services/00000000-0000-4000-8000-000000000001/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/hotels/00000000-0000-4000-8000-000000000001/inventory",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/hotels/00000000-0000-4000-8000-000000000001/rooms",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/hotel-rooms/00000000-0000-4000-8000-000000000001/allocations",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/hotel-rooms/00000000-0000-4000-8000-000000000001/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/hotels",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/hotels",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/hotels/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/hotels",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/hotels",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/hotels/00000000-0000-4000-8000-000000000001/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/flights",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/admin/flights/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/flights/suppliers",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/flights/suppliers/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/customers/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/customers/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/customers/00000000-0000-4000-8000-000000000001/history?kind=bookings",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/customers/00000000-0000-4000-8000-000000000001/status",
+      "method": "PATCH",
+      "status": 401
+    },
+    {
+      "path": "/admin/users/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/users/00000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/roles",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/roles",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/users/00000000-0000-4000-8000-000000000001/activity",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/dashboard/records?year=2026&group=year&kind=bookings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/dashboard/history",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/admin/dashboard/records?year=2026&group=year&kind=bookings",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/users",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/users",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/customers",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/customers",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/bookings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/bookings",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/payments",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/payments",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/refunds",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/refunds",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/admin/dashboard",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/admin/dashboard?year=2026&group=year&index=1",
+      "method": "GET",
+      "status": 401
+    },
     {
       "path": "/api/v1/admin/help",
       "method": "POST",
@@ -120,7 +455,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-p"
+        "requestId": "req-2k"
       }
     },
     {
@@ -142,7 +477,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-s"
+        "requestId": "req-2n"
       }
     },
     {
@@ -152,7 +487,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-t"
+        "requestId": "req-2o"
       }
     },
     {
@@ -168,7 +503,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-v"
+        "requestId": "req-2q"
       }
     },
     {
@@ -178,7 +513,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-w"
+        "requestId": "req-2r"
       }
     },
     {
@@ -188,7 +523,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-x"
+        "requestId": "req-2s"
       }
     },
     {
@@ -198,7 +533,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-y"
+        "requestId": "req-2t"
       }
     },
     {
@@ -220,7 +555,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-11"
+        "requestId": "req-2w"
       }
     },
     {
@@ -230,7 +565,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-12"
+        "requestId": "req-2x"
       }
     },
     {
@@ -240,7 +575,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-13"
+        "requestId": "req-2y"
       }
     },
     {
@@ -250,7 +585,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-14"
+        "requestId": "req-2z"
       }
     },
     {
@@ -260,7 +595,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-15"
+        "requestId": "req-30"
       }
     },
     {
@@ -270,7 +605,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-16"
+        "requestId": "req-31"
       }
     },
     {
@@ -280,7 +615,7 @@
       "body": {
         "code": "NOT_FOUND",
         "message": "This listing is not available.",
-        "requestId": "req-17"
+        "requestId": "req-32"
       }
     },
     {
@@ -290,7 +625,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-18"
+        "requestId": "req-33"
       }
     },
     {
@@ -300,7 +635,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-19"
+        "requestId": "req-34"
       }
     },
     {
@@ -310,7 +645,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1a"
+        "requestId": "req-35"
       }
     },
     {
@@ -320,7 +655,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1b"
+        "requestId": "req-36"
       }
     },
     {
@@ -330,7 +665,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1c"
+        "requestId": "req-37"
       }
     },
     {
@@ -340,7 +675,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1d"
+        "requestId": "req-38"
       }
     },
     {
@@ -350,7 +685,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1e"
+        "requestId": "req-39"
       }
     },
     {
@@ -360,7 +695,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1f"
+        "requestId": "req-3a"
       }
     },
     {
@@ -450,7 +785,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-10T09:00:00.000Z",
+              "startsAt": "2026-11-11T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Mumbai Event Studio 2 · Event Hall"
             }
@@ -495,7 +830,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-10T09:00:00.000Z",
+              "startsAt": "2026-11-11T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Chennai Arena 3 · Main stadium"
             }
@@ -585,7 +920,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-10T09:00:00.000Z",
+              "startsAt": "2026-11-11T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Bengaluru Aurora Cinema 3 · Screen 1"
             }
@@ -660,7 +995,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-10T04:15:21.123Z"
+        "serverTime": "2026-11-10T10:31:19.918Z"
       }
     },
     {
@@ -712,7 +1047,7 @@
             },
             "version": 3,
             "nextSession": {
-              "startsAt": "2026-11-10T09:00:00.000Z",
+              "startsAt": "2026-11-11T13:00:00.000Z",
               "timeZone": "Asia/Kolkata",
               "venueName": "DEMO Mumbai Event Studio 2 · Event Hall"
             }
@@ -735,7 +1070,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-10T04:15:21.125Z"
+        "serverTime": "2026-11-10T10:31:19.920Z"
       }
     },
     {
@@ -744,7 +1079,7 @@
       "contentType": "application/json; charset=utf-8",
       "body": {
         "groups": [],
-        "serverTime": "2026-11-10T04:15:21.126Z"
+        "serverTime": "2026-11-10T10:31:19.921Z"
       }
     },
     {
@@ -816,7 +1151,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1q"
+        "requestId": "req-3l"
       }
     },
     {
@@ -826,7 +1161,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1r"
+        "requestId": "req-3m"
       }
     },
     {
@@ -836,7 +1171,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1s"
+        "requestId": "req-3n"
       }
     },
     {
@@ -846,7 +1181,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1t"
+        "requestId": "req-3o"
       }
     },
     {
@@ -856,7 +1191,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1u"
+        "requestId": "req-3p"
       }
     },
     {
@@ -884,7 +1219,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1w"
+        "requestId": "req-3r"
       }
     },
     {
@@ -894,7 +1229,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1x"
+        "requestId": "req-3s"
       }
     },
     {
@@ -904,7 +1239,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1y"
+        "requestId": "req-3t"
       }
     },
     {
@@ -914,7 +1249,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1z"
+        "requestId": "req-3u"
       }
     },
     {
@@ -924,7 +1259,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-20"
+        "requestId": "req-3v"
       }
     },
     {
@@ -934,7 +1269,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-21"
+        "requestId": "req-3w"
       }
     },
     {
@@ -944,7 +1279,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-22"
+        "requestId": "req-3x"
       }
     },
     {
@@ -966,7 +1301,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-25"
+        "requestId": "req-40"
       }
     },
     {
@@ -982,7 +1317,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-27"
+        "requestId": "req-42"
       }
     },
     {
@@ -992,7 +1327,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-28"
+        "requestId": "req-43"
       }
     },
     {
@@ -1008,7 +1343,7 @@
       "body": {
         "code": "NOT_FOUND",
         "message": "Venue is not publicly available.",
-        "requestId": "req-2a"
+        "requestId": "req-45"
       }
     },
     {
@@ -1018,7 +1353,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2b"
+        "requestId": "req-46"
       }
     },
     {
@@ -1028,7 +1363,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2c"
+        "requestId": "req-47"
       }
     },
     {
@@ -1050,7 +1385,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2f"
+        "requestId": "req-4a"
       }
     },
     {
@@ -1060,7 +1395,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2g"
+        "requestId": "req-4b"
       }
     },
     {
@@ -1070,7 +1405,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2h"
+        "requestId": "req-4c"
       }
     },
     {
@@ -1098,7 +1433,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2l"
+        "requestId": "req-4g"
       }
     },
     {
@@ -1108,7 +1443,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2m"
+        "requestId": "req-4h"
       }
     },
     {
@@ -1118,7 +1453,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2n"
+        "requestId": "req-4i"
       }
     },
     {
@@ -1128,7 +1463,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2o"
+        "requestId": "req-4j"
       }
     },
     {
@@ -1138,7 +1473,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2p"
+        "requestId": "req-4k"
       }
     },
     {
@@ -1148,7 +1483,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2q"
+        "requestId": "req-4l"
       }
     },
     {
@@ -1158,7 +1493,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2r"
+        "requestId": "req-4m"
       }
     },
     {
@@ -1180,7 +1515,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2u"
+        "requestId": "req-4p"
       }
     },
     {
@@ -1190,7 +1525,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2v"
+        "requestId": "req-4q"
       }
     },
     {
@@ -1200,7 +1535,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2w"
+        "requestId": "req-4r"
       }
     },
     {
@@ -1210,7 +1545,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2x"
+        "requestId": "req-4s"
       }
     },
     {
@@ -1220,7 +1555,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2y"
+        "requestId": "req-4t"
       }
     },
     {
@@ -1242,7 +1577,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-31"
+        "requestId": "req-4w"
       }
     },
     {
@@ -1252,7 +1587,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-32"
+        "requestId": "req-4x"
       }
     },
     {
@@ -1262,7 +1597,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-33"
+        "requestId": "req-4y"
       }
     },
     {
@@ -1272,7 +1607,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-34"
+        "requestId": "req-4z"
       }
     },
     {
@@ -1282,7 +1617,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-35"
+        "requestId": "req-50"
       }
     },
     {
@@ -1292,7 +1627,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-36"
+        "requestId": "req-51"
       }
     },
     {

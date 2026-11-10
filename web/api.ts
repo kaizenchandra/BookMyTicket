@@ -3,6 +3,7 @@ export class ApiError extends Error {
     public code: string,
     message: string,
     public status: number,
+    public fields?: { path: (string | number)[]; message: string }[],
   ) {
     super(message);
   }
@@ -27,7 +28,12 @@ export async function api<T = any>(
   }
   const result = await response.json();
   if (!response.ok)
-    throw new ApiError(result.code, result.message, response.status);
+    throw new ApiError(
+      result.code,
+      result.message,
+      response.status,
+      result.fields,
+    );
   return result;
 }
 export const money = (paise: number) =>

@@ -18,9 +18,15 @@ export class TicketWallet {
     private occurrences: TicketOccurrences,
     private tickets: TicketReader,
     private renderer: TicketCodeRenderer,
+    private authority?: {
+      resolve(tx: Transaction, actor: string, id: string): Promise<string>;
+    },
   ) {}
-  private read(owner: string, id: string, credentials: boolean) {
+  private read(caller: string, id: string, credentials: boolean) {
     return this.store.unitOfWork(async (tx) => {
+      const owner = this.authority
+        ? await this.authority.resolve(tx, caller, id)
+        : caller;
       const order = await this.store.get(owner, id, tx),
         serverTime = new Date(order.server_time).toISOString();
       if (order.state !== "confirmed")

@@ -3,9 +3,13 @@
 India/INR ticket-booking platform under active implementation. **Not a completed or production-ready platform.** No live payment, external email delivery, supplier, payout or cloud deployment has been verified. Local Mailpit SMTP signup/login is verified.
 
 
-Current local demo (**v0.92.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
+Current local demo (**v0.107.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
 
 The user-requested sample catalog contains **4 fictional movies, 4 events, 3 sports fixtures and 22 sessions**, clearly labeled DEMO. Choose a **Free session** to test actual reservation → confirmation → QR ticket → cancellation. Priced demo sessions cannot collect real payments. [Demo setup, operator sign-in and limits](docs/runbooks/cinema-sports-demo.md).
+
+[Operator administration](docs/runbooks/admin-operations.md): customer directory, booking detail/timelines, payment attempts and refund recovery. [FR-03 admin users and roles](docs/runbooks/admin-roles.md): account creation, named roles, direct/role permissions, suspension/reactivation and privilege history.
+
+[Admin dashboard](http://127.0.0.1:3101/admin/dashboard): FR-02 analytics with date/product/city/partner/state filters, booking and value trends, active-customer counts, payment/support alerts, scoped drilldowns and immutable saved reports. Requires finance permission and current MFA; record-level drilldowns may need additional grants. [Metric definitions, coverage and limits](docs/runbooks/dashboard-analytics.md).
 
 Implemented subsets include PostgreSQL reservations, immutable commercial quotes and accepted orders, confirmation and ticket/ledger transactions, OTP controls and authenticator MFA, published discovery, onboarding drafts, support cases, customer payment initiation/recovery, session management, listing favorites and initial role interfaces. The customer appearance is inferred: browser access to the reference was unavailable.
 
@@ -191,3 +195,23 @@ Version 0.90.0 adds payment-history category and attempt-reference filters with 
 Version 0.91.0 adds Support for this booking links, customer case filtering by booking and prefilled new-case references. Filtered conversation/page navigation preserves booking context; ownership is revalidated on creation. [Usage](docs/runbooks/booking-support-context.md).
 
 Version 0.92.0 adds customer support case status/category filters, combined booking filtering and context-preserving pagination. Open conversations remain visible when their state changes. [Usage](docs/runbooks/customer-case-filters.md).
+
+Version 0.98.0 adds [customer management](http://127.0.0.1:3101/admin/customers): profile search, registration/activity filters, masked profiles and consent-aware saved attendees, permission-gated booking/payment/support histories, and audited status/review flags with session revocation. [Workflow and limitations](docs/runbooks/customer-management.md).
+
+Version 0.99.0 adds [flight supplier administration](http://127.0.0.1:3101/admin/flights): searchable supplier profiles and audited, versioned commercial-rule configuration with exact INR previews. **FR-05 is partial:** no authorized flight provider/API contract has been supplied, so live search, PNR/ticketing, disruption synchronization and cancellation/refund integration remain blocked. [Coverage and setup](docs/runbooks/flight-management.md).
+
+Version 0.100.0 adds [Hotels & properties](http://127.0.0.1:3101/admin/hotels): onboarding, content/media references, policies, completeness, review/publication, suspension/delisting and immutable history. [Published listings](http://127.0.0.1:3101/hotels) exclude private contacts and supplier metadata. External supplier synchronization remains blocked; room inventory and booking are outside FR-06. [Workflow](docs/runbooks/hotel-properties.md).
+
+Version 0.101.0 adds [hotel room inventory and rates](docs/runbooks/hotel-inventory.md), accessible from each admin property: room types/occupancy, refundable plans, nightly calendar and bulk rates/restrictions, atomic multi-night holds, inventory allocation/release and immutable reconciliation history. Allocations do not create hotel bookings or payments. Authorized channel-manager synchronization remains blocked.
+
+Version 0.102.0 adds [Bus management](http://127.0.0.1:3101/admin/buses): operator/route/service catalogues, boarding/drop-off points, reference fares and seat layouts, cancellation-policy references and audited local disruption records. **FR-08 remains partial:** live supplier availability, holds, bookings, tickets and reconciliation need an authorized supplier integration. [Workflow and limits](docs/runbooks/bus-management.md).
+
+Version 0.103.0 adds [Train management](http://127.0.0.1:3101/admin/trains): stations, ordered route calls, dated schedules, travel classes and audited local incidents. **FR-09 remains partial:** live provider fares/availability, bookings, PNR/waitlist/cancellation/refund tracking and reconciliation require an authorized railway integration. [Workflow and limits](docs/runbooks/train-management.md).
+
+Version 0.104.0 adds [Holiday package administration](http://127.0.0.1:3101/admin/packages): itineraries, policies, media/date/occupancy management, price previews, approval/publication and supplier-allotment planning. [Published information](http://127.0.0.1:3101/holidays) is non-bookable. **FR-11 remains partial:** component reservations, compensation and fulfillment require authorized supplier integrations. [Workflow and limits](docs/runbooks/holiday-packages.md).
+
+Version 0.105.0 adds [cab and transfer administration](docs/runbooks/cab-management.md) at `/admin/cabs`: supplier/category/coverage management, exact configured tariff previews, versioned edits and local incidents. Live supplier reservations, actual trips and reconciliation remain blocked pending an authorized provider contract.
+
+Version 0.106.0 extends [central booking operations](docs/runbooks/central-booking-operations.md): product/supplier/session-date filters, stalled/refund review queues, versioned exception assignment/escalation, safe admin pending cancellation and audited admission-ticket downloads. Travel booking integration, supplier documents, confirmed cancellation/rescheduling and corrections remain incomplete.
+
+Version 0.107.0 extends [payment administration](docs/runbooks/payment-management.md): transaction/method/status search, immutable failure/refund observation detail, provider reconciliation exceptions and finance-approved CSV exports. Refund execution and bank settlement integration remain incomplete.

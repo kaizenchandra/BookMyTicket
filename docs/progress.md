@@ -800,3 +800,143 @@ Next cohesive work: versioned attendee registration schemas and event/sports reg
 - Verified 229 native and Docker tests, zero failures/skips; build/typecheck; 213-module architecture checks; 127 API paths; and 113 HTTP smoke checks. Local v0.92.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
 - Tests cover 102 matching records across pages, filter intersections, cursor mismatches, state changes, exact conversation retrieval, empty results, enum validation and rendered/encoded navigation. Evidence prefix: docs/evidence/customer-case-filters-.
 - Browser/draft/back-navigation/accessibility/load, attachments and broader support requirements remain open. See ADR 095 and runbooks/customer-case-filters.md.
+
+## Admin dashboard — version 0.93.0 (2026-11-10)
+
+Implemented finance/MFA protected `/admin/dashboard` end to end: monthly/quarterly/yearly IST controls, exact GBV/ABV/captured cash, booking and cancellation counts/rates, repeat customers, movie/event/sports classification, latest 20 bookings, refund recovery and provider-refunded attempt status, plus current inventory capacity/sold/live holds. Reports are read from owner modules under one repeatable-read snapshot with transactional permission recheck and audit. The UI includes responsive cards, a chart with table alternative, refresh/loading/error/empty states, demo disclosure and unavailable KPI explanations.
+
+232 tests pass natively and in Linux containers. Build/typecheck, architecture (219 files), generated API contract (128 paths) and 115 deployed local HTTP checks pass. Local verification app and worker are healthy at port 3101. Evidence: `docs/evidence/admin-dashboard-{build,full-suite,container-tests,deploy,smoke}.txt`.
+
+Completed-refund counts/amounts, actual supplier margins/net revenue, search conversion, promo attribution and confirmation latency remain unavailable. Corporate travel metrics are outside this ticketing domain. All records, including labeled demos, are included. Production-scale report projections, more filters, exports, admin booking drilldown and browser/accessibility validation remain open. See ADR 096 and the dashboard runbook for precise metric bases; this does not complete the entire reporting requirements.
+
+## Operator administration — version 0.94.0 (2026-11-10)
+
+Added an initial end-to-end operator workflow for the supplied `makemyticket-admin-panel.md`, retaining the movies/events/sports domain while travel scope remains unanswered. New account directories support masked exact-contact/reference search, status filtering and actor/filter-bound keyset pagination. Access administrators can change existing verified accounts' status and allowlisted platform grants with reason/confirmation/version guards; self-modification is forbidden and target sessions are revoked atomically with the change/audit. Customer booking lookup leads to a unified booking directory and safe detail/timeline/payment/fulfillment views. Finance has separate payment attempt and recovery obligation directories. Navigation uses effective platform grants. New permissions are not automatically provisioned.
+
+Dashboard now supports Today, Yesterday, Last 7 Days, Last 30 Days and bounded custom IST dates using database time. GBV, booking and cancellation drilldowns preserve cohort semantics. Migration 072 adds account admin versioning and account/booking directory indexes. Contract generator now recognizes PATCH and documents the new APIs.
+
+Verified: 235 tests pass natively and in Linux containers; build/typecheck and architecture checks pass (228 module files), 137 API paths generated, local app/worker deployment healthy, 125 HTTP smoke checks pass. Evidence is in `docs/evidence/admin-operations-{build,full-suite,container-tests,deploy,smoke}.txt`. Browser visual/accessibility and production-scale load verification remain outstanding.
+
+`python3 scripts/register-admin-requirements.py` registers 301 detailed clauses with original IDs or GAP IDs, 30 partial implementation mappings and a source hash. Unassessed clauses are not marked complete or inferred absent. The entire 24-module FRS is not delivered: custom role lifecycle/invitations, password/SSO, travel supplier integrations, full customer profiles, refund execution, paid cancellation/rescheduling, commissions/settlements, promotions, scheduled reporting and configuration remain open. See ADR 097 and the operator runbook.
+
+## FR-02 Dashboard & Analytics — version 0.95.0 (2026-11-10)
+
+Implemented the supported ticketing-domain FR-02 workflows end to end: product/city/partner/state/INR intersections, booking-active customer counts, booking-state and product count/value breakdowns, zero-filled daily/monthly booking and GBV charts, payment exception/recovery and permission-gated support alerts. KPI drilldowns use pinned period dates, the same scope and actor/filter-bound pagination, with additional record-level permissions. Historical report captures preserve metrics/filter metadata/definition version under migration 073 and reject updates; current permissions still control historical support visibility. Application orchestration uses owner-module read ports and one repeatable-read transaction for report, snapshot and audit.
+
+Verified: 236 tests pass natively and in Linux containers, build/typecheck, architecture (234 module files) and generated contracts (140 API paths) pass. Local app/worker/migration health passes and 128 HTTP smoke checks pass. Evidence: `docs/evidence/dashboard-fr02-{build,full-suite,container-tests,deploy,smoke}.txt`. Browser verification was attempted against an isolated test preview but the browser access host was unavailable; the temporary process was stopped and its fixture session revoked. See `docs/evidence/dashboard-fr02-browser.txt`.
+
+All twelve FR-02 clauses now have explicit subset/limitation mappings in the supplied-admin register (301 detailed clauses, 40 partial mappings across the broader admin FRS). Travel-product summaries/supplier synchronization failures remain unavailable because those products/integrations are absent. Completed refund accounting and net earnings remain unavailable rather than inferred from recovery/provider attempt states. Historical capture retention/archival and production-scale projections/load validation remain open. Browser visual, interaction and accessibility acceptance remains blocked. These limits are displayed/documented and are not hidden feature flags.
+
+## FR-03 Admin Users, Roles & Permissions — version 0.96.0 (2026-11-10)
+
+Implemented persistent custom roles and account-role assignments, seeded unassigned Super Admin/Operations/Finance/Support/Content Manager definitions, allowlisted module/action permissions, admin account creation and metadata editing, role/status/effective-permission/name directory filters and privilege/activity history. Existing direct grants combine with active roles through a provenance-tracked effective-grant projection consumed by existing authorization checks. Deactivation removes role-derived access while preserving direct/scoped grants and assignments; reactivation restores derived access deliberately.
+
+Mutations require current access.manage/MFA, serialized authorization and version checks. Direct self changes and edits to roles assigned to the actor are forbidden. Role/account updates atomically revoke affected sessions and audit before/after state. POST creation is actor/operation/key idempotent, rejects changed payloads and preserves contact/name uniqueness. Newly provisioned administrators receive no session/credential/invitation; normal email verification and MFA remain required.
+
+Migration 074 is deployed to the local verification stack. Verified: 239 tests pass natively and in Linux containers, build/typecheck and architecture checks pass (240 module files), contracts cover 143 paths, and 131 local HTTP smoke checks pass. Evidence: `docs/evidence/admin-fr03-{build,full-suite,container-tests,deploy,smoke}.txt`. Vite reports the main bundle exceeding its 500 kB advisory threshold; the build succeeds. Browser interaction/visual/accessibility acceptance remains unverified (previous browser host unavailable).
+
+All ten FR-03 clauses now have explicit implementation and verification mappings in the supplied-admin register. Browser acceptance, invitation delivery, password/SSO and tenant role administration are not claimed. No existing account received a new role or privilege automatically. See ADR 099 and `docs/runbooks/admin-roles.md`.
+
+## FR-03 completion review — version 0.97.0 (2026-11-10)
+
+Completed the dedicated administrator detail route and page, displaying masked metadata, account status, active/inactive assigned role definitions and direct/role sources of effective permissions. Directory links open the page; guarded editing and privilege history remain available. Newest/oldest account and role ordering uses matching timestamp/UUID keysets, and first-page navigation preserves active filters and ordering.
+
+Fixed a case-sensitive application self-change comparison: UUID casing no longer permits a self-account update. Application actor/target normalization and case-insensitive historical target lookup are covered by regression tests. Existing role grant provenance, session revocation and permission guards are preserved. No migration or dependency change was needed.
+
+Verification: 242 tests pass natively and in Linux containers; build/typecheck, architecture (240 module files), generated contracts (143 paths), local deployment health and 133 HTTP smoke checks pass. Evidence: `docs/evidence/admin-fr03-completion-{build,full-suite,container-tests,deploy,smoke}.txt`. Browser verification was retried and failed because the browser access host is unavailable; no browser interaction/visual/accessibility success is claimed. See `docs/evidence/admin-fr03-completion-browser.txt` and ADR 100.
+
+## FR-04 customer management — version 0.98.0
+
+Implemented customer directory/profile and history screens plus owner-module read adapters for Profiles, Bookings, Payments and Support. Added independent registration/activity filters, sort and keyset pagination, exact-contact/ID/profile-name search, masked contacts and saved attendees, honest contact-verification evidence, unsupported wallet/loyalty indicators, and permission-aware histories. Reasoned status/flag edits reuse serialized version checks, self/last-manager safeguards, atomic auditing and session revocation. Migration 075 persists successful-OTP verification timestamps and constrained customer flags. Detailed FE:FR-FE-018–023 and BE:FR-BE-018–023 mappings are in `docs/requirements/admin-traceability.json` and ADR 101.
+
+Validation: build/typecheck, 247-file architecture import check, 146-path contract generation; 246 tests pass natively and in containers. Local Compose application rebuilt and HTTP smoke checks passed. No production deployment or new account privileges. Browser acceptance remains blocked by unavailable browser access host. Activity/name ID materialization needs load testing before large-scale use. Payment histories are event observations, not additive ledger balances. Wallet/loyalty are unsupported by the existing platform.
+
+## FR-05 supplier configuration subset — version 0.99.0
+
+Added the Flights module, migration 076, `/admin/flights` directory/detail screens and supplier/commercial APIs. Supplier creation is actor-key idempotent with stable unique business code; edits use locked versions and atomic audit. Exact INR previews use decimal paise strings/bigint, half-up base-fare markups and fixed service fees. Separate flights.read/flights.manage/pricing permissions are enforced; none are automatically granted. Profiles only support draft/suspended metadata, never fabricated live availability.
+
+250 native tests pass, including authorization/MFA, concurrent duplicate creation, stale versions, pagination scope, audit rollback and precision tests. Build/typecheck and architecture checks pass (251 module files). OpenAPI documents 150 paths. Browser acceptance is unverified; the existing browser host limitation remains outstanding.
+
+FR-05 is not fully delivered. Asked for authorized supplier name, API documentation and sandbox configuration location; no supplier answer was available during implementation. Live fares, availability, baggage/cabin/fare families, PNR/ticketing, disruption/exception/synchronization management, revalidation/reservation/reconciliation, commission application and supplier cancellation/void/refund flows remain explicitly blocked. ADR 102 and the detailed admin requirement register distinguish these from the implemented profile/commercial subset. Existing cinema/event/sports booking behavior is preserved.
+
+Local verification completed: all 250 container tests passed; Compose application/worker are healthy after migration/rebuild; all 141 HTTP smoke checks passed. This verifies the implemented subset only, not a supplier integration or browser workflow.
+
+## FR-06 hotel/property management — version 0.100.0
+
+Implemented hotel/homestay onboarding, stable codes, supplier association metadata, private contacts, location/coordinates, HTTPS media references/alt text, amenities/facilities, house rules and check-in/out/cancellation policies. Admin directory supports pre-pagination name/city/type/state/bounding-box filters. Detail screens expose completeness, field-level validation and immutable content/policy history. Reasoned workflow decisions support submit/approve/reject/suspend/delist/reopen with separate edit/review permissions and expectedVersion protection. Published edits withdraw to draft pending fresh review. `/hotels` and its public API expose only published content and exclude private contacts/supplier metadata.
+
+Migration 077 creates Hotels-owned records/revisions/idempotency requests and assignable grants without granting privileges automatically. Application transactions recheck grants; mutations commit current content, immutable snapshot and redacted audit together. Concurrent/stale edits, repeated creates, publication privacy, geographical filters and audit rollback are covered by integration tests. Native suite: 254 passing. Build/typecheck, 255-module architecture check and 155-path contract generation pass.
+
+FR-BE-038 external supplier content synchronization remains blocked: requested provider/documentation/secure sandbox configuration, not supplied during implementation. Supplier association is operator-entered metadata rather than a verified external supplier master. Image upload/object storage is not claimed; references and metadata are persisted. Room inventory/rates and hotel checkout belong to FR-07 and subsequent work. Browser host remains unavailable; no visual acceptance claimed. ADR 103, runbook and detailed admin traceability preserve these limits.
+
+Final verification: corrected the new test helper's overly broad payload type after the container TypeScript check caught it. Native build/typecheck/architecture/contracts now pass; all 254 container tests pass. Migration and local Compose application/worker rebuild completed healthy. All 147 local HTTP smoke checks passed. Browser verification attempted again and blocked by unavailable browser host; no browser acceptance claimed.
+
+## FR-07 hotel inventory & rates — version 0.101.0
+
+Implemented property room-type/occupancy management, refundable/non-refundable plans, exact INR nightly defaults/date overrides, seasonal prices/date discounts, calendar views, bulk capacity/rate/restriction editing, stop-sell/blackout/minimum stays, paginated allocations and immutable change history. Inventory owns room capacity; Hotels supplies an owner-module property lock contract. A single room/night capacity pool is shared across all rate plans.
+
+Ten-minute database-time holds validate every stay night atomically under the room aggregate lock. Identical retries preserve original ID/expiry. Expired holds stop counting without workers; conditional consumption rechecks expiry at the UPDATE. Release binds to allocation identity and cannot free a newer hold. Capacity reductions below live commitments and occupancy reductions below future/live allocations are rejected. Inventory reservations do not create bookings/payments/tickets. Reconciliation records operator-observed discrepancies without changing stock; reviewed bulk updates perform corrections.
+
+Migration 078 adds Inventory-owned rooms/plans/dates/allocations/replay/history tables; existing movie/event/sports inventory is preserved. All mutation history and audit commit atomically. Detailed clause mappings and limitations are recorded in admin traceability, ADR 104 and the hotel-inventory runbook. FR-BE-044 channel-manager synchronization remains blocked pending authorized supplier API/configuration; no live synchronization is fabricated. Date promotions are simple per-plan reductions, not coupon segmentation/stacking. Browser access host remains unavailable.
+
+Verification completed: 259 native and container tests pass, including cross-plan concurrent overselling, expired-hold rejection, release/replay safety, all-or-nothing multi-night validation, restricted dates/occupancy, quote math, metadata versions, reconciliation and audit rollback. Build/typecheck, 261-module import boundary check and 165-path contract generation pass. Local Compose migration/rebuild completed healthy; 151 HTTP smoke checks passed. Browser acceptance and production-scale load testing remain outstanding.
+
+## FR-08 bus catalogue/local incidents — version 0.102.0
+
+Implemented protected bus operator, route and service management with business contacts/supplier references, ordered boarding/drop-off addresses/offsets, timezone-qualified schedules, amenities, unique seat labels/positions, deck/type/reference fares and cancellation-rule metadata. Service route snapshots prevent later route edits from silently rewriting saved schedules. Search/filter/pagination, create replay/unique codes, versioned editing and explicit local disruption/resolve/withdraw workflows are integrated with the frontend. Mutations atomically append immutable before/after history and redacted audit. Migration 079 adds Buses-owned records and assignable grants; none are automatically granted.
+
+FR-08 remains partial. Requested the authorized bus supplier name/API documentation/secure sandbox configuration; none was supplied during implementation. Live fare/seat availability, seat holds, supplier booking/ticket confirmation, supplier cancellations/departure synchronization and response reconciliation are not implemented. The UI labels all seat availability unknown; detail APIs return null supplier counts/statuses rather than fabricated zeroes. Manual catalogue withdrawals do not send supplier requests, notifications or refunds. Detailed GAP namespace clauses in admin traceability and ADR 105 preserve these boundaries.
+
+Native verification: 263 tests pass; build/typecheck, 265-module architecture import check and 169-path contract generation pass. Tests cover MFA/permissions, concurrent/replayed creation, stale edits, immutable incidents, layout/timing/reference validation, canonical UUID references, filter-before-pagination and audit rollback. Browser acceptance remains unverified because browser access was unavailable in the preceding verification attempts; no visual or supplier acceptance is claimed.
+
+Local deployment completed: all 263 container tests passed; Compose migration/rebuild completed with healthy application and worker. All 157 HTTP smoke checks passed. These verify the local catalogue/incident subset, not live supplier bookings or browser acceptance.
+
+## FR-09 train catalogue/local incidents — version 0.103.0
+
+Implemented protected station, route and dated service administration. Stations have unique immutable reference codes; routes validate ordered station calls and boarding/alighting endpoints; services validate travel-class uniqueness and exact final-arrival duration. Active references are revalidated and canonicalized, with station/route snapshots preventing later edits from silently rewriting saved schedules. Frontend includes searchable catalogue pages, station-call tables, IST schedule displays, class lists, local incident actions and immutable history. Migration 080 adds Trains-owned records/history/replay and assignable grants without granting access automatically.
+
+FR-09 remains partial. Requested authorized railway provider/API documentation/secure sandbox configuration, not supplied during implementation. Live schedules/fares/availability, permitted booking submission, PNR/confirmation/waitlist/cancellation/refund tracking, asynchronous reconciliation and supplier-specific booking restrictions remain blocked. Supplier fields are explicitly null and bookable=false. Local notes/timing constraints do not substitute for supplier rules. Incidents do not cancel/refund provider bookings or notify customers. Detailed GAP clause traceability, ADR 106 and runbook record these boundaries.
+
+Native verification: all 267 tests pass; build/typecheck, 269-module architecture check and 173-path contract generation pass. New tests cover MFA/permissions, duplicate creates/station codes, stale edits, immutable codes/history, active reference/timing/class validation, route snapshot preservation/refresh, query pagination and audit rollback. Browser verification was attempted; host is unavailable, so no visual or provider acceptance is claimed.
+
+Local deployment completed: all 267 container tests passed; Compose migration/rebuild finished healthy. All 163 HTTP smoke checks passed. These verify local catalogue/incident functionality only, not live railway bookings or browser acceptance.
+
+## FR-11 holiday package administration — version 0.104.0
+
+Implemented versioned package definitions/itineraries, destinations/inclusions/exclusions, media references, inclusive travel dates, occupancy/child policies, component costs, optional add-ons, cancellation-policy references, price previews and approval/publication/unpublication. Published edits withdraw to draft. Public `/holidays` content excludes supplier references and commercial cost/markup data and is explicitly non-bookable. Inventory owns departure/component passenger-allotment planning through a public contract; planning revisions bind to definition version and record before/after snapshots atomically with audit.
+
+Exact pricing uses bigint paise, stored adult/child/fixed costs, half-up component markup, package fee and selected person/booking add-ons. Previews enforce departure/age/party/add-on constraints but never assert supplier availability. Planning-limit comparisons remain informational. Migration 081 adds Packages-owned definition/history/replay and Inventory-owned planning records; no existing inventory booking behavior changes or account grants are introduced.
+
+FR-11 remains partial. Requested contracted component-provider documentation and secure sandbox configuration, not supplied during implementation. Authoritative package/component availability, supplier reservations, compensation/recovery and fulfillment confirmations remain blocked; the UI and API show not_configured/unknown/bookable=false. ADR 107, runbook and detailed admin traceability preserve the scope boundary. Browser host remains unavailable.
+
+Validation completed: 272 native and container tests pass, including lifecycle/privacy, exact price math, child/add-on validation, stale allotments, optimistic versions, pagination, immutable history and cross-module allotment rollback on audit failure. Build/typecheck, 275-module architecture check and 180-path contracts pass. Local Compose migration/rebuild completed healthy; 168 HTTP smoke checks passed. Browser acceptance and production-scale load testing remain outstanding.
+
+## FR-10 cab management — v0.105.0
+
+Implemented frontend/API supplier and vehicle-category management, city/airport/outstation directional coverage and operating windows, included-distance/waiting and per-trip tariffs, exact INR estimates, local service incidents, permission-aware actions, pagination, immutable history and audit. Migration 082 adds assignable cabs.read/manage with no automatic grants. Build/architecture checks and 276 native tests pass. Requirement mappings preserve all 11 FR-10 clauses with explicit partial/blocked status.
+
+Remaining: authorized cab supplier contract and secure sandbox configuration are missing. Live availability/reservations/trip status/cancellation/rescheduling/escalation, actual charges and reconciliation are not implemented. No provider confirmations are fabricated. Browser host unavailable; browser acceptance unverified. Evidence: docs/evidence/cab-management-*.
+
+FR-10 local deployment verified: Compose app/worker healthy after migration; all 174 HTTP smoke checks passed. Existing FR-11 tests also passed in the 276-test regression suite.
+
+## FR-12 centralized booking operations — v0.106.0
+
+Extended supported movie/event/sports booking administration with current catalogue product/supplier matching through a public contract, saved session-date ranges, stalled pending-payment and refund-required review queues, and case state/assignee filters before pagination. Exception open/assign/escalate/resolve/reopen actions enforce active qualified assignees, optimistic versions and actor-scoped replay; immutable history, audit and durable outbox events commit atomically. No blanket account grants.
+
+Admin pending cancellation reuses existing inventory/payment rules, with transaction-scoped authorization and staff audit attribution. Confirmed admission-ticket documents reuse the wallet and current QR validity rules behind read/manage and fresh MFA, with audited access. Customer wallet/cancellation ownership rules remain intact.
+
+Build/typecheck, architecture checks and 282 native regression tests pass, including concurrent case actions, retry conflicts, assignment authorization, filter matching, audit rollback, cancellation safety and protected document downloads. 189 API paths generated. Browser host remains unavailable; visual acceptance is not claimed.
+
+FR-12 remains partial: no connected travel booking suppliers/PNRs/callbacks, supplier vouchers/invoices/separate confirmations, complete traveller context, confirmed cancellation, rescheduling or correction workflows. Detailed source IDs remain mapped without claiming full acceptance.
+
+FR-12 local deployment verified: migration completed, Compose app/worker healthy, and all 176 HTTP smoke checks passed.
+
+## FR-13 payment administration — v0.107.0
+
+Implemented finance-only transaction ID/method/state/date filtering, transaction detail and immutable metadata observations, explicit capture/refund/settlement distinctions, unresolved provider-order queue (including zero attempts) and reasoned/approved bounded CSV export. Metadata excludes card/contact/VPA and free-text error descriptions; optional cumulative refund observations are exact and nondecreasing. Existing Razorpay capture/webhook/idempotency/ledger behavior remains intact. Provider transaction IDs are intentionally exposed only in the finance projection; prior directory test expectations were updated for that contract change.
+
+Validation: production build, 288-module architecture check and all 286 native tests pass. Contracts cover 192 API paths. Tests verify access/MFA, exact metadata/history, monotonic refund observations, association conflicts, pagination scope, exception visibility, export approval/range and CSV formula handling. Existing capture/webhook/booking tests pass. No external payment/refund calls were made.
+
+Remaining: refund eligibility and execution/idempotency, additional gateways, manual/partial capture, bank settlement ingestion/reconciliation and live merchant acceptance. Browser host is unavailable; browser acceptance not claimed. See ADR 110, runbook and detailed clause traceability.
+
+FR-13 local deployment verified: migration completed, app/worker healthy, all 180 HTTP smoke checks passed.

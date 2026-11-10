@@ -1,0 +1,3 @@
+Browser verification attempted using cua.getState().
+Result: browsers=[]; Browsers: Error: The browser access host is unavailable.
+No browser interaction or visual acceptance is claimed.

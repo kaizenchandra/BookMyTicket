@@ -345,3 +345,83 @@ Native and isolated Docker suites each pass 203 tests with zero failures/skips. 
 
 ## Customer case filter verification (0.92.0)
 `npm test` passed 229 tests natively and in isolated Docker without failures/skips. `npm run build`, `npm run check:architecture` (213 module files) and `npm run contracts` (127 paths) passed. No migration was needed. Existing local services were rebuilt with `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait` and are healthy. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passed 113 HTTP checks. Evidence prefix: docs/evidence/customer-case-filters-. Browser/navigation/accessibility/load acceptance remains unverified.
+
+## Admin dashboard verification (0.93.0)
+
+Dashboard URL: `http://127.0.0.1:3101/admin/dashboard`. Requires an existing platform finance grant and current MFA; no grants are seeded by this feature. No new migration or dependency is required.
+
+- `npm run build`, `npm run check:architecture`, `npm run contracts` passed (128 API paths).
+- Full existing PostgreSQL/Mailpit `npm test` command above passed 232 tests natively and in verification containers, including `tests/admin-dashboard.test.ts`.
+- Existing `bookmyticket-verify` Compose stack rebuilt and passed health checks.
+- `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passed 115 HTTP checks.
+- See `docs/evidence/admin-dashboard-*.txt`. Browser visual/accessibility and production load verification remain outstanding.
+
+## Operator administration verification (0.94.0)
+
+Migration 072 is applied by the existing `npm run migrate` flow and verification Compose migration service. It adds account versioning and directory indexes. New platform grants (`access.manage`, `customers.read`, `bookings.read`) require explicitly approved provisioning; application code seeds none.
+
+Verified commands remain `npm run build`, `npm run check:architecture`, `npm run contracts`, the existing PostgreSQL/Mailpit `npm test`, and the existing `bookmyticket-verify` test/deploy Compose commands. Native/container suites pass 235 tests. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passes 125 HTTP checks. `python3 scripts/register-admin-requirements.py` generates the separate 301-clause supplied-admin register. See `docs/evidence/admin-operations-*.txt`; no browser acceptance claim is made.
+
+## FR-02 dashboard analytics verification (0.95.0)
+
+Migration 073 adds immutable captured dashboard reports; the existing migration command applies it. No new dependencies or seeded permissions. `npm run build`, `npm run check:architecture` and `npm run contracts` pass (234 module files, 140 API paths). The existing PostgreSQL/Mailpit full suite passes 236 tests natively and in verification containers, including the new `tests/dashboard-analytics.test.ts`. Local verification Compose deployment passes health checks. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passes 128 checks. `python3 scripts/register-admin-requirements.py` preserves the full supplied FRS register and updates all 12 FR-02 mappings.
+
+Browser check: attempted with a temporary localhost preview backed exclusively by `bookmyticket_test`; browser access host unavailable. Preview stopped and fixture session revoked. No browser visual/accessibility success is claimed. Evidence: `docs/evidence/dashboard-fr02-*.txt`. Definitions and source/permission limitations: `docs/runbooks/dashboard-analytics.md` and ADR 098.
+
+## FR-03 admin users and roles verification (0.96.0)
+
+Apply migration 074 through the existing migration command. It adds role/assignment/provenance/idempotency storage, admin metadata and five unassigned role definitions. It grants no account additional access. Existing grant authorization remains authoritative through transactional role materialization.
+
+Verified: `npm run build`, `npm run check:architecture` (240 module files), `npm run contracts` (143 paths), native PostgreSQL/Mailpit `npm test` (239 tests), verification Compose tests (239) and local deployment health. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passes 131 checks. Evidence: `docs/evidence/admin-fr03-*.txt`. Build emits Vite's advisory main-chunk size warning; no type or build failure. Browser interaction/visual/accessibility remains unverified.
+
+## FR-03 completion verification (0.97.0)
+
+No additional migration/dependency change. Verified build/typecheck, module import boundaries (240 files), contracts (143 API paths), native and Linux-container PostgreSQL/Mailpit tests (242), local deployment health and HTTP smoke (133). Commands remain the existing `npm run build`, `npm run check:architecture`, `npm run contracts`, configured `npm test`, verification Compose and `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts`. Evidence: `docs/evidence/admin-fr03-completion-*.txt`. Browser verification was attempted again but the browser access host was unavailable; Vite's advisory main-bundle size warning remains.
+
+## FR-04 customer management verification
+
+Version 0.98.0 uses migration 075. Verified `npm run build`, `npm run check:architecture` (247 module files), `npm run contracts` (146 API paths), and the full `npm test` suite (246 passing) with the existing isolated PostgreSQL/Mailpit configuration. The targeted command is `node --import tsx --test tests/customer-administration.test.ts` with `DATABASE_URL` pointing to `bookmyticket_test`.
+
+The existing `bookmyticket-verify` Compose verification service passed all 246 tests; `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait` rebuilt the local deployment. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` verifies route shells and unauthenticated API denial separately from authenticated database/HTTP integration tests. Evidence: `docs/evidence/customer-management-*`. Browser access host unavailable; no visual/browser acceptance claimed. Vite reports a non-blocking bundle-size warning.
+
+## Flight administration subset verification
+
+Version 0.99.0 adds migration 076 (supplier profiles, versioned commercial rules, create-request replay records and assignable flight grants). Verified commands: `npm run build`, `npm run check:architecture` (251 module files), `npm run contracts` (150 API paths), and the existing isolated PostgreSQL/Mailpit `npm test` command (250 tests). Targeted tests: `node --import tsx --test tests/flight-administration.test.ts` with `DATABASE_URL` ending in `/bookmyticket_test`.
+
+Container checks and local rebuild use the existing `bookmyticket-verify` Compose verification profile and port 3101. Evidence is under `docs/evidence/flight-management-*`. HTTP smoke checks remain distinct from browser acceptance and supplier acceptance. No live supplier calls or flight fulfillment verification are claimed. The build retains the existing bundle-size warning.
+
+## Hotel property management verification
+
+Version 0.100.0 adds migration 077. Verified: `npm run build`, `npm run check:architecture` (255 modules), `npm run contracts` (155 API paths), and the isolated PostgreSQL/Mailpit `npm test` command (254 tests). Targeted command: `node --import tsx --test tests/hotel-administration.test.ts` with the existing `bookmyticket_test` database environment.
+
+The existing `bookmyticket-verify` Compose verification profile builds/runs container tests; `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait` migrates/rebuilds the local app. HTTP smoke command: `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts`. Evidence uses `docs/evidence/hotel-management-*`. The browser host is unavailable, and supplier synchronization is unconfigured. Existing non-blocking bundle-size warning remains.
+
+## Hotel room inventory verification
+
+Version 0.101.0 requires migration 078. Verified commands: `npm run build`, `npm run check:architecture` (261 module files), `npm run contracts` (165 paths), and the existing isolated PostgreSQL/Mailpit `npm test` command (259 tests). Targeted tests: `node --import tsx --test tests/hotel-inventory.test.ts`, with `DATABASE_URL` ending in `/bookmyticket_test`.
+
+The `bookmyticket-verify` Compose verification service passed 259 tests. `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait` migrated/rebuilt the local app/worker. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passed 151 HTTP checks. Evidence: `docs/evidence/hotel-inventory-*`. Browser verification remains unavailable; channel-manager API integration is not configured. The existing bundle-size warning remains non-blocking.
+
+## Bus administration subset verification
+
+Version 0.102.0 requires migration 079. Verified `npm run build`, `npm run check:architecture` (265 module files), `npm run contracts` (169 API paths), and the isolated PostgreSQL/Mailpit `npm test` command (263 tests). Targeted command: `node --import tsx --test tests/bus-administration.test.ts` with `DATABASE_URL` ending in `/bookmyticket_test`.
+
+Container verification uses the existing `bookmyticket-verify` verification profile. Local migration/rebuild uses `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait`. HTTP smoke command: `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts`. Evidence uses `docs/evidence/bus-management-*`. Browser acceptance and live supplier integration are not verified. Existing bundle-size warning is non-blocking.
+
+## Train administration subset verification
+
+Version 0.103.0 requires migration 080. Verified `npm run build`, `npm run check:architecture` (269 module files), `npm run contracts` (173 API paths), and the existing isolated PostgreSQL/Mailpit `npm test` command (267 tests). Targeted command: `node --import tsx --test tests/train-administration.test.ts` with `DATABASE_URL` ending in `/bookmyticket_test`.
+
+Container verification uses the existing `bookmyticket-verify` profile. Local migration/rebuild uses `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait`. HTTP smoke command: `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts`. Evidence uses `docs/evidence/train-management-*`. Browser host is unavailable and railway provider integration is unconfigured; no live provider booking/refund verification is claimed. Existing bundle-size warning remains non-blocking.
+
+## Holiday package administration verification
+
+Version 0.104.0 requires migration 081. Verified `npm run build`, `npm run check:architecture` (275 module files), `npm run contracts` (180 paths), and the existing isolated PostgreSQL/Mailpit `npm test` command (272 tests). Targeted command: `node --import tsx --test tests/package-administration.test.ts`, with `DATABASE_URL` ending in `/bookmyticket_test`.
+
+The `bookmyticket-verify` container verification service passed 272 tests. Local migration/rebuild used `APP_PORT=3101 APP_ORIGIN=http://127.0.0.1:3101 docker compose -p bookmyticket-verify up --build -d --wait`. `SMOKE_ORIGIN=http://127.0.0.1:3101 node --import tsx scripts/smoke.ts` passed 168 HTTP checks. Evidence uses `docs/evidence/package-management-*`. Browser host is unavailable. Supplier booking/compensation/fulfillment integration is unconfigured; no live supplier verification claimed. Existing bundle-size warning remains non-blocking.
+
+Cab management (FR-10, partial): migration 082, `npm run build`, `npm run check:architecture`, `npm run contracts`, and the existing isolated `npm test` command verified with 276 tests. Targeted: `DATABASE_URL=postgresql://bookmyticket:local-only-change-me@127.0.0.1:55432/bookmyticket_test node --import tsx --test tests/cab-administration.test.ts`. See cab-management evidence and runbook for integration limits.
+
+FR-12 booking operations (partial): migration 083, `npm run contracts` (189 paths), `npm run build`, `npm run check:architecture` (284 module files) and isolated `npm test` (282 passing tests). Targeted suite: `DATABASE_URL=postgresql://bookmyticket:local-only-change-me@127.0.0.1:55432/bookmyticket_test node --import tsx --test tests/booking-exceptions.test.ts tests/admin-operations.test.ts`. See docs/evidence/booking-management-* for results.
+
+FR-13 payment administration (partial): migration 084; `npm run contracts` generates 192 paths, `npm run build`, `npm run check:architecture` (288 module files), and isolated `npm test` (286 passing). Targeted suite: `DATABASE_URL=postgresql://bookmyticket:local-only-change-me@127.0.0.1:55432/bookmyticket_test node --import tsx --test tests/payment-administration.test.ts`.

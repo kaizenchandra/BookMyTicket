@@ -2,6 +2,57 @@ import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 const baseUrl = process.env.SMOKE_ORIGIN ?? "http://127.0.0.1:3000";
 const checks = [];
+for(const path of ['/api/v1/admin/bookings/00000000-0000-4000-8000-000000000001/exceptions','/api/v1/admin/bookings?exception=stalled']){const response=await fetch(baseUrl+path);assert.equal(response.status,401);checks.push({path,method:'GET',status:response.status});}
+for(const path of ['/admin/payment-exceptions','/admin/payments/00000000-0000-4000-8000-000000000001','/api/v1/admin/payment-exceptions','/api/v1/admin/payments/00000000-0000-4000-8000-000000000001']){const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});}
+for(const path of ['/holidays','/admin/packages','/api/v1/holiday-packages','/api/v1/admin/packages','/api/v1/admin/packages/00000000-0000-4000-8000-000000000001/history']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/v1/admin/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/admin/cabs','/admin/cabs?kind=services','/api/v1/admin/cabs/suppliers','/api/v1/admin/cabs/categories','/api/v1/admin/cabs/services','/api/v1/admin/cabs/services/00000000-0000-4000-8000-000000000001/history']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/admin/trains','/admin/trains?kind=services','/api/v1/admin/trains/stations','/api/v1/admin/trains/routes','/api/v1/admin/trains/services','/api/v1/admin/trains/services/00000000-0000-4000-8000-000000000001/history']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/admin/buses','/admin/buses?kind=services','/api/v1/admin/buses/operators','/api/v1/admin/buses/routes','/api/v1/admin/buses/services','/api/v1/admin/buses/services/00000000-0000-4000-8000-000000000001/history']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/admin/hotels/00000000-0000-4000-8000-000000000001/inventory','/api/v1/admin/hotels/00000000-0000-4000-8000-000000000001/rooms','/api/v1/admin/hotel-rooms/00000000-0000-4000-8000-000000000001/allocations','/api/v1/admin/hotel-rooms/00000000-0000-4000-8000-000000000001/history']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/hotels','/admin/hotels','/admin/hotels/00000000-0000-4000-8000-000000000001','/api/v1/hotels','/api/v1/admin/hotels','/api/v1/admin/hotels/00000000-0000-4000-8000-000000000001/history']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/v1/admin/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/admin/flights','/admin/flights/00000000-0000-4000-8000-000000000001','/api/v1/admin/flights/suppliers','/api/v1/admin/flights/suppliers/00000000-0000-4000-8000-000000000001']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+for(const path of ['/admin/customers/00000000-0000-4000-8000-000000000001','/api/v1/admin/customers/00000000-0000-4000-8000-000000000001','/api/v1/admin/customers/00000000-0000-4000-8000-000000000001/history?kind=bookings']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+{
+ const path='/api/v1/admin/customers/00000000-0000-4000-8000-000000000001/status';const response=await fetch(baseUrl+path,{method:'PATCH',headers:{'content-type':'application/json',origin:baseUrl},body:'{}'});assert.equal(response.status,401);checks.push({path,method:'PATCH',status:response.status});
+}
+for(const path of ['/admin/users/00000000-0000-4000-8000-000000000001','/api/v1/admin/users/00000000-0000-4000-8000-000000000001']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+
+for(const path of ['/admin/roles','/api/v1/admin/roles','/api/v1/admin/users/00000000-0000-4000-8000-000000000001/activity']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+
+for(const path of ['/admin/dashboard/records?year=2026&group=year&kind=bookings','/api/v1/admin/dashboard/history','/api/v1/admin/dashboard/records?year=2026&group=year&kind=bookings']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,path.startsWith('/api/')?401:200);checks.push({path,method:'GET',status:response.status});
+}
+
+for(const path of ['/admin/users','/admin/customers','/admin/bookings','/admin/payments','/admin/refunds']){
+ const response=await fetch(baseUrl+path);assert.equal(response.status,200);checks.push({path,method:'GET',status:response.status});
+ const protectedPath='/api/v1'+path;const denied=await fetch(baseUrl+protectedPath);assert.equal(denied.status,401);checks.push({path:protectedPath,method:'GET',status:denied.status});
+}
+
+for (const [path,expected] of [["/admin/dashboard",200],["/api/v1/admin/dashboard?year=2026&group=year&index=1",401]] as const) {
+  const response=await fetch(baseUrl+path);
+  assert.equal(response.status,expected);
+  checks.push({path,method:'GET',status:response.status});
+}
 {
   const path = "/api/v1/admin/help";
   const response = await fetch(baseUrl + path, {

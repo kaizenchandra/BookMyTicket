@@ -1,0 +1,3 @@
+Attempted browser verification using cua.createBrowserTab at http://127.0.0.1:3101/admin/users.
+Result: The browser access host is unavailable.
+No page state, screenshots or interactive-browser acceptance were obtained. Database/HTTP and pure UI helper tests are recorded separately.

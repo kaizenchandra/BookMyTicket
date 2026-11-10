@@ -1,0 +1,1 @@
+2026-11-10: cua.getState returned no browsers and error "Browsers: Error: The browser access host is unavailable". No browser acceptance or visual verification claimed. Database/HTTP integration, build and local deployment checks are recorded separately.

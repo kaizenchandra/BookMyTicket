@@ -1,0 +1,15 @@
+# Hotel room inventory & rates
+
+From a property at `/admin/hotels/:id`, select **Manage room inventory & rates**. Existing grants apply: hotels.read for visibility, hotels.manage for room/hold/allocation work, pricing for rate plans, and both manage/pricing for combined bulk inventory/rate changes. Fresh MFA is required; no new grants are seeded.
+
+1. Create a room type with a stable property-unique code and maximum guests per room. Edit its name, occupancy or active status with a reason. Live/future allocations and rate-plan included occupancy constrain reductions.
+2. Create refundable/non-refundable plans with policy text, default nightly INR paise price, included guests, extra-guest rate and minimum stay. Plan names are unique per room, case-insensitively. Existing nightly overrides take precedence over changed defaults.
+3. Select a plan and calendar range. Check-out/end is exclusive, dates are IST. Unconfigured stock is unavailable. The table shows total capacity, live held/reserved stock, remaining stock, base rates, discounts and restrictions.
+4. Bulk update all displayed dates. Capacity is the total physical count shared by every plan; stop-sell/blackout also affect all plans. Price/discount/minimum-stay overrides affect only the selected plan. Review the explicit replacement confirmation. On stale version, reload and reconsider current stock.
+5. For operator allocations, create a ten-minute hold on a published property. The backend checks every night, occupancy, restrictions and capacity atomically. Review its saved price/policy in allocation details. Confirm inventory allocation or release with a reason/confirmation. A reserved allocation is **not a hotel booking or payment**; no customer fulfillment is issued.
+6. Expired holds cease occupying capacity without a cleanup worker. Consumption rejects expiry; retries never extend the original hold. Read effective_state from the allocation page, not a cached create response. Refresh the calendar before relying on displayed counts. Reserved allocations require explicit release; release does not issue a monetary refund.
+7. Record observed physical capacity through reconciliation. Differences appear in immutable history; recording them does not change stock. Apply reviewed bulk corrections separately. The system will reject reductions below live commitments.
+
+Both allocations and change history have older/latest pagination. Change history includes previous nightly values, configuration edits, quote snapshots, allocation actions and reconciliation discrepancies. No raw provider payload or passenger PII is stored here. Do not manually rewrite immutable history or revive expired allocations; create new holds instead.
+
+Migration 078 creates inventory-owned hotel tables. Existing movie/event/sports reservations are untouched. No channel manager is configured: FR-BE-044 requires authorized provider details and secure configuration. No external availability or synchronization health is claimed. Evidence and tests are in `docs/evidence/hotel-inventory-*` and `tests/hotel-inventory.test.ts`.

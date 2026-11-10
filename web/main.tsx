@@ -1,3 +1,15 @@
+import {PaymentManagementDetail,PaymentExceptionQueue} from "./features/payment-management.tsx";
+import {AdminCabs} from "./features/admin-cabs.tsx";
+import {AdminPackages,PublishedPackages} from "./features/admin-packages.tsx";
+import {AdminTrains} from "./features/admin-trains.tsx";
+import {AdminBuses} from "./features/admin-buses.tsx";
+import {HotelInventoryPage} from "./features/hotel-inventory.tsx";
+import {AdminHotels,PublishedHotels} from "./features/admin-hotels.tsx";
+import {AdminFlights} from "./features/admin-flights.tsx";
+import {AdminCustomers,AdminCustomerDetail} from "./features/admin-customers.tsx";
+import {AdminUsers,AdminUserDetail,AdminRoleList,AdminAccessActivity} from "./features/admin-access.tsx";
+import { AdminFinanceRecords, AdminAccounts, AdminBookingList, AdminBookingDetail, AdminNavigation } from "./features/admin-workspace.tsx";
+import { AdminDashboard, DashboardRecordList } from "./features/admin-dashboard.tsx";
 import { CustomerCaseFiltersForm } from "./features/customer-case-filters.tsx";
 import { customerCaseLink } from "./features/support-context.ts";
 import { HelpAdministration } from "./features/help-editor.tsx";
@@ -355,6 +367,14 @@ function App() {
           <BookingHistory key={me?.id ?? "anonymous"} />
         ) : route === "/scanner" ? (
           <Scanner key={me?.id ?? "anonymous"} />
+        ) : route === "/holidays" ? (<PublishedPackages/>) : route === "/admin/cabs" ? (<AdminCabs key={`${me?.id}:${location.search}`}/>) : route === "/admin/packages" ? (<AdminPackages key={`${me?.id}:${location.search}`}/>) : route === "/admin/trains" ? (<AdminTrains key={`${me?.id}:${location.search}`}/>) : route === "/admin/buses" ? (<AdminBuses key={`${me?.id}:${location.search}`}/>) : /^\/admin\/hotels\/[^/]+\/inventory$/.test(route) ? (<HotelInventoryPage key={`${me?.id}:${route}`} property={route.split("/")[3]}/>) : route === "/hotels" ? (<PublishedHotels/>) : route === "/admin/hotels" || /^\/admin\/hotels\/[^/]+$/.test(route) ? (<AdminHotels key={`${me?.id}:${route}`} id={route.split("/")[3]}/>) : route === "/admin/flights" || /^\/admin\/flights\/[^/]+$/.test(route) ? (<AdminFlights key={`${me?.id}:${route}`} id={route.split("/")[3]}/>) : route === "/admin/payment-exceptions" ? (<PaymentExceptionQueue key={me?.id}/>) : /^\/admin\/payments\/[^/]+$/.test(route) ? (<PaymentManagementDetail key={`${me?.id}:${route}`} id={route.split("/")[3]}/>) : route === "/admin/payments" || route === "/admin/refunds" ? (<AdminFinanceRecords key={`${me?.id}:${route}`} recovery={route === "/admin/refunds"}/>) : route === "/admin/roles" ? (<AdminRoleList key={me?.id}/>) : /^\/admin\/users\/[^/]+\/activity$/.test(route) ? (<AdminAccessActivity key={`${me?.id}:${route}`} id={route.split("/")[3]}/>) : /^\/admin\/users\/[^/]+$/.test(route) ? (<AdminUserDetail key={`${me?.id}:${route}`} id={route.split("/")[3]}/>) : route === "/admin/users" ? (<AdminUsers key={me?.id}/>) : route === "/admin/customers" ? (
+          <AdminCustomers key={`${me?.id}:${route}`}/>
+        ) : /^\/admin\/customers\/[^/]+$/.test(route) ? (<AdminCustomerDetail key={`${me?.id}:${route}`} id={route.split("/")[3]}/>) : route === "/admin/bookings" ? (
+          <AdminBookingList key={me?.id}/>
+        ) : route.startsWith("/admin/bookings/") ? (
+          <AdminBookingDetail key={`${me?.id}:${route}`} id={route.split('/')[3]}/>
+        ) : route === "/admin/dashboard/records" ? (<DashboardRecordList key={me?.id}/>) : route === "/admin/dashboard" ? (
+          <AdminDashboard key={me?.id} />
         ) : route === "/admin/help" ? (
           <HelpAdministration key={me?.id ?? "anonymous"} />
         ) : route === "/admin/audit" ? (
@@ -408,7 +428,7 @@ function App() {
           <a href="/partner/organizer">Event & sports organizers</a>
           <a href="/bookings">My bookings</a>
           <a href="/notifications">Notifications</a>
-          <a href="/admin">Administration</a>
+          <a href="/admin/dashboard">Dashboard</a> · <a href="/admin">Administration</a>
           <a href="/operations">Support & finance</a>
           <a href="/admin/help">Help content administration</a>
           <a href="/scanner">Admission</a>
@@ -1844,7 +1864,7 @@ function Admin() {
   }
   return (
     <section className="reading">
-      <p className="eyebrow">PLATFORM ADMINISTRATION</p>
+      <AdminNavigation/><p className="eyebrow">PLATFORM ADMINISTRATION</p>
       <h1>Review queue</h1>
       <p>
         <a href="/admin/provider-history">Find provider decision history</a>

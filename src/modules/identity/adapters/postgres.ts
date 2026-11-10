@@ -102,6 +102,7 @@ export class PostgresIdentity implements IdentityStore, Access {
         )
       ).rows[0];
       if (account.status !== "active") return null;
+      await tx.query('UPDATE identity.accounts SET contact_verified_at=coalesce(contact_verified_at,clock_timestamp()) WHERE id=$1',[account.id]);
       await tx.query(
         "UPDATE identity.challenges SET consumed=true WHERE id=$1",
         [id],

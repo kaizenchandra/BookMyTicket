@@ -1,4 +1,8 @@
 export type ProviderPayment = {
+  method?: string;
+  error_code?: string | null;
+  error_reason?: string | null;
+  amount_refunded?: number;
   id: string;
   order_id: string;
   amount: number;

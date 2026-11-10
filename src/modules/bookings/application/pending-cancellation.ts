@@ -59,6 +59,9 @@ export interface PendingCancellationStore {
   ): Promise<void>;
   result(tx: Transaction, id: string): Promise<unknown>;
 }
+export interface CancellationAuthority {
+  resolve(tx: Transaction, actor: string, id: string): Promise<string>;
+}
 export class PendingCancellation {
   constructor(
     private store: PendingCancellationStore,
@@ -66,9 +69,21 @@ export class PendingCancellation {
     private payments: CancellationPaymentStatus,
     private events: DurableEvents,
     private audit: SecurityAudit,
+    private authority?: CancellationAuthority,
   ) {}
-  preview(owner: string, id: string) {
+  preview(caller: string, id: string) {
     return this.store.unitOfWork(async (tx) => {
+      const owner = this.authority
+        ? await this.authority.resolve(tx, caller, id)
+        : caller;
+      if (this.authority)
+        await this.audit.record(
+          tx,
+          caller,
+          "booking.admin_cancellation.preview",
+          id,
+          {},
+        );
       const order = await this.store.lock(tx, owner, id),
         payment = await this.payments.pendingCancellation(tx, id);
       const allowed = order.state === "pending_payment";
@@ -96,7 +111,7 @@ export class PendingCancellation {
     });
   }
   async cancel(
-    owner: string,
+    caller: string,
     id: string,
     key: string,
     input: PendingCancelInput,
@@ -113,6 +128,10 @@ export class PendingCancellation {
         "Confirm the payment notice and provide a cancellation reason.",
         422,
       );
+    if (this.authority)
+      key = createHash("sha256")
+        .update("admin:" + caller + ":" + key)
+        .digest("hex");
     const fingerprint = createHash("sha256")
       .update(
         JSON.stringify({
@@ -124,6 +143,9 @@ export class PendingCancellation {
       )
       .digest("hex");
     return this.store.unitOfWork(async (tx) => {
+      const owner = this.authority
+        ? await this.authority.resolve(tx, caller, id)
+        : caller;
       await this.store.serialize(tx, owner);
       const previous = await this.store.prior(tx, owner, key, fingerprint);
       if (previous) return this.store.result(tx, previous);
@@ -148,7 +170,10 @@ export class PendingCancellation {
         await this.events.publish(tx, "booking.pending_cancelled", id, {
           ownerId: owner,
         });
-        await this.audit.record(tx, owner, "booking.pending_cancelled", id, {
+        await this.audit.record(tx, caller, "booking.pending_cancelled", id, {
+          reason: input.reason.trim(),
+          customerId: owner,
+          initiatedBy: this.authority ? "administrator" : "customer",
           reservationId: order.reservation_id,
           paymentActivity: payment.paymentActivity,
         });

@@ -1,3 +1,18 @@
+import {paymentAdminFilters,paymentReportInput,paymentDetailQuery,paymentAdminPage,paymentAdminDetail,paymentExceptionPage,paymentReportResponse} from "../src/modules/payments/adapters/administration-schema.ts";
+import {exceptionInput,exceptionHistory,exceptionResponse,exceptionDetailResponse} from "../src/modules/bookings/adapters/exceptions-schema.ts";
+import {cabKind,cabCreate,cabEdit,cabFilters,cabDisruption,cabHistoryQuery,cabRecordResponse,cabPageResponse,cabDetailResponse,cabHistoryResponse,cabPreview,cabPriceResponse} from "../src/modules/cabs/adapters/schema.ts";
+import {packageCreate,packageEdit,packageAction,packageFilters,packagePreview,packageAllotment,packageHistoryQuery,packagePageResponse,packageDetailResponse,packagePublishedResponse,packagePriceResponse,packageHistoryResponse} from "../src/modules/packages/adapters/schema.ts";
+import {trainKind,trainCreate,trainEdit,trainFilters,trainIncident,trainHistoryQuery,trainRecordResponse,trainPageResponse,trainDetailResponse,trainHistoryResponse} from "../src/modules/trains/adapters/schema.ts";
+import {busKind,busCreate,busEdit,busFilters,busDisruption,busHistoryQuery,busRecordResponse,busPageResponse,busDetailResponse,busHistoryResponse} from "../src/modules/buses/adapters/schema.ts";
+import {hotelRoomInput,hotelRoomEdit,hotelPlanInput,hotelPlanEdit,hotelCalendarQuery,hotelBulkInput,hotelHoldInput,hotelAllocationAction,hotelHistoryQuery,hotelReconciliationInput,hotelRoomsResponse,hotelCalendarResponse,hotelAllocationResponse,hotelAllocationsResponse,hotelChangesResponse} from "../src/modules/inventory/adapters/hotel-schema.ts";
+import {propertyCreate,propertyEdit,propertyAction,propertyFilters,propertyResponse,propertyPage,publishedPropertyPage,propertyHistory} from "../src/modules/hotels/adapters/schema.ts";
+import {supplierInput,supplierUpdate,supplierFilters,commercialInput,previewInput,supplierResponse,ruleResponse,supplierPage,supplierDetail,previewResponse} from "../src/modules/flights/adapters/schema.ts";
+import {customerFilterInput,customerStatusChange,customerHistoryFilters,customerPage,customerDetail,customerHistoryPage} from "../src/modules/identity/adapters/customer-admin-schema.ts";
+import {roleInput,roleUpdate,roleFilters,adminCreation,rolePage,roleResponse,adminActivityPage} from "../src/modules/identity/adapters/roles-schema.ts";
+import {accountFiltersInput,accountChange,adminAccountPage,adminAccountChanged,adminAccountDetail} from "../src/modules/identity/adapters/administration-schema.ts";
+import {adminBookingFiltersInput,adminBookingPage,adminPaymentFilters} from "../src/modules/bookings/adapters/admin-schema.ts";
+import {financeRecordFilters} from "../src/modules/payments/adapters/admin.ts";
+import { dashboardFilters, dashboardPage, dashboardRecordKind, dashboardRecordsPage } from "../src/modules/reporting/adapters/dashboard-schema.ts";
 import { paymentHistoryFilters, paymentHistoryPage } from "../src/modules/bookings/adapters/payment-history-schema.ts";
 import { bookingTimelinePage } from "../src/modules/bookings/adapters/timeline-schema.ts";
 import { helpFilters, helpResponse, helpEdit, helpEditorPage, helpSaved, helpHistoryFilters, helpHistoryPage, helpCreation, helpAdminFilters } from "../src/modules/catalog/adapters/help-schema.ts";
@@ -161,6 +176,10 @@ import {
 const source = await readFile("src/app.ts", "utf8"),
   paths: Record<string, any> = {};
 const requests: Record<string, unknown> = {
+  "post /api/v1/admin/users":z.toJSONSchema(adminCreation,{io:'input'}),
+  "post /api/v1/admin/roles":z.toJSONSchema(roleInput,{io:'input'}),
+  "patch /api/v1/admin/roles/{id}":z.toJSONSchema(roleUpdate,{io:'input'}),
+  "patch /api/v1/admin/users/{id}": z.toJSONSchema(accountChange),
   "post /api/v1/occurrences/series": z.toJSONSchema(scheduleSeriesInput),
   "post /api/v1/occurrences/series/preview":
     z.toJSONSchema(scheduleSeriesInput),
@@ -285,7 +304,7 @@ const requests: Record<string, unknown> = {
   ),
 };
 for (const [, method, raw] of source.matchAll(
-  /(?:app|webhook)\.(get|post|put|delete)\(\s*["']([^"']+)["']/g,
+  /(?:app|webhook)\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
 )) {
   if (!raw.startsWith("/api/v1/")) continue;
   const path = raw.replace(/:([a-zA-Z]+)/g, "{$1}"),
@@ -715,6 +734,165 @@ for (const [, method, raw] of source.matchAll(
         schema: property,
       }),
     );
+  }
+  if(['/api/v1/admin/users','/api/v1/admin/customers','/api/v1/admin/bookings','/api/v1/admin/payments','/api/v1/admin/refunds','/api/v1/admin/bookings/{id}/payments'].includes(path)){
+    const schema=z.toJSONSchema(path.endsWith('/{id}/payments')?adminPaymentFilters:path==='/api/v1/admin/bookings'?adminBookingFiltersInput:path.endsWith('/users')||path.endsWith('/customers')?accountFiltersInput:financeRecordFilters,{io:'input'});
+    operation.parameters=[...parameters,...Object.entries(schema.properties??{}).map(([name,property])=>({name,in:'query',required:false,schema:property}))];
+    operation.description='Current MFA and route-specific platform permission required. Reads are audited. Cursor scope binds filters and actor. Contacts and provider identifiers are redacted.';
+  }
+  if(method==='get'&&(path==='/api/v1/admin/users'||path==='/api/v1/admin/customers'))operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(adminAccountPage)}};
+  if(path==='/api/v1/holiday-packages'||path.startsWith('/api/v1/admin/packages')){
+    const list=path==='/api/v1/admin/packages',history=path.endsWith('/history'),preview=path.endsWith('/preview'),allotments=path.endsWith('/allotments'),actions=path.endsWith('/actions');
+    operation.description='Holiday package information/pricing/allotment planning only; bookable=false. Requires packages.read and fresh MFA for admin routes; definition/allotment/submit writes packages.manage; review actions packages.review. Published edits return to draft. Public projection excludes supplier references, costs and commercial markup. Versioned plans are not supplier-confirmed availability. Component reservation, compensation and fulfillment integrations are not configured.';
+    if(method==='get'){
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(path==='/api/v1/holiday-packages'?packagePublishedResponse:list?packagePageResponse:history?packageHistoryResponse:packageDetailResponse)}};
+      if(list||history||path==='/api/v1/holiday-packages'){const q=z.toJSONSchema(history?packageHistoryQuery:packageFilters,{io:'input'});operation.parameters=[...parameters,...Object.entries(q.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    }else{
+      operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(list?packageCreate:preview?packagePreview:allotments?packageAllotment:actions?packageAction:packageEdit,{io:'input'})}}};
+      operation.responses['200'].content={'application/json':{schema:list?{type:'object',properties:{id:{type:'string',format:'uuid'}},required:['id']}:preview?z.toJSONSchema(packagePriceResponse):{type:'object',properties:{updated:{const:true},bookable:{const:false}},required:['updated']}}};
+      if(list)operation.parameters=[...parameters,{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];
+    }
+  }
+  if(path.startsWith('/api/v1/admin/trains/')){
+    const list=path.endsWith('/{kind}'),history=path.endsWith('/history'),incident=path.endsWith('/incidents');
+    operation.description='Local railway reference catalogue only. Requires trains.read and current MFA; writes additionally trains.manage. kind is stations, routes or services; content must match path kind. Immutable station codes and snapshots; unique class codes; ordered stop timing; final arrival matches route offset. Versioned writes and immutable history/audit. Provider integration is not configured: availability/fare/PNR/booking/waitlist/cancellation/refund status are null and bookable=false. Local incidents do not submit provider requests.';
+    operation.parameters=parameters.map(p=>p.name==='kind'?{...p,schema:z.toJSONSchema(trainKind)}:p);
+    if(method==='get'){
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(list?trainPageResponse:history?trainHistoryResponse:trainDetailResponse)}};
+      if(list||history){const q=z.toJSONSchema(history?trainHistoryQuery:trainFilters,{io:'input'});operation.parameters=[...operation.parameters,...Object.entries(q.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    }else{
+      operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(incident?trainIncident:method==='post'?z.union([trainCreate.stations,trainCreate.routes,trainCreate.services]):z.union([trainEdit.stations,trainEdit.routes,trainEdit.services]),{io:'input'})}}};
+      operation.responses['200'].content={'application/json':{schema:list?{type:'object',properties:{id:{type:'string',format:'uuid'}},required:['id']}:z.toJSONSchema(trainRecordResponse)}};
+      if(list)operation.parameters.push({name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}});
+    }
+  }
+  if(path==='/api/v1/admin/bookings/{id}/tickets/download'){
+    operation.description='Audited admission ticket HTML document containing current valid QR credentials. Requires bookings.read/manage and fresh MFA, confirmed booking, existing wallet issuance/validity rules. Private no-store attachment; not a supplier voucher or invoice.';
+    operation.responses['200'].content={'text/html':{schema:{type:'string'}}};
+  }
+  if(path==='/api/v1/admin/bookings/{id}/exceptions'){
+    operation.description='Booking exception case state only; never changes booking/payment/ticket state. Read requires bookings.read and fresh MFA; actions also bookings.manage. Active authorized assignees, versioned transitions, actor-key fingerprint replay, immutable history/audit and durable event commit atomically.';
+    if(method==='get'){const q=z.toJSONSchema(exceptionHistory,{io:'input'});operation.parameters=[...parameters,...Object.entries(q.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(exceptionDetailResponse)}};}
+    else{operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(exceptionInput,{io:'input'})}}};operation.parameters=[...parameters,{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(exceptionResponse)}};}
+  }
+  if(path.startsWith('/api/v1/admin/bookings/')&&path.includes('/pending-cancellation')){
+    operation.description='Requires bookings.read/manage and fresh MFA. Only pending-payment orders can be cancelled. Preview checks payment activity; submission atomically revalidates preview/state, releases inventory, records cancellation/audit/outbox with staff attribution. Late captures require refund recovery; no refund success is implied. Actor-scoped retry fingerprint.';
+    operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(path.endsWith('/preview')?z.object({}).strict():pendingCancelInput,{io:'input'})}}};
+    if(!path.endsWith('/preview'))operation.parameters=[...parameters,{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];
+  }
+  if(path==='/api/v1/admin/payments'||path==='/api/v1/admin/payments/{id}'||path==='/api/v1/admin/payments/reports'||path==='/api/v1/admin/payment-exceptions'){
+    operation.description='Finance permission and fresh MFA required; all reads/exports audited. Exact paise strings. Provider observations, local captures, recovery obligations and settlement availability remain separate. Refund execution and bank settlement integration are not implemented. Reports explicitly approved by requesting finance actor, bounded to 5000 rows and 366 days; CSV formula prefixes neutralized.';
+    const report=path.endsWith('/reports'),list=path==='/api/v1/admin/payments',exceptions=path.endsWith('/payment-exceptions');
+    if(report)operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(paymentReportInput,{io:'input'})}}};
+    else {const q=z.toJSONSchema(list?paymentAdminFilters:paymentDetailQuery,{io:'input'});operation.parameters=[...parameters,...Object.entries(q.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(report?paymentReportResponse:list?paymentAdminPage:exceptions?paymentExceptionPage:paymentAdminDetail)}};
+  }
+  if(path.startsWith('/api/v1/admin/cabs/')){
+    const list=path.endsWith('/{kind}'),history=path.endsWith('/history'),incident=path.endsWith('/disruptions'),preview=path.endsWith('/preview');
+    operation.description='Cab catalogue and configured tariff estimates. Fresh MFA and cabs.read required; writes additionally cabs.manage (preview is read). Suppliers/categories/services use kind-specific content. Versioned writes and actor-scoped create replay, atomic immutable history/audit. Directional endpoint and full trip-window checks, current active supplier/category and party/distance constraints. Exact paise distance ceiling plus waiting/per-trip fees. Estimates exclude taxes/tolls/parking and do not confirm availability. No supplier booking, cancellation, rescheduling, actual charge or reconciliation adapter is configured.';
+    operation.parameters=parameters.map(p=>p.name==='kind'?{...p,schema:z.toJSONSchema(cabKind)}:p);
+    if(method==='get'){
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(list?cabPageResponse:history?cabHistoryResponse:cabDetailResponse)}};
+      if(list||history){const q=z.toJSONSchema(history?cabHistoryQuery:cabFilters,{io:'input'});operation.parameters=[...operation.parameters,...Object.entries(q.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    }else{
+      operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(preview?cabPreview:incident?cabDisruption:method==='post'?z.union([cabCreate.suppliers,cabCreate.categories,cabCreate.services]):z.union([cabEdit.suppliers,cabEdit.categories,cabEdit.services]),{io:'input'})}}};
+      operation.responses['200'].content={'application/json':{schema:preview?z.toJSONSchema(cabPriceResponse):list?{type:'object',properties:{id:{type:'string',format:'uuid'}},required:['id']}:z.toJSONSchema(cabRecordResponse)}};
+      if(list)operation.parameters.push({name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}});
+    }
+  }
+  if(path.startsWith('/api/v1/admin/buses/')){
+    const list=path.endsWith('/{kind}'),history=path.endsWith('/history'),incident=path.endsWith('/disruptions');
+    operation.description='Local bus reference catalogue only. Requires buses.read and current MFA; writes additionally buses.manage. kind is operators, routes or services; request content must match the path kind. Stable codes, actor/operation/key create replay, expectedVersion writes, immutable history and atomic audit. Service layout/fares/cancellation rules are indicative. Availability, booked seats, booking and ticket status are null until an authorized supplier is connected. Disruption actions do not cancel supplier bookings or issue refunds/notifications.';
+    operation.parameters=parameters.map(p=>p.name==='kind'?{...p,schema:z.toJSONSchema(busKind)}:p);
+    if(method==='get'){
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(list?busPageResponse:history?busHistoryResponse:busDetailResponse)}};
+      if(list||history){const q=z.toJSONSchema(history?busHistoryQuery:busFilters,{io:'input'});operation.parameters=[...operation.parameters,...Object.entries(q.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    }else{
+      operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(incident?busDisruption:method==='post'?z.union([busCreate.operators,busCreate.routes,busCreate.services]):z.union([busEdit.operators,busEdit.routes,busEdit.services]),{io:'input'})}}};
+      operation.responses['200'].content={'application/json':{schema:list?{type:'object',properties:{id:{type:'string',format:'uuid'}},required:['id']}:z.toJSONSchema(busRecordResponse)}};
+      if(list)operation.parameters.push({name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}});
+    }
+  }
+  if(path==='/api/v1/hotels'||path.startsWith('/api/v1/admin/hotels')){
+    operation.description='Property content only, not room inventory or booking. Admin reads require hotels.read and fresh MFA; create/edit/submit additionally hotels.manage; review/suspend/delist/reopen additionally hotels.review. Atomic versioned mutations, immutable snapshots and audit. Published edits return to draft. Public reads only published content, excluding private contacts and supplier association. Supplier synchronization is not configured.';
+    if(method==='get'){
+      const history=path.endsWith('/history'),detail=path.endsWith('/{id}');
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(path==='/api/v1/hotels'?publishedPropertyPage:history?propertyHistory:detail?propertyResponse:propertyPage)}};
+      if(history)operation.parameters=[...parameters,{name:'before',in:'query',required:false,schema:{type:'integer',minimum:1}}];
+      else if(!detail){const query=z.toJSONSchema(propertyFilters,{io:'input'});operation.parameters=[...parameters,...Object.entries(query.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    }else{
+      const action=path.endsWith('/actions');operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(action?propertyAction:method==='patch'?propertyEdit:propertyCreate,{io:'input'})}}};
+      operation.responses['200'].content={'application/json':{schema:action||method==='patch'?z.toJSONSchema(propertyResponse):{type:'object',required:['id'],properties:{id:{type:'string',format:'uuid'}}}}};
+      if(!action&&method==='post')operation.parameters=[...parameters,{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];
+    }
+  }
+  if(path.startsWith('/api/v1/admin/hotel-rooms/')||path==='/api/v1/admin/hotels/{id}/rooms'){
+    operation.description='Hotel inventory allocation only; does not create booking/payment. Active hotels.read and fresh MFA required. Room/hold/actions/reconciliation require hotels.manage; plans require pricing; bulk calendar requires both. Ten-minute database-time holds share room capacity across all plans. Multi-night all-or-nothing allocation; expired holds excluded without cleanup; retries never extend expiry. Date endpoints are exclusive and use IST nights. Manual reconciliation records observations without changing inventory. No channel manager is configured.';
+    const rooms=path.endsWith('/rooms'),plans=path.endsWith('/plans'),planEdit=path.endsWith('/plans/{planId}'),calendar=path.endsWith('/calendar'),holds=path.endsWith('/holds'),actions=path.endsWith('/actions'),reconcile=path.endsWith('/reconciliation'),history=path.endsWith('/history'),allocations=path.endsWith('/allocations');
+    if(method==='get'){
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(rooms?hotelRoomsResponse:calendar?hotelCalendarResponse:allocations?hotelAllocationsResponse:hotelChangesResponse)}};
+      operation.parameters=parameters;
+      if(!rooms){const query=z.toJSONSchema(calendar?hotelCalendarQuery:hotelHistoryQuery,{io:'input'});operation.parameters=[...parameters,...Object.entries(query.properties??{}).map(([name,schema])=>({name,in:'query',required:calendar,schema}))];}
+    }else{
+      operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(rooms?hotelRoomInput:plans?hotelPlanInput:planEdit?hotelPlanEdit:calendar?hotelBulkInput:holds?hotelHoldInput:actions?hotelAllocationAction:reconcile?hotelReconciliationInput:hotelRoomEdit,{io:'input'})}}};
+      const result=holds||actions?z.toJSONSchema(hotelAllocationResponse):rooms||plans||planEdit?{type:'object',properties:{id:{type:'string',format:'uuid'}},required:['id']}:reconcile?{type:'object',properties:{discrepancies:{type:'array',items:{type:'object'}},inventoryChanged:{const:false}},required:['discrepancies','inventoryChanged']}:{type:'object',properties:{updated:{const:true},nights:{type:'integer'}},required:['updated']};
+      operation.responses['200'].content={'application/json':{schema:result}};
+      if(rooms||plans||holds||reconcile)operation.parameters=[...parameters,{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];
+    }
+  }
+  if(path.startsWith('/api/v1/admin/flights/suppliers')){
+    operation.description='Supplier profile and commercial configuration only; no live flight adapter is configured. Requires flights.read and current MFA. Profile writes additionally require flights.manage; commercial writes/previews require pricing. Changes audited with expectedVersion; create requests require actor-scoped Idempotency-Key. No credentials accepted. Profiles cannot be activated for sale. Preview is arithmetic only, not a fare quote.';
+    if(method==='get'){
+      operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(path.endsWith('/{id}')?supplierDetail:supplierPage)}};
+      if(!path.endsWith('/{id}')){const query=z.toJSONSchema(supplierFilters);operation.parameters=[...parameters,...Object.entries(query.properties??{}).map(([name,schema])=>({name,in:'query',required:false,schema}))];}
+    }else{
+      const preview=path.endsWith('/price-preview'),rule=path.endsWith('/commercial-rule');
+      operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(preview?previewInput:rule?commercialInput:method==='patch'?supplierUpdate:supplierInput,{io:'input'})}}};
+      operation.responses['200'].content={'application/json':{schema:preview?z.toJSONSchema(previewResponse):rule?z.toJSONSchema(ruleResponse):method==='patch'?z.toJSONSchema(supplierResponse):{type:'object',required:['id'],properties:{id:{type:'string',format:'uuid'}}}}};
+      if(method==='post'&&!preview)operation.parameters=[...parameters,{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];
+    }
+  }
+  if(path.startsWith('/api/v1/admin/customers')){
+    operation.description='Requires customers.read and current MFA. Audited reads; masked contacts and attendees. Histories additionally require bookings.read, finance or support. Status/flags changes require access.manage, reason and expectedVersion, and revoke sessions. Wallet and loyalty are unsupported. Dates are inclusive from/exclusive until; activity uses booking creation dates and counts ever-confirmed bookings.';
+    if(path==='/api/v1/admin/customers'||path.endsWith('/history')){const query=z.toJSONSchema(path.endsWith('/history')?customerHistoryFilters:customerFilterInput,{io:'input'});operation.parameters=[...parameters,...Object.entries(query.properties??{}).map(([name,schema])=>({name,in:'query',required:name==='kind',schema}))];}
+    if(method==='get')operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(path.endsWith('/history')?customerHistoryPage:path.endsWith('/{id}')?customerDetail:customerPage)}};
+    if(method==='patch'){operation.requestBody={required:true,content:{'application/json':{schema:z.toJSONSchema(customerStatusChange)}}};operation.responses['200'].content={'application/json':{schema:{type:'object',properties:{updated:{const:true}},required:['updated']}}};}
+  }
+  if(path==='/api/v1/admin/bookings')operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(adminBookingPage)}};
+  if(path==='/api/v1/admin/bookings/{id}/payments')operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(paymentHistoryPage)}};
+  if(path==='/api/v1/admin/users/{id}'){
+    operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(method==='get'?adminAccountDetail:adminAccountChanged)}};
+    operation.description=method==='get'?'Requires access.manage and current MFA. Masked administrator account, direct/effective permissions and active/inactive assigned role definitions. Read is audited.':'Requires access.manage and current MFA. Reason and expectedVersion required; case-insensitive self changes forbidden. Revokes all target sessions atomically with change and audit. Scoped grants are preserved.';
+  }
+  if(path==='/api/v1/admin/roles'){
+    operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(method==='get'?rolePage:roleResponse)}};
+    if(method==='get'){const schema=z.toJSONSchema(roleFilters);operation.parameters=Object.entries(schema.properties??{}).map(([name,property])=>({name,in:'query',required:false,schema:property}));}
+  }
+  if(path==='/api/v1/admin/roles/{id}')operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(roleResponse)}};
+  if(path==='/api/v1/admin/users/{id}/activity')operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(adminActivityPage)}};
+  if(method==='post'&&(path==='/api/v1/admin/users'||path==='/api/v1/admin/roles')){
+    operation.parameters=[{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:8,maxLength:100}}];
+    operation.description='Requires active access.manage and fresh MFA. Actor/operation scoped idempotency rejects changed payloads. No invitation or initial session is issued; new administrators must verify their email and MFA. Role definitions grant no access until assigned.';
+    if(path==='/api/v1/admin/users')operation.responses['200'].content={'application/json':{schema:{type:'object',properties:{id:{type:'string',format:'uuid'}},required:['id']}}};
+  }
+  if(path==='/api/v1/admin/dashboard/records'){
+    const schema=z.toJSONSchema(dashboardFilters,{io:'input'});
+    operation.parameters=[...Object.entries(schema.properties??{}).map(([name,property])=>({name,in:'query',required:schema.required?.includes(name)??false,schema:property})),{name:'kind',in:'query',required:true,schema:z.toJSONSchema(dashboardRecordKind)},{name:'after',in:'query',required:false,schema:{type:'string',maxLength:1500}}];
+    operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(dashboardRecordsPage)}};
+    operation.description='Finance and current MFA required. Booking/customer/support records additionally require bookings.read/customers.read/support. Actor/filter/date-bound keyset pages. These are current records, not historical snapshot drilldowns.';
+  }
+  if(path==='/api/v1/admin/dashboard/history/{id}'){
+    operation.responses['200'].content={'application/json':{schema:z.toJSONSchema(dashboardPage)}};
+    operation.description='Immutable captured financial report. Current finance permission and MFA required; support aggregate redacted unless current support permission exists.';
+  }
+  if(path==='/api/v1/admin/dashboard/history'){
+    operation.responses['200'].content={'application/json':{schema:{type:'object',properties:{items:{type:'array',maxItems:20,items:{type:'object',properties:{id:{type:'string',format:'uuid'},created_at:{type:'string',format:'date-time'},definition_version:{type:'string'},filters:z.toJSONSchema(dashboardFilters,{io:'input'})},required:['id','created_at','definition_version','filters']}}},required:['items']}}};
+  }
+  if (path === "/api/v1/admin/dashboard") {
+    operation.responses["200"].content = {"application/json":{schema:z.toJSONSchema(dashboardPage)}};
+    const schema=z.toJSONSchema(dashboardFilters,{io:'input'});
+    operation.parameters=Object.entries(schema.properties??{}).map(([name,property])=>({name,in:'query',required:schema.required?.includes(name)??false,schema:property}));
+    operation.description='Finance permission and current MFA required; support aggregates require support permission. IST calendar/preset/custom periods and current catalog product/city/partner plus booking-state filters. INR only. Includes demo records. Decimal paise strings. Zero-filled daily/monthly series. Returns an immutable historical capture ID; definitions version 2. Booking cohorts, cash events and inventory use distinct bases.';
   }
   if (path === "/api/v1/admin/audit") {
     operation.responses["200"].content = {

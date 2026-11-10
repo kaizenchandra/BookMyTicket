@@ -1,0 +1,4 @@
+Browser verification attempted through cua.createBrowserTab against an isolated localhost preview backed only by bookmyticket_test.
+Tool result: "The browser access host is unavailable".
+No browser page state or screenshot was obtained. Temporary preview process was stopped and its fixture session revoked.
+Browser visual, interaction, responsive-layout and accessibility acceptance remain unverified.

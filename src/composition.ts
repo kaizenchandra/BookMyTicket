@@ -1,3 +1,5 @@
+import {AdminCancellationAuthority,AdminDocumentAuthority} from "./modules/bookings/adapters/cancellation-authority.ts";
+import {PostgresStaffAuthorization} from "./modules/identity/adapters/staff-authorization.ts";
 import { OnlineAccess } from "./modules/events/application/online-access.ts";
 import { PostgresOnlineAccess } from "./modules/events/adapters/online-access.ts";
 import { PostgresOnlineEligibility } from "./modules/bookings/adapters/online-eligibility.ts";
@@ -106,6 +108,7 @@ export function commerce() {
       new PostgresEvents(),
       new PostgresAudit(),
     ),
+    adminPendingCancellation: new PendingCancellation(new PostgresPendingCancellation(),new PostgresPendingRelease(),new PostgresCancellationPaymentStatus(),new PostgresEvents(),new PostgresAudit(),new AdminCancellationAuthority(new PostgresStaffAuthorization())),
     pendingCancellation: new PendingCancellation(
       new PostgresPendingCancellation(),
       new PostgresPendingRelease(),
@@ -113,6 +116,7 @@ export function commerce() {
       new PostgresEvents(),
       new PostgresAudit(),
     ),
+    adminWallet: new TicketWallet(bookings,new PostgresTicketOccurrences(),tickets,new QrCodes(),new AdminDocumentAuthority(new PostgresStaffAuthorization(),new PostgresAudit())),
     wallet: new TicketWallet(
       bookings,
       new PostgresTicketOccurrences(),

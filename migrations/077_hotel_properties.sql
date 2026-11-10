@@ -1,0 +1,10 @@
+CREATE SCHEMA hotels;
+CREATE TABLE hotels.properties(id uuid PRIMARY KEY,code text NOT NULL UNIQUE,content jsonb NOT NULL,state text NOT NULL DEFAULT 'draft' CHECK(state IN ('draft','pending_review','published','suspended','delisted')),version integer NOT NULL DEFAULT 1,latitude numeric,longitude numeric,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX hotel_location ON hotels.properties(latitude,longitude) WHERE state='published';
+CREATE INDEX hotel_city ON hotels.properties(lower(content->>'city'),state);
+CREATE TABLE hotels.revisions(property_id uuid NOT NULL REFERENCES hotels.properties(id),version integer NOT NULL,actor_id uuid NOT NULL,action text NOT NULL,reason text NOT NULL,snapshot jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(property_id,version));
+CREATE FUNCTION hotels.immutable_revision() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Hotel revision history is immutable'; END $$;
+CREATE TRIGGER hotel_revision_immutable BEFORE UPDATE OR DELETE ON hotels.revisions FOR EACH ROW EXECUTE FUNCTION hotels.immutable_revision();
+CREATE TABLE hotels.requests(actor_id uuid NOT NULL,key text NOT NULL,fingerprint text NOT NULL,result jsonb NOT NULL,PRIMARY KEY(actor_id,key));
+ALTER TABLE identity.admin_role_permissions DROP CONSTRAINT admin_role_permissions_permission_check;
+ALTER TABLE identity.admin_role_permissions ADD CONSTRAINT admin_role_permissions_permission_check CHECK(permission IN ('access.manage','customers.read','bookings.read','finance','support','support_assign','moderate','pricing','audit','flights.read','flights.manage','hotels.read','hotels.manage','hotels.review'));

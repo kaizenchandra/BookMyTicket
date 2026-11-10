@@ -7050,17 +7050,24 @@
     "source": "frontend-functional-requirement.md:409",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7069,17 +7076,24 @@
     "source": "frontend-functional-requirement.md:410",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7088,17 +7102,24 @@
     "source": "frontend-functional-requirement.md:411",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7107,17 +7128,24 @@
     "source": "frontend-functional-requirement.md:412",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7145,17 +7173,24 @@
     "source": "frontend-functional-requirement.md:414",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7254,17 +7289,24 @@
     "source": "frontend-functional-requirement.md:419",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -7273,17 +7315,24 @@
     "source": "frontend-functional-requirement.md:423",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -17936,17 +17985,24 @@
     "source": "backend-functional-requirement.md:538",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -17955,17 +18011,24 @@
     "source": "backend-functional-requirement.md:539",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -17974,17 +18037,24 @@
     "source": "backend-functional-requirement.md:540",
     "role": "pending mapping",
     "journey": "pending mapping",
-    "frontendRoute": "pending mapping",
+    "frontendRoute": "/admin/dashboard",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; GET /api/v1/admin/dashboard: IST calendar cohorts, booking/cash/recovery/allocation summaries and recent bookings",
     "dataOwnership": "pending mapping",
-    "permissions": "pending mapping",
-    "transactionRules": "pending mapping",
-    "acceptanceTests": [],
-    "implementationStatus": "not_started",
+    "permissions": "Platform finance grant + current MFA; active grant rechecked inside snapshot transaction",
+    "transactionRules": "Repeatable-read snapshot plus atomic access audit; no financial mutations",
+    "acceptanceTests": [
+      "tests/admin-dashboard.test.ts"
+    ],
+    "implementationStatus": "partial",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/admin-dashboard-full-suite.txt",
+      "docs/architecture/adr-096-admin-dashboard.md"
+    ],
+    "dependencies": [
+      "Refund ledger, net earnings, attribution, broader filters/drilldown, browser/accessibility and production load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
