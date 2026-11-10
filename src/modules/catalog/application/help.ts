@@ -1,16 +1,25 @@
 import type { helpDestinations } from "../domain/help.ts";
 import {
-  searchHelp,
+  helpSearchTerms,
+  type HelpSearch,
   type HelpArticle,
   type HelpTopic,
 } from "../domain/help.ts";
 export interface HelpContent {
-  published(): readonly HelpArticle[] | Promise<readonly HelpArticle[]>;
+  published(
+    filters: HelpSearch,
+  ): readonly HelpArticle[] | Promise<readonly HelpArticle[]>;
 }
 export class Help {
   constructor(private content: HelpContent) {}
-  async search(q?: string, topic?: HelpTopic) {
-    return { items: searchHelp(await this.content.published(), q, topic) };
+  async search(q?: string, topic?: HelpTopic, after?: string) {
+    const rows = await this.content.published({
+      terms: helpSearchTerms(q),
+      topic,
+      after,
+    });
+    const items = rows.slice(0, 20);
+    return { items, nextCursor: rows.length > 20 ? items[19].id : null };
   }
 }
 

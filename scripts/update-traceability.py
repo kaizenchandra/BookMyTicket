@@ -544,6 +544,48 @@ for row in rows:
   row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors']))
   row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/help-list-full-suite.txt','docs/architecture/adr-088-help-administration-pagination.md']))
   row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:SUP-C-01','BE:CAT-10','BE:API-05']:
+  row['apiUseCase'] += '; bounded PostgreSQL public FAQ search with publication/topic/all-term predicates before stable ID pagination and filter-preserving frontend page links'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/help-search.test.ts: published search pagination, hidden content, live withdrawals, literal terms and filter-preserving navigation']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/public-help-pages-full-suite.txt','docs/architecture/adr-089-public-help-pagination.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Public FAQ pagination implemented; indexing, multilingual search, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:BKG-03','BE:BKG-13','BE:API-05']:
+  row['apiUseCase'] += '; owner-only booking milestone timeline with exact recorded creation/acceptance/confirmation/cancellation timestamps, current-state separation and customer refresh/retry panel'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/booking-timeline.test.ts: timestamp ordering, state separation, both cancellation sources, missing legacy events, owner isolation, no-store and safe presentation']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/booking-timeline-full-suite.txt','docs/architecture/adr-090-booking-milestones.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Booking milestone subset implemented; full payment/refund/disruption timelines, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:BKG-03','BE:BKG-13','BE:API-05']:
+  row['apiUseCase'] += '; owner-authorized customer capture/recovery history through Payments public contract, random capture IDs, exact cursor pagination and separate payment-history panel'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/booking-timeline.test.ts: paginated payment records, exact times, new arrivals, provider redaction, scope controls and presentation semantics']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/payment-history-full-suite.txt','docs/architecture/adr-091-customer-payment-records.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Capture/recovery record subset implemented; full attempt/refund/disruption history, retention, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:BKG-03','BE:BKG-13','BE:API-05']:
+  row['apiUseCase'] += '; immutable newly accepted payment-attempt observations with atomic persistence, duplicate/stale suppression, safe attempt grouping and customer timeline labels'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/booking-timeline.test.ts: actual observation writer concurrency, accepted states, immutable history, rollback, grouping, pagination and semantics']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/attempt-history-full-suite.txt','docs/architecture/adr-092-payment-attempt-observations.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['New attempt observations implemented; historical reconstruction, full refund/disruption timelines, retention, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:BKG-03','BE:BKG-13','BE:API-05']:
+  row['apiUseCase'] += '; payment-history category and public-attempt filters applied before pagination, filter-bound cursors with legacy compatibility and frontend apply/clear controls'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/booking-timeline.test.ts: category/attempt pagination, cursor scope, legacy compatibility, validation and owner isolation']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/payment-filters-full-suite.txt','docs/architecture/adr-093-payment-history-filters.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Payment history filtering implemented; broader refund/disruption history, browser/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:SUP-C-02','FE:SUP-C-04','BE:SUP-01','BE:API-05']:
+  row['apiUseCase'] += '; owner-scoped case filtering by booking before pagination, booking-bound cursor scopes and contextual booking-to-support links with prefilled creation reference'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/booking-timeline.test.ts: filtered case pages, scope isolation, exact selections, linked creation ownership and context-preserving links']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/case-booking-filter-full-suite.txt','docs/architecture/adr-094-booking-scoped-customer-support.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Booking-scoped customer support implemented; attachments, browser/sign-in/navigation/accessibility and load acceptance remain open']))
+for row in rows:
+ if row['id'] in ['FE:SUP-C-04','BE:SUP-02','BE:API-05']:
+  row['apiUseCase'] += '; customer case state/category filters before owner-scoped pagination, filter-bound cursors and context-preserving list/conversation navigation'
+  row['acceptanceTests'] = list(dict.fromkeys(row['acceptanceTests'] + ['tests/booking-timeline.test.ts: combined customer case filters, scoped cursors, live state changes and filter form/navigation']))
+  row['evidence'] = list(dict.fromkeys(row['evidence'] + ['docs/evidence/customer-case-filters-full-suite.txt','docs/architecture/adr-095-customer-case-status-filters.md']))
+  row['dependencies'] = list(dict.fromkeys(row['dependencies'] + ['Customer case state/category filters implemented; browser/draft/navigation/accessibility, load and attachment acceptance remain open']))
 Path('docs/requirements/traceability.json').write_text(json.dumps(rows,indent=2)+'\n')
 Path('docs/requirements/traceability.md').write_text(f'''# Traceability register
 

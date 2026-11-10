@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { helpTopics, helpDestinations } from "../domain/help.ts";
+export const helpId = z
+  .string()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  .max(100);
 export const helpFilters = z
   .object({
     q: z
@@ -8,31 +12,31 @@ export const helpFilters = z
       .transform((value) => value.trim())
       .optional(),
     topic: z.enum(helpTopics).optional(),
+    after: helpId.optional(),
   })
   .strict();
 export const helpResponse = z
   .object({
-    items: z.array(
-      z
-        .object({
-          id: z.string(),
-          version: z.number().int().positive(),
-          topic: z.enum(helpTopics),
-          question: z.string(),
-          answer: z.string(),
-          href: z.string().startsWith("/"),
-          action: z.string(),
-        })
-        .strict(),
-    ),
+    items: z
+      .array(
+        z
+          .object({
+            id: z.string(),
+            version: z.number().int().positive(),
+            topic: z.enum(helpTopics),
+            question: z.string(),
+            answer: z.string(),
+            href: z.string().startsWith("/"),
+            action: z.string(),
+          })
+          .strict(),
+      )
+      .max(20),
+    nextCursor: helpId.nullable(),
   })
   .strict();
 export type HelpPage = z.infer<typeof helpResponse>;
 
-export const helpId = z
-  .string()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  .max(100);
 export const helpEdit = z
   .object({
     question: z.string().trim().min(1).max(200),

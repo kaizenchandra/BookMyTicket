@@ -1,0 +1,11 @@
+# ADR 089: Bounded public FAQ search
+
+FE:SUP-C-01, BE:CAT-10 and BE:API-05 are advanced by paginating public Help search. The previous implementation loaded all published answers into application memory; staff-created content makes that unsuitable as a growing collection.
+
+The Help application normalizes whitespace-separated search terms and passes terms, topic and cursor through its content port. The PostgreSQL adapter requires published state, applies every literal term to the combined question/answer text, applies topic and ID boundary, then fetches twenty-one rows. The application returns at most twenty articles and nextCursor. Search remains case-insensitive for supported English content; SQL wildcard characters have no special meaning. The bootstrap/test adapter implements the same bounded port behavior.
+
+GET /api/v1/help adds optional after, a validated article slug. IDs sort and compare with C collation. Clients preserve query/topic when following nextCursor. New earlier articles appear on refresh; unpublishing removes content immediately from subsequent reads. This is current-state pagination, not a frozen snapshot. Cursors can be lexical boundaries without exposing any hidden article content. Empty pages return nextCursor=null. Public queries never return staff metadata or unpublished content.
+
+The Help page stores the cursor alongside search/topic in the URL. First page clears only the cursor; Next answers preserves applied filters. Submitting the search form starts over because the form does not submit a cursor. Result counts describe the current page. Navigation is withheld during loading/errors and links are encoded with URLSearchParams. Existing support links and retry behavior remain available.
+
+API consumers must now follow nextCursor to retrieve all matches. Integration tests cover more than twenty matching records, topics, hidden content, literal percent/underscore search, mixed-case terms across question/answer, new earlier articles, unpublishing between pages, empty boundaries and malformed cursors. Rendering tests verify query-preserving links. No migration is required. Search indexing, multilingual collation, production load and browser/accessibility acceptance remain open.

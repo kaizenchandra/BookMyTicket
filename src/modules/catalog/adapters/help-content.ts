@@ -1,3 +1,4 @@
+import { searchHelp, type HelpSearch } from "../domain/help.ts";
 import type { HelpContent } from "../application/help.ts";
 import type { HelpArticle } from "../domain/help.ts";
 // Bootstrap fixture for migration 068/tests. Runtime answers are read from PostgreSQL.
@@ -64,7 +65,10 @@ const articles: readonly HelpArticle[] = [
   },
 ];
 export class PublishedHelpContent implements HelpContent {
-  published() {
-    return articles;
+  published(filters: HelpSearch = { terms: [] }) {
+    return searchHelp(articles, filters.terms.join(" "), filters.topic)
+      .filter((article) => !filters.after || article.id > filters.after)
+      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+      .slice(0, 21);
   }
 }

@@ -1,3 +1,6 @@
+import { customerCaseLink } from "./support-context.ts";
+import { PaymentHistoryPanel } from "./payment-history.tsx";
+import { BookingTimelinePanel } from "./booking-timeline.tsx";
 import { OnlineEventAccess } from "./online-access.tsx";
 import { BookingProgress } from "./booking-design.tsx";
 import type { ReservedSnapshot } from "../../src/modules/inventory/contracts/index.ts";
@@ -374,6 +377,8 @@ export function BookingDetail({ id }: { id: string }) {
                 occurrenceId={o.id}
               />
             ))}
+          <BookingTimelinePanel key={id} id={id} revision={revision} />
+          <PaymentHistoryPanel key={id} id={id} revision={revision} />
           <SavedRegistration orderId={id} />
           <TicketWallet key={id} orderId={id} revision={revision} />
           {order.amount_paise === 0 ? (
@@ -398,7 +403,7 @@ export function BookingDetail({ id }: { id: string }) {
       </button>
       <p>
         <a href="/bookings">Back to My bookings</a> ·{" "}
-        <a href="/cases">Contact support</a>
+        <a href={customerCaseLink({bookingId:id})}>Support for this booking</a>
       </p>
     </section>
   );

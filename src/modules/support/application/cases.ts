@@ -1,4 +1,10 @@
-export type CustomerCaseFilters = { caseId?: string; after?: string };
+export type CustomerCaseFilters = {
+  caseId?: string;
+  after?: string;
+  bookingId?: string;
+  state?: "open" | "in_progress" | "escalated" | "resolved";
+  category?: "booking" | "payment" | "accessibility" | "other";
+};
 export interface CasesPort {
   create(
     ownerId: string,

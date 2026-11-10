@@ -1,4 +1,4 @@
-import { helpDestinations } from "../domain/help.ts";
+import { helpDestinations, type HelpSearch } from "../domain/help.ts";
 import { createHash } from "node:crypto";
 import { pool, transaction } from "../../../shared/database.ts";
 import { AppError } from "../../../shared/errors.ts";
@@ -94,10 +94,15 @@ export class PostgresHelp implements HelpContent, HelpEditorStore {
       return { id: input.id, version: 1, replayed: false };
     });
   }
-  async published() {
+  async published(filters: HelpSearch) {
     return (
       await pool.query(
-        `SELECT ${projection} FROM catalog.help_articles WHERE published ORDER BY id`,
+        `SELECT ${projection} FROM catalog.help_articles
+       WHERE published AND ($1::text IS NULL OR topic=$1)
+       AND ($2::text IS NULL OR id COLLATE "C" > $2 COLLATE "C")
+       AND NOT EXISTS (SELECT 1 FROM unnest($3::text[]) term WHERE strpos(lower(question || ' ' || answer),term)=0)
+       ORDER BY id COLLATE "C" LIMIT 21`,
+        [filters.topic ?? null, filters.after ?? null, filters.terms],
       )
     ).rows;
   }

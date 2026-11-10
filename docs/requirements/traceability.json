@@ -4987,15 +4987,34 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping",
+    "apiUseCase": "pending mapping; owner-only booking milestone timeline with exact recorded creation/acceptance/confirmation/cancellation timestamps, current-state separation and customer refresh/retry panel; owner-authorized customer capture/recovery history through Payments public contract, random capture IDs, exact cursor pagination and separate payment-history panel; immutable newly accepted payment-attempt observations with atomic persistence, duplicate/stale suppression, safe attempt grouping and customer timeline labels; payment-history category and public-attempt filters applied before pagination, filter-bound cursors with legacy compatibility and frontend apply/clear controls",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
-    "acceptanceTests": [],
+    "acceptanceTests": [
+      "tests/booking-timeline.test.ts: timestamp ordering, state separation, both cancellation sources, missing legacy events, owner isolation, no-store and safe presentation",
+      "tests/booking-timeline.test.ts: paginated payment records, exact times, new arrivals, provider redaction, scope controls and presentation semantics",
+      "tests/booking-timeline.test.ts: actual observation writer concurrency, accepted states, immutable history, rollback, grouping, pagination and semantics",
+      "tests/booking-timeline.test.ts: category/attempt pagination, cursor scope, legacy compatibility, validation and owner isolation"
+    ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
-    "evidence": [],
-    "dependencies": [],
+    "evidence": [
+      "docs/evidence/booking-timeline-full-suite.txt",
+      "docs/architecture/adr-090-booking-milestones.md",
+      "docs/evidence/payment-history-full-suite.txt",
+      "docs/architecture/adr-091-customer-payment-records.md",
+      "docs/evidence/attempt-history-full-suite.txt",
+      "docs/architecture/adr-092-payment-attempt-observations.md",
+      "docs/evidence/payment-filters-full-suite.txt",
+      "docs/architecture/adr-093-payment-history-filters.md"
+    ],
+    "dependencies": [
+      "Booking milestone subset implemented; full payment/refund/disruption timelines, browser/accessibility and load acceptance remain open",
+      "Capture/recovery record subset implemented; full attempt/refund/disruption history, retention, browser/accessibility and load acceptance remain open",
+      "New attempt observations implemented; historical reconstruction, full refund/disruption timelines, retention, browser/accessibility and load acceptance remain open",
+      "Payment history filtering implemented; broader refund/disruption history, browser/accessibility and load acceptance remain open"
+    ],
     "decompositionStatus": "pending compound review"
   },
   {
@@ -5572,13 +5591,14 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval",
+    "apiUseCase": "pending mapping; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; bounded PostgreSQL public FAQ search with publication/topic/all-term predicates before stable ID pagination and filter-preserving frontend page links",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
     "acceptanceTests": [
       "tests/help-search.test.ts: domain search, public HTTP validation/contracts and safe contextual result rendering",
-      "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview"
+      "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview",
+      "tests/help-search.test.ts: published search pagination, hidden content, live withdrawals, literal terms and filter-preserving navigation"
     ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
@@ -5586,11 +5606,14 @@
       "docs/evidence/help-search-full-suite.txt",
       "docs/architecture/adr-084-searchable-help.md",
       "docs/evidence/help-admin-full-suite.txt",
-      "docs/architecture/adr-085-help-administration.md"
+      "docs/architecture/adr-085-help-administration.md",
+      "docs/evidence/public-help-pages-full-suite.txt",
+      "docs/architecture/adr-089-public-help-pagination.md"
     ],
     "dependencies": [
       "Public FAQ search implemented; administrative content lifecycle, localization, browser/accessibility and load acceptance remain open",
-      "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open"
+      "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open",
+      "Public FAQ pagination implemented; indexing, multilingual search, browser/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -5602,13 +5625,14 @@
     "journey": "Create a case linked to an owned booking and inspect restricted context",
     "frontendRoute": "/cases; /operations",
     "backendModule": "support; bookings",
-    "apiUseCase": "Cases.create with optional owned booking link and actor-scoped idempotency key",
+    "apiUseCase": "Cases.create with optional owned booking link and actor-scoped idempotency key; owner-scoped case filtering by booking before pagination, booking-bound cursor scopes and contextual booking-to-support links with prefilled creation reference",
     "dataOwnership": "support case reference; bookings order truth",
     "permissions": "Customer owns linked booking; staff support grant with fresh MFA at detail access",
     "transactionRules": "Owner advisory lock; fingerprinted durable outcome; atomic case/message/audit; owned booking validation; no mutation on replay",
     "acceptanceTests": [
       "tests/booking-history.test.ts: linked support context",
-      "tests/support-operations.test.ts: case creation retries"
+      "tests/support-operations.test.ts: case creation retries",
+      "tests/booking-timeline.test.ts: filtered case pages, scope isolation, exact selections, linked creation ownership and context-preserving links"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
@@ -5616,10 +5640,13 @@
       "docs/evidence/support-booking-full-suite.txt",
       "docs/evidence/case-retries-full-suite.txt",
       "docs/evidence/case-retries-container-tests.txt",
-      "docs/architecture/adr-029-case-creation-retries.md"
+      "docs/architecture/adr-029-case-creation-retries.md",
+      "docs/evidence/case-booking-filter-full-suite.txt",
+      "docs/architecture/adr-094-booking-scoped-customer-support.md"
     ],
     "dependencies": [
-      "Attachments; browser acceptance; legacy clients must adopt request keys; page-reload draft recovery"
+      "Attachments; browser acceptance; legacy clients must adopt request keys; page-reload draft recovery",
+      "Booking-scoped customer support implemented; attachments, browser/sign-in/navigation/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -5650,7 +5677,7 @@
     "journey": "Request further review of an unresolved owned support case",
     "frontendRoute": "/cases",
     "backendModule": "support; reporting",
-    "apiUseCase": "Customer/staff replies with actor/channel-scoped durable keys and audience protection; support.staff_replied outbox and customer inbox; owner-scoped exact case selection; owner-scoped customer case keyset pagination and exact conversation navigation; bounded customer-visible conversation pages with owner/case-scoped cursors",
+    "apiUseCase": "Customer/staff replies with actor/channel-scoped durable keys and audience protection; support.staff_replied outbox and customer inbox; owner-scoped exact case selection; owner-scoped customer case keyset pagination and exact conversation navigation; bounded customer-visible conversation pages with owner/case-scoped cursors; owner-scoped case filtering by booking before pagination, booking-bound cursor scopes and contextual booking-to-support links with prefilled creation reference; customer case state/category filters before owner-scoped pagination, filter-bound cursors and context-preserving list/conversation navigation",
     "dataOwnership": "support cases/messages/escalation commands; reporting audit",
     "permissions": "Authenticated case owner only",
     "transactionRules": "Actor serialization; owned/authorized case lock; fingerprinted outcome; atomic message/case/audit; replay cannot reopen later resolution",
@@ -5658,7 +5685,9 @@
       "tests/support-operations.test.ts: reply retry concurrency and privacy",
       "tests/support-operations.test.ts: Customer-visible staff replies",
       "tests/support-operations.test.ts: Customer case history traverses timestamp ties",
-      "tests/support-operations.test.ts: Customer conversations page visible messages"
+      "tests/support-operations.test.ts: Customer conversations page visible messages",
+      "tests/booking-timeline.test.ts: filtered case pages, scope isolation, exact selections, linked creation ownership and context-preserving links",
+      "tests/booking-timeline.test.ts: combined customer case filters, scoped cursors, live state changes and filter form/navigation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
@@ -5671,13 +5700,19 @@
       "docs/evidence/case-history-full-suite.txt",
       "docs/architecture/adr-035-customer-case-history.md",
       "docs/evidence/conversation-pages-full-suite.txt",
-      "docs/architecture/adr-036-customer-conversation-pages.md"
+      "docs/architecture/adr-036-customer-conversation-pages.md",
+      "docs/evidence/case-booking-filter-full-suite.txt",
+      "docs/architecture/adr-094-booking-scoped-customer-support.md",
+      "docs/evidence/customer-case-filters-full-suite.txt",
+      "docs/architecture/adr-095-customer-case-status-filters.md"
     ],
     "dependencies": [
       "Browser acceptance; durable draft recovery after remount; headerless legacy clients need keys; wider support acceptance scope",
       "Support notification browser acceptance; external reply delivery and assignment notice browser acceptance remains open",
       "Customer history browser/accessibility acceptance; staff conversation-message browser acceptance; durable draft/scroll restoration",
-      "Staff-thread browser acceptance; API clients must follow message cursors; browser acceptance and durable drafts remain open"
+      "Staff-thread browser acceptance; API clients must follow message cursors; browser acceptance and durable drafts remain open",
+      "Booking-scoped customer support implemented; attachments, browser/sign-in/navigation/accessibility and load acceptance remain open",
+      "Customer case state/category filters implemented; browser/draft/navigation/accessibility, load and attachment acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -11299,7 +11334,7 @@
     "journey": "pending mapping",
     "frontendRoute": "pending mapping",
     "backendModule": "pending mapping",
-    "apiUseCase": "pending mapping; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation",
+    "apiUseCase": "pending mapping; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation; bounded PostgreSQL public FAQ search with publication/topic/all-term predicates before stable ID pagination and filter-preserving frontend page links",
     "dataOwnership": "pending mapping",
     "permissions": "pending mapping",
     "transactionRules": "pending mapping",
@@ -11308,7 +11343,8 @@
       "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview",
       "tests/help-admin.test.ts: paginated real revisions, attribution, access rechecks, audit failure and safe explicit-load history rendering",
       "tests/help-admin.test.ts: FAQ creation permission, concurrent retries, collision, publication, immutable receipts, rollback and draft form",
-      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors"
+      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors",
+      "tests/help-search.test.ts: published search pagination, hidden content, live withdrawals, literal terms and filter-preserving navigation"
     ],
     "implementationStatus": "not_started",
     "verificationStatus": "not_verified",
@@ -11322,14 +11358,17 @@
       "docs/evidence/help-creation-full-suite.txt",
       "docs/architecture/adr-087-help-draft-creation.md",
       "docs/evidence/help-list-full-suite.txt",
-      "docs/architecture/adr-088-help-administration-pagination.md"
+      "docs/architecture/adr-088-help-administration-pagination.md",
+      "docs/evidence/public-help-pages-full-suite.txt",
+      "docs/architecture/adr-089-public-help-pagination.md"
     ],
     "dependencies": [
       "Public FAQ search implemented; administrative content lifecycle, localization, browser/accessibility and load acceptance remain open",
       "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open",
       "FAQ history inspection implemented; article creation, comparison/restore, approved retention, browser/accessibility and load acceptance remain open",
       "FAQ creation implemented; deletion, destination editing, approval, creation-history UI, retention, pagination/load and browser/accessibility acceptance remain open",
-      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open"
+      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open",
+      "Public FAQ pagination implemented; indexing, multilingual search, browser/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -14479,23 +14518,39 @@
     "journey": "Search owned booking history and open saved booking details",
     "frontendRoute": "/bookings",
     "backendModule": "bookings; inventory; catalog",
-    "apiUseCase": "BookingHistory.search; Catalog.bookingTitle at quote snapshot creation",
+    "apiUseCase": "BookingHistory.search; Catalog.bookingTitle at quote snapshot creation; owner-only booking milestone timeline with exact recorded creation/acceptance/confirmation/cancellation timestamps, current-state separation and customer refresh/retry panel; owner-authorized customer capture/recovery history through Payments public contract, random capture IDs, exact cursor pagination and separate payment-history panel; immutable newly accepted payment-attempt observations with atomic persistence, duplicate/stale suppression, safe attempt grouping and customer timeline labels; payment-history category and public-attempt filters applied before pagination, filter-bound cursors with legacy compatibility and frontend apply/clear controls",
     "dataOwnership": "bookings immutable order snapshots; catalog published title source",
     "permissions": "Authenticated owner on every request; cursor bound to account and filters",
     "transactionRules": "Owner-scoped read; exact microsecond timestamp/UUID keyset; immutable title accepted from locked published catalog; no historical backfill",
     "acceptanceTests": [
       "tests/booking-history.test.ts",
-      "tests/cinema-sports.test.ts: saved title after rename"
+      "tests/cinema-sports.test.ts: saved title after rename",
+      "tests/booking-timeline.test.ts: timestamp ordering, state separation, both cancellation sources, missing legacy events, owner isolation, no-store and safe presentation",
+      "tests/booking-timeline.test.ts: paginated payment records, exact times, new arrivals, provider redaction, scope controls and presentation semantics",
+      "tests/booking-timeline.test.ts: actual observation writer concurrency, accepted states, immutable history, rollback, grouping, pagination and semantics",
+      "tests/booking-timeline.test.ts: category/attempt pagination, cursor scope, legacy compatibility, validation and owner isolation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
     "evidence": [
       "docs/evidence/booking-history-full-suite.txt",
       "docs/evidence/booking-history-container-tests.txt",
-      "docs/architecture/adr-025-booking-history.md"
+      "docs/architecture/adr-025-booking-history.md",
+      "docs/evidence/booking-timeline-full-suite.txt",
+      "docs/architecture/adr-090-booking-milestones.md",
+      "docs/evidence/payment-history-full-suite.txt",
+      "docs/architecture/adr-091-customer-payment-records.md",
+      "docs/evidence/attempt-history-full-suite.txt",
+      "docs/architecture/adr-092-payment-attempt-observations.md",
+      "docs/evidence/payment-filters-full-suite.txt",
+      "docs/architecture/adr-093-payment-history-filters.md"
     ],
     "dependencies": [
-      "Browser/accessibility acceptance; partial cancellation and complete independent payment/refund/disruption timelines; historical titles absent for prior bookings"
+      "Browser/accessibility acceptance; partial cancellation and complete independent payment/refund/disruption timelines; historical titles absent for prior bookings",
+      "Booking milestone subset implemented; full payment/refund/disruption timelines, browser/accessibility and load acceptance remain open",
+      "Capture/recovery record subset implemented; full attempt/refund/disruption history, retention, browser/accessibility and load acceptance remain open",
+      "New attempt observations implemented; historical reconstruction, full refund/disruption timelines, retention, browser/accessibility and load acceptance remain open",
+      "Payment history filtering implemented; broader refund/disruption history, browser/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -17543,22 +17598,26 @@
     "journey": "Create a case linked to an owned booking and inspect restricted context",
     "frontendRoute": "/cases; /operations",
     "backendModule": "support; bookings",
-    "apiUseCase": "Cases.create; SupportOperations.detail; SupportBookingReader.readOwned",
+    "apiUseCase": "Cases.create; SupportOperations.detail; SupportBookingReader.readOwned; owner-scoped case filtering by booking before pagination, booking-bound cursor scopes and contextual booking-to-support links with prefilled creation reference",
     "dataOwnership": "support case reference; bookings order truth",
     "permissions": "Customer owns linked booking; staff support grant with fresh MFA at detail access",
     "transactionRules": "Owned booking shared lock within case creation; failure rolls back case/message; restricted current summary through public contract",
     "acceptanceTests": [
-      "tests/booking-history.test.ts: linked support context"
+      "tests/booking-history.test.ts: linked support context",
+      "tests/booking-timeline.test.ts: filtered case pages, scope isolation, exact selections, linked creation ownership and context-preserving links"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
     "evidence": [
       "docs/evidence/support-booking-full-suite.txt",
       "docs/evidence/support-booking-container-tests.txt",
-      "docs/architecture/adr-028-support-booking-context.md"
+      "docs/architecture/adr-028-support-booking-context.md",
+      "docs/evidence/case-booking-filter-full-suite.txt",
+      "docs/architecture/adr-094-booking-scoped-customer-support.md"
     ],
     "dependencies": [
-      "Browser/accessibility acceptance; attachments; payment/refund/settlement links; complete timelines; durable case-creation idempotency"
+      "Browser/accessibility acceptance; attachments; payment/refund/settlement links; complete timelines; durable case-creation idempotency",
+      "Booking-scoped customer support implemented; attachments, browser/sign-in/navigation/accessibility and load acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -17570,7 +17629,7 @@
     "journey": "Assign or reassign an unresolved support case to an eligible agent",
     "frontendRoute": "/operations",
     "backendModule": "support; identity; reporting",
-    "apiUseCase": "SupportAssignment.assign; SupportDirectory.search for controlled agent selection; SupportOperations.change with durable actor-scoped action retries; atomic support.case_assigned outbox and recipient inbox with protected case link; atomic identity.support_directory.read access audit with bounded identifiers and no contact/search content",
+    "apiUseCase": "SupportAssignment.assign; SupportDirectory.search for controlled agent selection; SupportOperations.change with durable actor-scoped action retries; atomic support.case_assigned outbox and recipient inbox with protected case link; atomic identity.support_directory.read access audit with bounded identifiers and no contact/search content; customer case state/category filters before owner-scoped pagination, filter-bound cursors and context-preserving list/conversation navigation",
     "dataOwnership": "support case and assignment commands; identity account/grants",
     "permissions": "Active support and support_assign operator grants; recent MFA; active support target",
     "transactionRules": "Actor retry serialization; case row lock; identity/grant shared locks; version check; request fingerprint; atomic assignment/outcome/audit",
@@ -17579,7 +17638,8 @@
       "tests/support-assignment.test.ts: Support directory restricts disclosure",
       "tests/support-operations.test.ts: Keyed workflow actions",
       "tests/support-assignment.test.ts: Supervisor assignment notices",
-      "tests/support-assignment.test.ts: Directory access audit"
+      "tests/support-assignment.test.ts: Directory access audit",
+      "tests/booking-timeline.test.ts: combined customer case filters, scoped cursors, live state changes and filter form/navigation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
@@ -17594,13 +17654,16 @@
       "docs/evidence/assignment-notices-full-suite.txt",
       "docs/architecture/adr-038-assignment-notifications.md",
       "docs/evidence/directory-audit-full-suite.txt",
-      "docs/architecture/adr-040-support-directory-audit.md"
+      "docs/architecture/adr-040-support-directory-audit.md",
+      "docs/evidence/customer-case-filters-full-suite.txt",
+      "docs/architecture/adr-095-customer-case-status-filters.md"
     ],
     "dependencies": [
       "Browser/accessibility acceptance; assignment notification browser acceptance; broader support lifecycle and directory-read audit browser acceptance",
       "Legacy action callers must adopt keys; view-remount recovery and approved command retention remain outstanding",
       "Assignment notice browser acceptance; external delivery and self-claim/reminder policy remain open",
-      "Approved audit retention; denied-access logging; controlled detail export and browser acceptance"
+      "Approved audit retention; denied-access logging; controlled detail export and browser acceptance",
+      "Customer case state/category filters implemented; browser/draft/navigation/accessibility, load and attachment acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },
@@ -18313,7 +18376,7 @@
     "journey": "Filter case queues and navigate older cases",
     "frontendRoute": "/operations",
     "backendModule": "support",
-    "apiUseCase": "SupportOperations.queue; owner-scoped customer case keyset pagination and exact conversation navigation; bounded customer-visible conversation pages with owner/case-scoped cursors; audited bounded staff detail message pages with actor/case-scoped cursors; exact PostgreSQL microsecond boundaries for owner-scoped notification UUID cursors; GET /admin/providers stable creation-time/UUID pagination and kind filters with URL-based admin navigation; GET /admin/listings paginated review queue with listing-type filters, dedicated /admin/listings UI and inline versioned review decisions; owner invitation history with exact timestamp/UUID cursor pagination, current MFA/ownership checks and First/Previous/Next frontend controls; authenticated-contact recipient invitation pages with exact cursors, pending/unexpired filtering and frontend First/Previous/Next navigation; independent staff member UUID cursor pagination with bounded lists, current owner/MFA checks and separate frontend member/invitation navigation; owner invitation effective-status filters before pagination with authoritative expiry classification and frontend status selection preserving member position; owner member-role filters applied before pagination with independent invitation filtering and frontend member-role selection; domain-defined notification categories combined with unread cursor pagination and frontend category selection preserving owner isolation; all/unread/read notification status views combined with category pagination and backward-compatible legacy unread filtering; inclusive India event-date ranges combined with category/read-state pagination and frontend apply/clear controls; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation",
+    "apiUseCase": "SupportOperations.queue; owner-scoped customer case keyset pagination and exact conversation navigation; bounded customer-visible conversation pages with owner/case-scoped cursors; audited bounded staff detail message pages with actor/case-scoped cursors; exact PostgreSQL microsecond boundaries for owner-scoped notification UUID cursors; GET /admin/providers stable creation-time/UUID pagination and kind filters with URL-based admin navigation; GET /admin/listings paginated review queue with listing-type filters, dedicated /admin/listings UI and inline versioned review decisions; owner invitation history with exact timestamp/UUID cursor pagination, current MFA/ownership checks and First/Previous/Next frontend controls; authenticated-contact recipient invitation pages with exact cursors, pending/unexpired filtering and frontend First/Previous/Next navigation; independent staff member UUID cursor pagination with bounded lists, current owner/MFA checks and separate frontend member/invitation navigation; owner invitation effective-status filters before pagination with authoritative expiry classification and frontend status selection preserving member position; owner member-role filters applied before pagination with independent invitation filtering and frontend member-role selection; domain-defined notification categories combined with unread cursor pagination and frontend category selection preserving owner isolation; all/unread/read notification status views combined with category pagination and backward-compatible legacy unread filtering; inclusive India event-date ranges combined with category/read-state pagination and frontend apply/clear controls; favorites account/resource request invalidation, scoped sign-in save intent, explicit list retry and strict retrieval/state contracts; public published FAQ search with strict keyword/topic filters, versioned code-managed articles, searchable Help UI and contextual booking/payment links; moderation-authorized versioned FAQ editor with preview, publication state, immutable retry receipts, transactional audit and PostgreSQL public retrieval; audited moderation-only FAQ revision history with prior-content projection, version pagination and draft-preserving explicit-load frontend panel; unpublished FAQ draft creation with controlled internal destinations, actor/fingerprint-bound durable receipts, atomic audit and retained frontend retry requests; bounded FAQ administration pages with stable ID cursors, literal ID/question search, publication filters and draft-preserving frontend list navigation; bounded PostgreSQL public FAQ search with publication/topic/all-term predicates before stable ID pagination and filter-preserving frontend page links; owner-only booking milestone timeline with exact recorded creation/acceptance/confirmation/cancellation timestamps, current-state separation and customer refresh/retry panel; owner-authorized customer capture/recovery history through Payments public contract, random capture IDs, exact cursor pagination and separate payment-history panel; immutable newly accepted payment-attempt observations with atomic persistence, duplicate/stale suppression, safe attempt grouping and customer timeline labels; payment-history category and public-attempt filters applied before pagination, filter-bound cursors with legacy compatibility and frontend apply/clear controls; owner-scoped case filtering by booking before pagination, booking-bound cursor scopes and contextual booking-to-support links with prefilled creation reference; customer case state/category filters before owner-scoped pagination, filter-bound cursors and context-preserving list/conversation navigation",
     "dataOwnership": "support.cases",
     "permissions": "Current platform support permission and fresh MFA for every page",
     "transactionRules": "Read-only parameterized query; exact microsecond timestamp/UUID keyset; actor/filter-scoped cursor; live filter membership",
@@ -18339,7 +18402,14 @@
       "tests/help-admin.test.ts: authorization, concurrency, publication, retry safety, immutable receipts, audit rollback and editor preview",
       "tests/help-admin.test.ts: paginated real revisions, attribution, access rechecks, audit failure and safe explicit-load history rendering",
       "tests/help-admin.test.ts: FAQ creation permission, concurrent retries, collision, publication, immutable receipts, rollback and draft form",
-      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors"
+      "tests/help-admin.test.ts: FAQ administration filters before bounded pagination with stable ID cursors",
+      "tests/help-search.test.ts: published search pagination, hidden content, live withdrawals, literal terms and filter-preserving navigation",
+      "tests/booking-timeline.test.ts: timestamp ordering, state separation, both cancellation sources, missing legacy events, owner isolation, no-store and safe presentation",
+      "tests/booking-timeline.test.ts: paginated payment records, exact times, new arrivals, provider redaction, scope controls and presentation semantics",
+      "tests/booking-timeline.test.ts: actual observation writer concurrency, accepted states, immutable history, rollback, grouping, pagination and semantics",
+      "tests/booking-timeline.test.ts: category/attempt pagination, cursor scope, legacy compatibility, validation and owner isolation",
+      "tests/booking-timeline.test.ts: filtered case pages, scope isolation, exact selections, linked creation ownership and context-preserving links",
+      "tests/booking-timeline.test.ts: combined customer case filters, scoped cursors, live state changes and filter form/navigation"
     ],
     "implementationStatus": "partial",
     "verificationStatus": "postgres_http_verified_not_browser",
@@ -18386,7 +18456,21 @@
       "docs/evidence/help-creation-full-suite.txt",
       "docs/architecture/adr-087-help-draft-creation.md",
       "docs/evidence/help-list-full-suite.txt",
-      "docs/architecture/adr-088-help-administration-pagination.md"
+      "docs/architecture/adr-088-help-administration-pagination.md",
+      "docs/evidence/public-help-pages-full-suite.txt",
+      "docs/architecture/adr-089-public-help-pagination.md",
+      "docs/evidence/booking-timeline-full-suite.txt",
+      "docs/architecture/adr-090-booking-milestones.md",
+      "docs/evidence/payment-history-full-suite.txt",
+      "docs/architecture/adr-091-customer-payment-records.md",
+      "docs/evidence/attempt-history-full-suite.txt",
+      "docs/architecture/adr-092-payment-attempt-observations.md",
+      "docs/evidence/payment-filters-full-suite.txt",
+      "docs/architecture/adr-093-payment-history-filters.md",
+      "docs/evidence/case-booking-filter-full-suite.txt",
+      "docs/architecture/adr-094-booking-scoped-customer-support.md",
+      "docs/evidence/customer-case-filters-full-suite.txt",
+      "docs/architecture/adr-095-customer-case-status-filters.md"
     ],
     "dependencies": [
       "Browser/accessibility acceptance; browser history restoration; broader API pagination coverage",
@@ -18409,7 +18493,14 @@
       "Existing FAQ editing/publication implemented; article creation, history UI, approval workflow, retention, browser/accessibility and load acceptance remain open",
       "FAQ history inspection implemented; article creation, comparison/restore, approved retention, browser/accessibility and load acceptance remain open",
       "FAQ creation implemented; deletion, destination editing, approval, creation-history UI, retention, pagination/load and browser/accessibility acceptance remain open",
-      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open"
+      "FAQ administration filtering/pagination implemented; public-search pagination, indexing, browser/accessibility and load acceptance remain open",
+      "Public FAQ pagination implemented; indexing, multilingual search, browser/accessibility and load acceptance remain open",
+      "Booking milestone subset implemented; full payment/refund/disruption timelines, browser/accessibility and load acceptance remain open",
+      "Capture/recovery record subset implemented; full attempt/refund/disruption history, retention, browser/accessibility and load acceptance remain open",
+      "New attempt observations implemented; historical reconstruction, full refund/disruption timelines, retention, browser/accessibility and load acceptance remain open",
+      "Payment history filtering implemented; broader refund/disruption history, browser/accessibility and load acceptance remain open",
+      "Booking-scoped customer support implemented; attachments, browser/sign-in/navigation/accessibility and load acceptance remain open",
+      "Customer case state/category filters implemented; browser/draft/navigation/accessibility, load and attachment acceptance remain open"
     ],
     "decompositionStatus": "pending compound review"
   },

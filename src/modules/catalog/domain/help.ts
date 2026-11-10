@@ -14,12 +14,20 @@ export type HelpArticle = {
   href: string;
   action: string;
 };
+export type HelpSearch = {
+  terms: readonly string[];
+  topic?: HelpTopic;
+  after?: string;
+};
+export function helpSearchTerms(q = "") {
+  return q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
 export function searchHelp(
   articles: readonly HelpArticle[],
   q = "",
   topic?: HelpTopic,
 ) {
-  const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = helpSearchTerms(q);
   return articles.filter((article) => {
     const text = `${article.question} ${article.answer}`.toLowerCase();
     return (

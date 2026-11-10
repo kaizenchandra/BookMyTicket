@@ -1,3 +1,5 @@
+import { CustomerCaseFiltersForm } from "./features/customer-case-filters.tsx";
+import { customerCaseLink } from "./features/support-context.ts";
 import { HelpAdministration } from "./features/help-editor.tsx";
 import { HelpCenter } from "./features/help.tsx";
 import { OrganizationCreationForm } from "./features/organization-creation.tsx";
@@ -1529,10 +1531,16 @@ function Cases() {
   const creation = React.useRef({ payload: "", key: "" });
   const params = new URLSearchParams(window.location.search);
   const caseId = params.get("caseId"),
-    after = params.get("after");
+    after = params.get("after"),
+    linkedBooking = params.get("bookingId"),
+    listState = params.get("state"),
+    listCategory = params.get("category");
   const query = new URLSearchParams();
   if (caseId !== null) query.set("caseId", caseId);
   if (after !== null) query.set("after", after);
+  if (linkedBooking !== null) query.set("bookingId",linkedBooking);
+  if (!caseId && listState) query.set("state",listState);
+  if (!caseId && listCategory) query.set("category",listCategory);
   const { data, error, loading, retry } = useLoad<{
     items: any[];
     nextCursor: string | null;
@@ -1540,12 +1548,12 @@ function Cases() {
   const [subject, setSubject] = useState(""),
     [body, setBody] = useState(""),
     [category, setCategory] = useState("booking"),
-    [bookingId, setBookingId] = useState(""),
+    [bookingId, setBookingId] = useState(linkedBooking ?? ""),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
-  function leaveDraft(event: React.MouseEvent<HTMLAnchorElement>) {
+  function leaveDraft(event: React.SyntheticEvent) {
     if (
-      (subject || body || bookingId) &&
+      (subject || body || (bookingId && bookingId !== (linkedBooking ?? ""))) &&
       !window.confirm("Discard your unsent new case draft?")
     )
       event.preventDefault();
@@ -1553,9 +1561,11 @@ function Cases() {
   return (
     <section className="reading">
       <h1>{caseId ? "Your support case" : "Your support cases"}</h1>
+      {linkedBooking && <p>Cases filtered by booking reference: {linkedBooking}. <a href={customerCaseLink({state:listState,category:listCategory})} onClick={leaveDraft}>Clear booking filter</a></p>}
+      {!caseId && <CustomerCaseFiltersForm bookingId={linkedBooking} state={listState} category={listCategory} onNavigate={leaveDraft} />}
       {caseId && (
         <p>
-          <a href="/cases">View all your cases</a>
+          <a href={customerCaseLink({bookingId:linkedBooking,state:listState,category:listCategory})}>{linkedBooking ? "View cases for this booking" : "View all your cases"}</a>
         </p>
       )}
       {caseId && !loading && !error && data?.items.length === 0 && (
@@ -1569,13 +1579,13 @@ function Cases() {
       )}
       {after && (
         <p>
-          <a href="/cases" onClick={leaveDraft}>
+          <a href={customerCaseLink({bookingId:linkedBooking,state:listState,category:listCategory})} onClick={leaveDraft}>
             Newest cases
           </a>
         </p>
       )}
       {!caseId && !loading && !error && data?.items.length === 0 && (
-        <p>No cases on this page.</p>
+        <p>No cases match these filters on this page.</p>
       )}
       <p>Do not include OTPs, card details, or payment secrets.</p>
       <p>
@@ -1610,7 +1620,7 @@ function Cases() {
               creation.current = { payload: "", key: "" };
               setSubject("");
               setBody("");
-              setBookingId("");
+              setBookingId(linkedBooking ?? "");
               retry();
             } catch (e) {
               setMessage((e as Error).message);
@@ -1623,6 +1633,7 @@ function Cases() {
             <label htmlFor="case-booking">Booking reference (optional)</label>
             <input
               id="case-booking"
+              maxLength={36}
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
               placeholder="Full booking UUID from My bookings"
@@ -1686,7 +1697,7 @@ function Cases() {
                 <CaseMessages key={c.version} id={c.id} onReplied={retry} />
               </>
             ) : (
-              <a href={`/cases?caseId=${c.id}`} onClick={leaveDraft}>
+              <a href={customerCaseLink({bookingId:linkedBooking,caseId:c.id,state:listState,category:listCategory})} onClick={leaveDraft}>
                 View conversation
               </a>
             )}
@@ -1695,7 +1706,7 @@ function Cases() {
       {!caseId && !loading && !error && data?.nextCursor && (
         <nav aria-label="Case history pages">
           <a
-            href={`/cases?after=${encodeURIComponent(data.nextCursor)}`}
+            href={customerCaseLink({bookingId:linkedBooking,after:data.nextCursor,state:listState,category:listCategory})}
             onClick={leaveDraft}
           >
             Older cases

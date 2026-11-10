@@ -70,7 +70,20 @@ export class PostgresCases implements CasesPort {
   async list(ownerId: string, filters: CustomerCaseFilters = {}) {
     const scope = createHash("sha256")
       .update(
-        JSON.stringify(["customer-cases", ownerId, filters.caseId ?? null]),
+        JSON.stringify([
+          "customer-cases",
+          ownerId,
+          filters.caseId ?? null,
+          ...(filters.bookingId ? [filters.bookingId] : []),
+          ...(filters.state || filters.category
+            ? [
+                {
+                  state: filters.state ?? null,
+                  category: filters.category ?? null,
+                },
+              ]
+            : []),
+        ]),
       )
       .digest("hex");
     let cursor: { id: string; time: string; scope: string } | undefined;
@@ -100,12 +113,18 @@ export class PostgresCases implements CasesPort {
        to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS page_time
        FROM support.cases WHERE owner_id=$1 AND ($2::uuid IS NULL OR id=$2)
        AND ($3::timestamptz IS NULL OR (created_at,id)<($3::timestamptz,$4::uuid))
+       AND ($5::uuid IS NULL OR booking_id=$5)
+       AND ($6::text IS NULL OR state=$6)
+       AND ($7::text IS NULL OR category=$7)
        ORDER BY created_at DESC,id DESC LIMIT 101`,
       [
         ownerId,
         filters.caseId ?? null,
         cursor?.time ?? null,
         cursor?.id ?? null,
+        filters.bookingId ?? null,
+        filters.state ?? null,
+        filters.category ?? null,
       ],
     );
     const items = rows.slice(0, 100),

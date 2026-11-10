@@ -1,3 +1,8 @@
+import { BookingPaymentHistory } from "./modules/bookings/application/payment-history.ts";
+import { PostgresPaymentHistory } from "./modules/payments/adapters/history.ts";
+import { paymentHistoryFilters } from "./modules/bookings/adapters/payment-history-schema.ts";
+import { BookingTimeline } from "./modules/bookings/application/timeline.ts";
+import { PostgresBookingTimeline } from "./modules/bookings/adapters/timeline.ts";
 import { Help, HelpEditor } from "./modules/catalog/application/help.ts";
 import { PostgresHelp } from "./modules/catalog/adapters/help-postgres.ts";
 import { helpFilters, helpId, helpEdit, helpHistoryFilters, helpCreation, helpAdminFilters } from "./modules/catalog/adapters/help-schema.ts";
@@ -353,7 +358,7 @@ export async function buildApp() {
   });
   app.get("/api/v1/help", async (req) => {
     const filters = helpFilters.parse(req.query);
-    return help.search(filters.q, filters.topic);
+    return help.search(filters.q, filters.topic, filters.after);
   });
   app.get("/api/v1/catalog", async (req) =>
     discovery.search(catalogFilters.parse(req.query)),
@@ -1267,6 +1272,18 @@ export async function buildApp() {
       historyFilters.parse(req.query),
     ),
   );
+  const paymentHistory = new BookingPaymentHistory(bookings, new PostgresPaymentHistory());
+  app.get("/api/v1/bookings/:id/payment-history", async(req)=>{
+    const actor=await identity.authenticate(req.cookies.session);
+    const filters=paymentHistoryFilters.parse(req.query);
+    return paymentHistory.get(actor.id,uuid.parse((req.params as {id:string}).id),filters.after,{category:filters.category,attemptId:filters.attemptId});
+  });
+  const bookingTimeline = new BookingTimeline(new PostgresBookingTimeline());
+  app.get("/api/v1/bookings/:id/timeline", async (req) => {
+    const actor=await identity.authenticate(req.cookies.session);
+    z.object({}).strict().parse(req.query);
+    return bookingTimeline.get(actor.id, uuid.parse((req.params as {id:string}).id));
+  });
   app.get("/api/v1/bookings/:id", async (req) =>
     bookings.get(
       (await identity.authenticate(req.cookies.session)).id,

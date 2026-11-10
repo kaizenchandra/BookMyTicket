@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-09T18:26:37.277Z",
+  "checkedAt": "2026-11-10T04:15:21.163Z",
   "baseUrl": "http://127.0.0.1:3101",
   "verificationLevel": "HTTP only; no browser rendering or authenticated live workflows",
   "checks": [
@@ -120,7 +120,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-o"
+        "requestId": "req-p"
       }
     },
     {
@@ -142,7 +142,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-r"
+        "requestId": "req-s"
       }
     },
     {
@@ -152,7 +152,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-s"
+        "requestId": "req-t"
       }
     },
     {
@@ -168,7 +168,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-u"
+        "requestId": "req-v"
       }
     },
     {
@@ -178,7 +178,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-v"
+        "requestId": "req-w"
       }
     },
     {
@@ -188,7 +188,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-w"
+        "requestId": "req-x"
       }
     },
     {
@@ -198,7 +198,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-x"
+        "requestId": "req-y"
       }
     },
     {
@@ -220,7 +220,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-10"
+        "requestId": "req-11"
       }
     },
     {
@@ -230,7 +230,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-11"
+        "requestId": "req-12"
       }
     },
     {
@@ -240,7 +240,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-12"
+        "requestId": "req-13"
       }
     },
     {
@@ -250,7 +250,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-13"
+        "requestId": "req-14"
       }
     },
     {
@@ -260,7 +260,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-14"
+        "requestId": "req-15"
       }
     },
     {
@@ -270,7 +270,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-15"
+        "requestId": "req-16"
       }
     },
     {
@@ -280,7 +280,7 @@
       "body": {
         "code": "NOT_FOUND",
         "message": "This listing is not available.",
-        "requestId": "req-16"
+        "requestId": "req-17"
       }
     },
     {
@@ -290,7 +290,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-17"
+        "requestId": "req-18"
       }
     },
     {
@@ -300,7 +300,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-18"
+        "requestId": "req-19"
       }
     },
     {
@@ -310,7 +310,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-19"
+        "requestId": "req-1a"
       }
     },
     {
@@ -320,7 +320,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1a"
+        "requestId": "req-1b"
       }
     },
     {
@@ -330,7 +330,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1b"
+        "requestId": "req-1c"
       }
     },
     {
@@ -340,7 +340,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1c"
+        "requestId": "req-1d"
       }
     },
     {
@@ -350,7 +350,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1d"
+        "requestId": "req-1e"
       }
     },
     {
@@ -360,7 +360,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1e"
+        "requestId": "req-1f"
       }
     },
     {
@@ -660,7 +660,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-09T18:26:37.062Z"
+        "serverTime": "2026-11-10T04:15:21.123Z"
       }
     },
     {
@@ -735,7 +735,7 @@
           ]
         },
         "nextCursor": null,
-        "serverTime": "2026-11-09T18:26:37.065Z"
+        "serverTime": "2026-11-10T04:15:21.125Z"
       }
     },
     {
@@ -744,7 +744,7 @@
       "contentType": "application/json; charset=utf-8",
       "body": {
         "groups": [],
-        "serverTime": "2026-11-09T18:26:37.067Z"
+        "serverTime": "2026-11-10T04:15:21.126Z"
       }
     },
     {
@@ -774,7 +774,27 @@
             "href": "/bookings",
             "action": "Check booking and payment status"
           }
-        ]
+        ],
+        "nextCursor": null
+      }
+    },
+    {
+      "path": "/api/v1/help?topic=booking&after=find-booking",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "items": [
+          {
+            "id": "reservation-expiry",
+            "version": 1,
+            "topic": "booking",
+            "question": "Does refreshing extend my seat reservation?",
+            "answer": "Seats are held only after the server confirms a reservation. The countdown uses server time. Refreshing does not extend the hold. If it expires, check availability and select seats again; availability is not guaranteed.",
+            "href": "/explore",
+            "action": "Browse available listings"
+          }
+        ],
+        "nextCursor": null
       }
     },
     {
@@ -796,7 +816,27 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1o"
+        "requestId": "req-1q"
+      }
+    },
+    {
+      "path": "/api/v1/cases?state=open&category=payment",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1r"
+      }
+    },
+    {
+      "path": "/api/v1/cases?bookingId=00000000-0000-4000-8000-000000000001",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-1s"
       }
     },
     {
@@ -806,7 +846,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1p"
+        "requestId": "req-1t"
       }
     },
     {
@@ -816,7 +856,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1q"
+        "requestId": "req-1u"
       }
     },
     {
@@ -844,7 +884,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1s"
+        "requestId": "req-1w"
       }
     },
     {
@@ -854,7 +894,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1t"
+        "requestId": "req-1x"
       }
     },
     {
@@ -864,7 +904,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1u"
+        "requestId": "req-1y"
       }
     },
     {
@@ -874,7 +914,37 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1v"
+        "requestId": "req-1z"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/timeline",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-20"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/payment-history",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-21"
+      }
+    },
+    {
+      "path": "/api/v1/bookings/00000000-0000-4000-8000-000000000001/payment-history?category=attempts",
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "code": "AUTH_REQUIRED",
+        "message": "Sign in to continue.",
+        "requestId": "req-22"
       }
     },
     {
@@ -896,7 +966,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-1y"
+        "requestId": "req-25"
       }
     },
     {
@@ -912,7 +982,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-20"
+        "requestId": "req-27"
       }
     },
     {
@@ -922,7 +992,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-21"
+        "requestId": "req-28"
       }
     },
     {
@@ -938,7 +1008,7 @@
       "body": {
         "code": "NOT_FOUND",
         "message": "Venue is not publicly available.",
-        "requestId": "req-23"
+        "requestId": "req-2a"
       }
     },
     {
@@ -948,7 +1018,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-24"
+        "requestId": "req-2b"
       }
     },
     {
@@ -958,7 +1028,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-25"
+        "requestId": "req-2c"
       }
     },
     {
@@ -980,7 +1050,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-28"
+        "requestId": "req-2f"
       }
     },
     {
@@ -990,7 +1060,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-29"
+        "requestId": "req-2g"
       }
     },
     {
@@ -1000,7 +1070,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2a"
+        "requestId": "req-2h"
       }
     },
     {
@@ -1028,7 +1098,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2e"
+        "requestId": "req-2l"
       }
     },
     {
@@ -1038,7 +1108,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2f"
+        "requestId": "req-2m"
       }
     },
     {
@@ -1048,7 +1118,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2g"
+        "requestId": "req-2n"
       }
     },
     {
@@ -1058,7 +1128,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2h"
+        "requestId": "req-2o"
       }
     },
     {
@@ -1068,7 +1138,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2i"
+        "requestId": "req-2p"
       }
     },
     {
@@ -1078,7 +1148,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2j"
+        "requestId": "req-2q"
       }
     },
     {
@@ -1088,7 +1158,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2k"
+        "requestId": "req-2r"
       }
     },
     {
@@ -1110,7 +1180,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2n"
+        "requestId": "req-2u"
       }
     },
     {
@@ -1120,7 +1190,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2o"
+        "requestId": "req-2v"
       }
     },
     {
@@ -1130,7 +1200,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2p"
+        "requestId": "req-2w"
       }
     },
     {
@@ -1140,7 +1210,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2q"
+        "requestId": "req-2x"
       }
     },
     {
@@ -1150,7 +1220,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2r"
+        "requestId": "req-2y"
       }
     },
     {
@@ -1172,7 +1242,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2u"
+        "requestId": "req-31"
       }
     },
     {
@@ -1182,7 +1252,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2v"
+        "requestId": "req-32"
       }
     },
     {
@@ -1192,7 +1262,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2w"
+        "requestId": "req-33"
       }
     },
     {
@@ -1202,7 +1272,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2x"
+        "requestId": "req-34"
       }
     },
     {
@@ -1212,7 +1282,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2y"
+        "requestId": "req-35"
       }
     },
     {
@@ -1222,7 +1292,7 @@
       "body": {
         "code": "AUTH_REQUIRED",
         "message": "Sign in to continue.",
-        "requestId": "req-2z"
+        "requestId": "req-36"
       }
     },
     {

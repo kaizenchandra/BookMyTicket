@@ -218,3 +218,24 @@ Implemented protected unpublished draft creation, internal destinations, unique 
 
 ### FAQ list progress (0.85.0)
 Implemented bounded administration pages, ID/question search, publication filters and frontend list navigation that preserves active drafts. Public-search pagination, indexing/load, browser/accessibility acceptance and broader phases remain open. See progress.md and runbooks/help-administration-list.md.
+
+### Public Help pagination progress (0.86.0)
+Implemented bounded database-side public FAQ search, stable ID cursors and filter-preserving frontend navigation. Indexing, multilingual search, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/public-help-pagination.md.
+
+### Booking milestone progress (0.87.0)
+Implemented an owner-scoped timeline for recorded booking creation, policy acceptance, confirmation and supported cancellations, with a customer refresh/retry panel. Full payment/refund/disruption history, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/booking-timeline.md.
+
+### Customer payment history progress (0.88.0)
+Implemented owner-only capture/recovery records through the Payments public contract, stable public IDs, cursor pagination and customer history UI. Full attempt/refund/disruption timelines, retention, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/payment-history.md.
+
+### Payment-attempt observation progress (0.89.0)
+Implemented immutable newly accepted attempt observations, atomic recording, safe attempt references and customer history presentation. Historical reconstruction, full refund/disruption history, retention, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/payment-attempt-history.md.
+
+### Payment history filter progress (0.90.0)
+Implemented category/attempt filters before pagination, filter-bound cursors, legacy compatibility and frontend Apply/Clear controls. Full refund/disruption history, browser/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/payment-history-filters.md.
+
+### Booking-scoped support progress (0.91.0)
+Implemented owner-scoped booking filters for cases, scoped pagination and booking-to-support navigation with prefilled references. Attachments, browser/sign-in/navigation/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/booking-support-context.md.
+
+### Customer case filter progress (0.92.0)
+Implemented status/category filtering before customer pagination, scoped cursors and context-preserving frontend list/conversation navigation. Attachments, browser/draft/navigation/accessibility/load acceptance and broader phases remain open. See progress.md and runbooks/customer-case-filters.md.

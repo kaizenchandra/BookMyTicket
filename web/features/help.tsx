@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.ts";
 import type { HelpPage } from "../../src/modules/catalog/adapters/help-schema.ts";
-export function HelpResults({ items }: HelpPage) {
+export function HelpResults({ items }: Pick<HelpPage, "items">) {
   return items.length ? (
     <>
-      <p role="status">{items.length} answers found.</p>
+      <p role="status">{items.length} answers on this page.</p>
       {items.map((article) => (
         <article key={article.id} id={article.id}>
           <h2>{article.question}</h2>
@@ -14,13 +14,17 @@ export function HelpResults({ items }: HelpPage) {
       ))}
     </>
   ) : (
-    <p role="status">No answers match. Try fewer words or choose All topics.</p>
+    <p role="status">
+      No answers match on this page. Return to the first page, try fewer words
+      or choose All topics.
+    </p>
   );
 }
 export function HelpCenter() {
   const params = new URLSearchParams(location.search);
   const q = params.get("q") ?? "",
-    topic = params.get("topic") ?? "";
+    topic = params.get("topic") ?? "",
+    after = params.get("after") ?? "";
   const [page, setPage] = useState<HelpPage | null>(null),
     [error, setError] = useState(""),
     [revision, setRevision] = useState(0);
@@ -31,6 +35,7 @@ export function HelpCenter() {
     const query = new URLSearchParams({
       ...(q ? { q } : {}),
       ...(topic ? { topic } : {}),
+      ...(after ? { after } : {}),
     });
     api<HelpPage>(`/help?${query}`)
       .then((value) => {
@@ -42,7 +47,7 @@ export function HelpCenter() {
     return () => {
       active = false;
     };
-  }, [q, topic, revision]);
+  }, [q, topic, after, revision]);
   return (
     <section className="reading">
       <p className="eyebrow">HELP & ACCESSIBILITY</p>
@@ -76,7 +81,15 @@ export function HelpCenter() {
           <button onClick={() => setRevision((v) => v + 1)}>Retry help</button>
         </>
       ) : page ? (
-        <HelpResults items={page.items} />
+        <>
+          <HelpResults items={page.items} />
+          <HelpNavigation
+            q={q}
+            topic={topic}
+            after={after}
+            nextCursor={page.nextCursor}
+          />
+        </>
       ) : (
         <p role="status">Loading help…</p>
       )}
@@ -89,5 +102,31 @@ export function HelpCenter() {
         estimate is configured.
       </p>
     </section>
+  );
+}
+
+export function HelpNavigation({
+  q,
+  topic,
+  after,
+  nextCursor,
+}: {
+  q: string;
+  topic: string;
+  after: string;
+  nextCursor: string | null;
+}) {
+  const link = (cursor?: string) =>
+    "/help?" +
+    new URLSearchParams({
+      ...(q ? { q } : {}),
+      ...(topic ? { topic } : {}),
+      ...(cursor ? { after: cursor } : {}),
+    });
+  return (
+    <nav aria-label="Help result pages">
+      {after && <a href={link()}>First page</a>}
+      {nextCursor && <a href={link(nextCursor)}>Next answers</a>}
+    </nav>
   );
 }

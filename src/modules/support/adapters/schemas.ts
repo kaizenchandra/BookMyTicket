@@ -84,6 +84,12 @@ export const casePage = z
 export const caseListFilters = z
   .object({
     caseId: z.uuid().optional(),
+    state: caseFilters.shape.state,
+    category: caseFilters.shape.category,
+    bookingId: z
+      .uuid()
+      .transform((value) => value.toLowerCase())
+      .optional(),
     after: z.string().min(1).max(2000).optional(),
   })
   .strict()

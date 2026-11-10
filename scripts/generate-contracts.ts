@@ -1,3 +1,5 @@
+import { paymentHistoryFilters, paymentHistoryPage } from "../src/modules/bookings/adapters/payment-history-schema.ts";
+import { bookingTimelinePage } from "../src/modules/bookings/adapters/timeline-schema.ts";
 import { helpFilters, helpResponse, helpEdit, helpEditorPage, helpSaved, helpHistoryFilters, helpHistoryPage, helpCreation, helpAdminFilters } from "../src/modules/catalog/adapters/help-schema.ts";
 import { favoriteFilters, favoritePage, favoriteState } from "../src/modules/profiles/adapters/favorites-schema.ts";
 import {
@@ -565,6 +567,13 @@ for (const [, method, raw] of source.matchAll(
     operation.responses["200"].content = {"application/json": {schema: z.toJSONSchema(helpHistoryPage)}};
     operation.parameters = [...(operation.parameters ?? []), ...Object.entries(z.toJSONSchema(helpHistoryFilters).properties ?? {}).map(([name,schema])=>({name,in:"query",required:false,schema}))];
   }
+  if (path === "/api/v1/bookings/{id}/payment-history" && method === "get") {
+    operation.responses["200"].content = {"application/json":{schema:z.toJSONSchema(paymentHistoryPage)}};
+    operation.parameters=[...(operation.parameters??[]),...Object.entries(z.toJSONSchema(paymentHistoryFilters,{io:"input"}).properties??{}).map(([name,schema])=>({name,in:"query",required:false,schema}))];
+  }
+  if (path === "/api/v1/bookings/{id}/timeline" && method === "get") {
+    operation.responses["200"].content = {"application/json":{schema:z.toJSONSchema(bookingTimelinePage)}};
+  }
   if (path === "/api/v1/admin/help" && method === "post") {
     operation.requestBody = {required:true, content:{"application/json":{schema:z.toJSONSchema(helpCreation)}}};
     operation.responses["200"].content = {"application/json":{schema:z.toJSONSchema(helpSaved)}};
@@ -677,7 +686,7 @@ for (const [, method, raw] of source.matchAll(
       "application/json": { schema: z.toJSONSchema(customerCasePage) },
     };
     operation.parameters = Object.entries(
-      z.toJSONSchema(caseListFilters).properties ?? {},
+      z.toJSONSchema(caseListFilters,{io:"input"}).properties ?? {},
     ).map(([name, schema]) => ({ name, in: "query", required: false, schema }));
   }
   if (path === "/api/v1/operations/support-agents") {

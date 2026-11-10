@@ -748,3 +748,55 @@ Next cohesive work: versioned attendee registration schemas and event/sports reg
 - Verified 215 native and Docker tests with no failures/skips, build/typecheck, 205-module architecture checks, 125 API paths and 107 deployed HTTP smoke checks. Local v0.85.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
 - Tests cover 27 articles, filtered/unfiltered pages, new earlier IDs, publication changes between pages, case-insensitive/literal-percent queries, strict inputs, audit failure and revoked access. Evidence prefix: docs/evidence/help-list-.
 - Public-search pagination, indexing/load, browser/editor/accessibility and broader content requirements remain open. See ADR 088 and runbooks/help-administration-list.md.
+
+## Version 0.86.0 — public FAQ search pagination
+- Moved public search filtering into the PostgreSQL content adapter: published state, optional topic, all literal search terms and stable ID boundary apply before a twenty-one-row lookahead. The application returns at most twenty answers and nextCursor.
+- Added optional after validation and frontend First page/Next answers links preserving search/topic in the URL. Form submissions reset pagination; counts describe the current page, and navigation is hidden during loading/errors.
+- Verified 217 native and Docker tests, zero failures/skips; build/typecheck; 205-module architecture checks; 125 API paths; and 108 HTTP smoke checks. Local v0.86.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
+- Tests cover multi-page public searches, topic and hidden-content filtering, literal wildcard characters, mixed-case terms, new earlier articles, unpublishing between pages, invalid/empty cursors and encoded links. Evidence prefix: docs/evidence/public-help-pages-.
+- Clients must follow nextCursor for the full result set. Search indexing, multilingual collation, browser/navigation/accessibility/load acceptance and broader requirements remain open. See ADR 089 and runbooks/public-help-pagination.md.
+
+## Version 0.87.0 — customer booking milestones
+- Added owner-only GET /bookings/:id/timeline through the Bookings application port. One database snapshot combines current state with recorded creation, policy acceptance, confirmation and pending/free-cancellation milestones. Exact UTC timestamp ordering is preserved; missing historical dates are not fabricated.
+- Added the customer timeline panel with India-time display, distinct creation/confirmation labels, independent refresh/error/retry states and refresh after booking changes. Current booking/payment controls remain authoritative; full payment/refund/disruption history is explicitly outside this subset.
+- Verified 220 native and Docker tests with zero failures/skips, build/typecheck, 209-module architecture checks, 126 API paths and 109 HTTP smoke checks. Local v0.87.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
+- Tests cover microsecond/tied timestamp ordering, confirmation followed by cancellation, both cancellation tables, absent legacy milestones, recovery state, ownership, suspension, no-store and private-field omission. Initial tests needed an explicit fixture UUID cast; a subsequent persistent-database rerun needed a unique fixture provider reference. Both were fixed before passing full native/Docker suites. Evidence prefix: docs/evidence/booking-timeline- includes earlier runs.
+- Full payment/refund/disruption timelines, browser/navigation/accessibility/load acceptance and broader requirements remain open. See ADR 090 and runbooks/booking-timeline.md.
+
+## Version 0.88.0 — customer payment capture/recovery records
+- Added GET /bookings/:id/payment-history through a Bookings owner-authorized transaction and Payments public contract. The Payments adapter alone reads its capture/recovery tables, returning twenty records plus a booking-bound cursor with exact recorded timestamps.
+- Migration 070 adds random stable capture timeline UUIDs and paging indexes. Provider references, recovery reasons and attempt payloads are excluded from responses/cursors. Reads do not change financial or booking state.
+- Added a separate customer history panel with amounts, India-time labels, newest/older navigation and refresh/retry. It distinguishes platform recording time from provider time, capture from booking confirmation, and recovery from refund completion.
+- Verified 222 native and Docker tests with no failures/skips, build/typecheck, 213-module architecture checks, 127 API paths and 110 local HTTP smoke checks. Migration 070 applied; local v0.88.0 app, worker, database and Mailpit are healthy. No application grants or external provider calls were needed.
+- Tests cover twenty-plus-five pages, tied/microsecond times, new arrivals, stable IDs, sensitive-field omission, ownership, booking-bound cursors, suspension, empty history, no-store and presentation. Evidence prefix: docs/evidence/payment-history-.
+- Full payment-attempt transitions, completed-refund/disruption timelines, retention, browser/accessibility/load acceptance and broader requirements remain open. See ADR 091 and runbooks/payment-history.md.
+
+## Version 0.89.0 — retained payment-attempt observations
+- Migration 071 gives attempts stable public UUIDs and records initial/newly accepted state observations atomically through a Payments persistence trigger. Unchanged or ignored stale observations add no history; records are immutable and earlier state sequences are not fabricated.
+- Extended the existing owner-only payment-history query with five attempt observation kinds and safe grouping references. Provider identifiers remain private. Existing capture/recovery cursors remain supported.
+- Updated frontend labels to distinguish observed states from authoritative booking/refund completion, explain historical coverage and display attempt references with existing paging/refresh controls.
+- Verified 224 native and Docker tests, zero failures/skips; build/typecheck; 213-module architecture checks; 127 API paths; and 110 deployed HTTP smoke checks. Migration 071 applied; local v0.89.0 app, worker, database and Mailpit are healthy. No application grants or external provider calls were needed.
+- Tests use the actual observation writer for concurrent duplicate inserts, accepted/stale states, association mismatch, immutable records, atomic rollback, stable grouping, twenty-plus-five pagination and safe labels. Evidence prefix: docs/evidence/attempt-history-.
+- Historical reconstruction, full refund/disruption histories, approved retention, live provider verification, browser/accessibility/load acceptance and broader requirements remain open. See ADR 092 and runbooks/payment-attempt-history.md.
+
+## Version 0.90.0 — payment history filters
+- Added all/captures/recovery/attempts filtering and optional public attempt UUID selection through the Bookings application and Payments public contract. Filters apply before pagination; other bookings’ references never expose their records.
+- Bound cursors to category/attempt selection while retaining legacy cursor compatibility for the unfiltered view. Invalid categories, incompatible attempt selection and changed-filter cursors are rejected.
+- Added frontend record-type selection, optional attempt reference and Apply/Clear controls, an explicit applied-view label and pagination reset/preservation rules.
+- Verified 225 native and Docker tests with zero failures/skips; build/typecheck; 213-module architecture checks; 127 API paths; and 111 local HTTP smoke checks. Local v0.90.0 app, worker, database and Mailpit are healthy. No migration, application grants or external calls were needed.
+- Tests cover filtered twenty-item pages, attempt grouping, uppercase UUID normalization, empty/recovery results, cross-booking isolation, cursor scope and legacy compatibility. A test query-array TypeScript annotation was corrected before final build/Docker verification; runtime tests passed. Evidence prefix: docs/evidence/payment-filters-.
+- Full refund/disruption histories, browser/interaction/accessibility/load acceptance and broader requirements remain open. See ADR 093 and runbooks/payment-history-filters.md.
+
+## Version 0.91.0 — booking-scoped customer support
+- Added optional bookingId filtering to customer case retrieval before pagination, with normalized UUIDs and booking-bound cursor scope. Unfiltered cursor compatibility is preserved; current owner predicates remain authoritative.
+- Added booking-detail support links, visible filter context, prefilled new-case booking references and context-preserving conversation/newest/older links. Clearing filters is explicit; untouched prefilled context does not trigger an unsent-draft warning.
+- Verified 227 native and Docker tests, zero failures/skips; build/typecheck; 213-module architecture checks; 127 API paths; and 112 HTTP smoke checks. Local v0.91.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
+- Tests cover 102 cases across filtered pages with a new arrival, exact case intersections, uppercase references, account/filter cursor changes, foreign-booking isolation, actual case linking/denial and encoded links. Evidence prefix: docs/evidence/case-booking-filter-.
+- Attachments, browser/sign-in/draft/navigation/accessibility/load acceptance and broader support requirements remain open. See ADR 094 and runbooks/booking-support-context.md.
+
+## Version 0.92.0 — customer case status/category filters
+- Added validated state/category filters before customer case pagination, combined with booking selection and current owner isolation. New filter scopes reject mismatched cursors while retaining earlier unfiltered/booking-only representations.
+- Added labeled Apply/Clear list controls with booking preservation and unsent-draft confirmation. List/page/conversation/back links retain filters; exact conversation retrieval omits state/category predicates so status changes do not hide an active thread.
+- Verified 229 native and Docker tests, zero failures/skips; build/typecheck; 213-module architecture checks; 127 API paths; and 113 HTTP smoke checks. Local v0.92.0 app, worker, database and Mailpit are healthy. No migration, application grants or external messages were needed.
+- Tests cover 102 matching records across pages, filter intersections, cursor mismatches, state changes, exact conversation retrieval, empty results, enum validation and rendered/encoded navigation. Evidence prefix: docs/evidence/customer-case-filters-.
+- Browser/draft/back-navigation/accessibility/load, attachments and broader support requirements remain open. See ADR 095 and runbooks/customer-case-filters.md.

@@ -3,7 +3,7 @@
 India/INR ticket-booking platform under active implementation. **Not a completed or production-ready platform.** No live payment, external email delivery, supplier, payout or cloud deployment has been verified. Local Mailpit SMTP signup/login is verified.
 
 
-Current local demo (**v0.85.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
+Current local demo (**v0.92.0**): [Movies](http://127.0.0.1:3101/movies?city=) · [Events](http://127.0.0.1:3101/events?city=) · [Sports](http://127.0.0.1:3101/sports?city=) · [Provider workspace](http://127.0.0.1:3101/partner/venues).
 
 The user-requested sample catalog contains **4 fictional movies, 4 events, 3 sports fixtures and 22 sessions**, clearly labeled DEMO. Choose a **Free session** to test actual reservation → confirmation → QR ticket → cancellation. Priced demo sessions cannot collect real payments. [Demo setup, operator sign-in and limits](docs/runbooks/cinema-sports-demo.md).
 
@@ -177,3 +177,17 @@ Version 0.83.0 adds protected FAQ revision history with prior content, staff att
 Version 0.84.0 adds unpublished FAQ draft creation with controlled internal destinations, unique article IDs, retained retry requests and immutable creation receipts. Review and publish drafts through the existing editor. [Usage](docs/runbooks/help-draft-creation.md).
 
 Version 0.85.0 adds FAQ administration search, publication filters and twenty-item cursor pages. API clients must follow nextCursor for the full collection. [Usage](docs/runbooks/help-administration-list.md).
+
+Version 0.86.0 adds bounded public Help search with twenty-answer pages and filter-preserving navigation. Search filters run in PostgreSQL before pagination. API clients must follow nextCursor for all matches. [Usage](docs/runbooks/public-help-pagination.md).
+
+Version 0.87.0 adds an owner-only booking milestone timeline for recorded creation, policy acceptance, confirmation and supported cancellations. Full payment/refund/disruption history remains open. [Usage](docs/runbooks/booking-timeline.md).
+
+Version 0.88.0 adds customer payment capture/recovery records with amounts, recorded times and twenty-item pagination. Provider identifiers and internal reasons are excluded; capture and recovery are not presented as booking/refund completion. [Usage](docs/runbooks/payment-history.md).
+
+Version 0.89.0 adds immutable newly accepted payment-attempt observations to customer payment history, with safe attempt references and duplicate/stale suppression. Historical transitions are not backfilled. [Usage](docs/runbooks/payment-attempt-history.md).
+
+Version 0.90.0 adds payment-history category and attempt-reference filters with scoped pagination and frontend Apply/Clear controls. [Usage](docs/runbooks/payment-history-filters.md).
+
+Version 0.91.0 adds Support for this booking links, customer case filtering by booking and prefilled new-case references. Filtered conversation/page navigation preserves booking context; ownership is revalidated on creation. [Usage](docs/runbooks/booking-support-context.md).
+
+Version 0.92.0 adds customer support case status/category filters, combined booking filtering and context-preserving pagination. Open conversations remain visible when their state changes. [Usage](docs/runbooks/customer-case-filters.md).
